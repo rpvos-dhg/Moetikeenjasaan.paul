@@ -9,13 +9,27 @@ const WALKERS = [
 let weatherData = null;
 let userPref = localStorage_safe_get('dighv_pref') || 'normal';
 let selectedWalkers = new Set();
-let darkMode = localStorage_safe_get('dighv_dark') === 'true';
+let darkModeForced = localStorage_safe_get('dighv_dark_force') || 'auto'; // 'auto', 'dark', 'light'
 
 // Apply dark mode
 function applyDarkMode() {
+  let darkMode;
+  if (darkModeForced === 'dark') {
+    darkMode = true;
+  } else if (darkModeForced === 'light') {
+    darkMode = false;
+  } else { // auto
+    darkMode = !isDayTime(new Date());
+  }
   document.body.classList.toggle('dark', darkMode);
   const btn = document.getElementById('darkModeToggle');
-  if (btn) btn.textContent = darkMode ? '☀️' : '🌙';
+  if (btn) {
+    if (darkModeForced === 'auto') {
+      btn.textContent = darkMode ? '🌙' : '☀️';
+    } else {
+      btn.textContent = darkModeForced === 'dark' ? '🌙' : '☀️';
+    }
+  }
 }
 applyDarkMode(); // Init
 
@@ -87,6 +101,7 @@ async function fetchWeather() {
     return;
   }
   render();
+  applyDarkMode(); // Update dark mode with new sunrise data
 }
 
 function isDayTime(date) {
@@ -616,8 +631,14 @@ document.querySelectorAll('.pref-btn').forEach(btn => {
 
 // Dark mode toggle
 document.getElementById('darkModeToggle').addEventListener('click', () => {
-  darkMode = !darkMode;
-  localStorage_safe_set('dighv_dark', darkMode);
+  if (darkModeForced === 'auto') {
+    darkModeForced = 'dark';
+  } else if (darkModeForced === 'dark') {
+    darkModeForced = 'light';
+  } else {
+    darkModeForced = 'auto';
+  }
+  localStorage_safe_set('dighv_dark_force', darkModeForced);
   applyDarkMode();
 });
 
