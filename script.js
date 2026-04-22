@@ -572,24 +572,12 @@ function renderAdvice() {
     tips.push({ text: 'Middel UV: bescherm je huid', yellow: false });
   }
 
-  // Pollen tip (specifieke allergens per seizoen)
+  // Pollen tip (только предупреждение в советах, детали - в отдельном блоке)
   const pollen = getPollenTip();
   if (pollen.level === 'zeer hoog') {
-    let msg = `🌸 ZEER HOGE POLLEN: ${pollen.allergens}. Allergie medicatie aangeraden!`;
-    if (pollen.live) msg += ` LIVE: ${pollen.live}`;
-    tips.push({ text: msg, yellow: false, pollen: true });
+    tips.push({ text: '🌸 ZEER HOGE POLLEN - medicatie aangeraden!', yellow: false, pollen: false });
   } else if (pollen.level === 'hoog') {
-    let msg = `🌸 Hoge pollen: ${pollen.allergens}. Let op je allergieën!`;
-    if (pollen.live) msg += ` LIVE: ${pollen.live}`;
-    tips.push({ text: msg, yellow: false, pollen: true });
-  } else if (pollen.level === 'matig-hoog') {
-    let msg = `🌾 Matig-hoge pollen: ${pollen.allergens}`;
-    if (pollen.live) msg += ` LIVE: ${pollen.live}`;
-    tips.push({ text: msg, yellow: false, pollen: false });
-  } else if (pollen.level === 'matig') {
-    let msg = `🌾 Matige pollen: ${pollen.allergens}`;
-    if (pollen.live) msg += ` LIVE: ${pollen.live}`;
-    tips.push({ text: msg, yellow: false, pollen: false });
+    tips.push({ text: '🌸 Hoge pollen - let op allergieën!', yellow: false, pollen: false });
   }
 
   tips.unshift({ text: jacketType, yellow: true });
@@ -602,7 +590,55 @@ function renderAdvice() {
     `<span class="tip ${t.yellow ? 'yellow' : ''} ${t.pollen ? 'pollen' : ''}">${t.text}</span>`
   ).join('');
   
+  renderPollenCard();
   renderChecklist();
+}
+
+function renderPollenCard() {
+  const pollenGrid = document.getElementById('pollenGrid');
+  if (!pollenGrid) return;
+
+  const pollens = [
+    { name: 'Els', icon: '🌳', value: pollenData?.alder || 0, threshold: 20, season: true },
+    { name: 'Berk', icon: '🌳', value: pollenData?.birch || 0, threshold: 20, season: true },
+    { name: 'Grassen', icon: '🌾', value: pollenData?.grass || 0, threshold: 50, season: true },
+    { name: 'Bijvoet', icon: '🌱', value: pollenData?.mugwort || 0, threshold: 10, season: true },
+    { name: 'Ragweed', icon: '🌱', value: pollenData?.ragweed || 0, threshold: 10, season: true },
+    { name: 'Olijf', icon: '🌳', value: pollenData?.olive || 0, threshold: 20, season: false },
+  ];
+
+  // Calculate levels and sort by highest first
+  const withLevels = pollens.map(p => ({
+    ...p,
+    level: p.value > p.threshold ? 'hoog' : p.value > p.threshold * 0.5 ? 'matig' : 'laag',
+    intensity: p.value
+  })).sort((a, b) => b.intensity - a.intensity);
+
+  // Get pollen tip for context
+  const tip = getPollenTip();
+
+  let html = `<div class="pollen-info">
+    <div class="pollen-level">Niveau: <strong>${tip.level.toUpperCase()}</strong></div>
+    <div class="pollen-allergens">Seizoen: <strong>${tip.allergens}</strong></div>
+  </div>`;
+
+  html += '<div class="pollen-items">';
+  withLevels.forEach(p => {
+    const percentage = Math.min(100, (p.value / (p.threshold * 2)) * 100);
+    const levelClass = p.level === 'hoog' ? 'high' : p.level === 'matig' ? 'medium' : 'low';
+    html += `<div class="pollen-item ${levelClass}">
+      <div class="pollen-item-header">
+        <span class="pollen-name">${p.icon} ${p.name}</span>
+        <span class="pollen-value">${Math.round(p.value)} µg/m³</span>
+      </div>
+      <div class="pollen-bar">
+        <div class="pollen-bar-fill" style="width: ${percentage}%"></div>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+
+  pollenGrid.innerHTML = html;
 }
 
 function renderChecklist() {
