@@ -734,3 +734,89 @@ code {
   color: var(--anwb-navy);
   font-weight: 700;
 }
+
+/* Lunch countdown card */
+.lunch-card {
+  background: var(--anwb-navy);
+  border-radius: 16px;
+  padding: 20px 24px;
+  color: white;
+}
+
+.lunch-card .card-title {
+  color: var(--anwb-yellow);
+  margin-bottom: 12px;
+}
+
+.countdown-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.countdown-value {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: white;
+}
+
+.countdown-preview {
+  margin-top: 10px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* Beste pauzetijd */
+.best-time-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.best-time-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.best-time-value {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--anwb-navy);
+  letter-spacing: -0.02em;
+}
+
+.best-time-icon {
+  font-size: 28px;
+}
+
+.best-time-detail {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Wacht ff strip */
+.wacht-strip {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 14px;
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+.wacht-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}

@@ -40,6 +40,7 @@ function updateClock() {
     else label += ` · data ${mins} min oud`;
   }
   document.getElementById('clock').textContent = label;
+  renderLunchCountdown();
 }
 updateClock();
 setInterval(updateClock, 30000);
@@ -94,12 +95,149 @@ function getWeatherIcon(code, size = 'small') {
   return icons[code]?.[size] || '☀️';
 }
 
+function renderLunchCountdown() {
+  const el = document.getElementById('lunchCountdown');
+  if (!el) return;
+
+  const now = new Date();
+  const h = now.getHours();
+
+  let targetHour, label;
+  if (h < 12) {
+    targetHour = 12; label = 'Lunch';
+  } else if (h < 15) {
+    targetHour = 15; label = 'Middagpauze';
+  } else {
+    targetHour = 12; label = 'Morgen lunch';
+  }
+
+  const target = new Date(now);
+  target.setHours(targetHour, 0, 0, 0);
+  if (h >= 15) target.setDate(target.getDate() + 1);
+
+  const diffMins = Math.max(0, Math.round((target - now) / 60000));
+  const dh = Math.floor(diffMins / 60);
+  const dm = diffMins % 60;
+  const countdownStr = diffMins === 0 ? 'Nu!' : dh > 0 ? `${dh}u ${dm}m` : `${dm} min`;
+
+  let preview = '';
+  if (weatherData && h < 15) {
+    const hourly = weatherData.hourly;
+    const idx = hourly.time.findIndex(t => new Date(t).getHours() === targetHour);
+    if (idx !== -1) {
+      const temp = Math.round(hourly.temperature_2m[idx]);
+      const rain = hourly.precipitation_probability[idx] || 0;
+      const code = hourly.weather_code?.[idx] || 0;
+      preview = `<div class="countdown-preview">${getWeatherIcon(code)} ${temp}°C · ${rain}% regen</div>`;
+    }
+  }
+
+  el.innerHTML = `
+    <div class="countdown-label">${label}</div>
+    <div class="countdown-value">${countdownStr}</div>
+    ${preview}
+  `;
+}
+
+function renderBestTime() {
+  const el = document.getElementById('bestTime');
+  if (!el || !weatherData) return;
+
+  const hourly = weatherData.hourly;
+  const now = new Date();
+  const currentHour = now.getHours();
+  const startIdx = hourly.time.findIndex(t => new Date(t).getHours() === currentHour);
+
+  let bestIdx = -1;
+  let bestScore = -Infinity;
+
+  for (let i = 0; i < 4; i++) {
+    const idx = startIdx + i;
+    if (idx >= hourly.time.length) break;
+    const temp = hourly.temperature_2m[idx];
+    const rain = hourly.precipitation_probability[idx] || 0;
+    const score = temp - rain * 0.3;
+    if (score > bestScore) {
+      bestScore = score;
+      bestIdx = idx;
+    }
+  }
+
+  if (bestIdx === -1) { el.innerHTML = '--'; return; }
+
+  const bestHour = new Date(hourly.time[bestIdx]);
+  const isNow = bestHour.getHours() === currentHour;
+  const timeStr = isNow ? 'Nu meteen' : `${String(bestHour.getHours()).padStart(2, '0')}:00`;
+  const temp = Math.round(hourly.temperature_2m[bestIdx]);
+  const rain = hourly.precipitation_probability[bestIdx] || 0;
+  const code = hourly.weather_code?.[bestIdx] || 0;
+
+  el.innerHTML = `
+    <div class="best-time-row">
+      <div class="best-time-main">
+        <span class="best-time-value">${timeStr}</span>
+        <span class="best-time-icon">${getWeatherIcon(code)}</span>
+      </div>
+      <div class="best-time-detail">${temp}°C · ${rain}% kans op regen</div>
+    </div>
+  `;
+}
+
+function renderWachtFf() {
+  const el = document.getElementById('wachtFf');
+  if (!el || !weatherData) { if (el) el.style.display = 'none'; return; }
+
+  const c = weatherData.current;
+  const minutely = weatherData.minutely_15;
+  const hourly = weatherData.hourly;
+  const now = new Date();
+  const currentHour = now.getHours();
+  const idxNow = hourly.time.findIndex(t => new Date(t).getHours() === currentHour);
+  const rainProb = hourly.precipitation_probability[idxNow] ?? 0;
+
+  const isRaining = c.precipitation > 0.1 || rainProb >= 50;
+
+  if (!isRaining || !minutely || !minutely.time) {
+    el.style.display = 'none';
+    return;
+  }
+
+  const startIdx = minutely.time.findIndex(t => new Date(t) >= now);
+  if (startIdx === -1) { el.style.display = 'none'; return; }
+
+  let clearIdx = -1;
+  for (let i = startIdx; i < Math.min(startIdx + 8, minutely.time.length); i++) {
+    if ((minutely.precipitation[i] || 0) < 0.05) {
+      clearIdx = i;
+      break;
+    }
+  }
+
+  el.style.display = 'flex';
+
+  if (clearIdx === -1) {
+    el.innerHTML = `<span class="wacht-icon">🌧️</span><span>Blijft de komende 2 uur regenen</span>`;
+  } else {
+    const clearTime = new Date(minutely.time[clearIdx]);
+    const waitMins = Math.max(1, Math.round((clearTime - now) / 60000));
+    const timeStr = String(clearTime.getHours()).padStart(2, '0') + ':' + String(clearTime.getMinutes()).padStart(2, '0');
+    if (waitMins <= 5) {
+      el.innerHTML = `<span class="wacht-icon">🌤️</span><span>Stopt zo dadelijk — wacht even</span>`;
+    } else {
+      el.innerHTML = `<span class="wacht-icon">⏱</span><span>Wacht ~${waitMins} min — droog rond <strong>${timeStr}</strong></span>`;
+    }
+  }
+}
+
 function render() {
   if (!weatherData) return;
   renderMetrics();
   renderForecast();
   renderRainChart();
   renderAdvice();
+  renderWachtFf();
+  renderBestTime();
+  renderLunchCountdown();
 }
 
 function renderRainChart() {
