@@ -104,8 +104,8 @@ const LAT = 52.0907;
 const LON = 4.2676;
 
 async function fetchWeather() {
-  // All data from Open-Meteo (reliable, no API key needed)
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,weather_code&minutely_15=precipitation,precipitation_probability&hourly=temperature_2m,precipitation_probability,precipitation,wind_speed_10m,weather_code,uv_index&daily=sunrise,sunset,pollen_tree,pollen_grass,pollen_weed&timezone=Europe/Amsterdam&forecast_days=1`;
+  // Use only valid Open-Meteo parameters (pollen is not available in this API)
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,weather_code&minutely_15=precipitation,precipitation_probability&hourly=temperature_2m,precipitation_probability,precipitation,wind_speed_10m,weather_code,uv_index&daily=sunrise,sunset&timezone=Europe/Amsterdam&forecast_days=1`;
 
   try {
     const res = await fetch(url);
@@ -115,17 +115,8 @@ async function fetchWeather() {
     lastUpdate = new Date();
     updateClock();
     
-    // Extract pollen data from Open-Meteo if available
-    if (data.daily && data.daily.pollen_tree && data.daily.pollen_tree[0] !== undefined) {
-      pollenData = {
-        tree: data.daily.pollen_tree[0] || 0,
-        grass: data.daily.pollen_grass[0] || 0,
-        weed: data.daily.pollen_weed[0] || 0,
-        timestamp: new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
-      };
-    } else {
-      pollenData = null; // Will use seasonal fallback
-    }
+    // Pollen data: Open-Meteo doesn't provide pollen, so we use seasonal fallback only
+    pollenData = null;
   } catch (err) {
     console.error('Weerdata fetch error:', err);
     document.getElementById('verdict').innerHTML = `<div class="error">Kon weerdata niet ophalen. Probeer later opnieuw.</div>`;
