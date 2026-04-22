@@ -5,9 +5,6 @@ const WALKERS = [
   'Remco', 'Sjors', 'Steven', 'Tessa', 'Timke'
 ];
 
-// Backend URL - replace with your Netlify site URL
-const BACKEND_URL = 'https://your-netlify-site.netlify.app';
-
 // State
 let weatherData = null;
 let userPref = localStorage_safe_get('dighv_pref') || 'normal';
@@ -24,7 +21,7 @@ function localStorage_safe_set(key, val) {
 
 // Tab switching
 document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', async () => {
+  tab.addEventListener('click', () => {
     const target = tab.dataset.tab;
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
@@ -34,7 +31,7 @@ document.querySelectorAll('.tab').forEach(tab => {
     } else if (target === 'log') {
       document.getElementById('view-log').classList.add('active');
       initLogTab();
-      await renderLogHistory();
+      renderLogHistory();
       updateLogTime();
     } else {
       document.getElementById('view-explain').classList.add('active');
@@ -460,30 +457,12 @@ function renderAdvice() {
 }
 
 // ─── Looplog ───────────────────────────────────────────
-async function getLog() {
-  try {
-    const response = await fetch(`${BACKEND_URL}/.netlify/functions/log`);
-    if (!response.ok) throw new Error('Failed to fetch log');
-    return await response.json();
-  } catch (e) {
-    console.error('Error fetching log:', e);
-    return [];
-  }
+function getLog() {
+  try { return JSON.parse(localStorage.getItem('dighv_log') || '[]'); } catch(e) { return []; }
 }
 
-async function saveLog(log) {
-  try {
-    const response = await fetch(`${BACKEND_URL}/.netlify/functions/log`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(log)
-    });
-    if (!response.ok) throw new Error('Failed to save log');
-    return await response.json();
-  } catch (e) {
-    console.error('Error saving log:', e);
-    throw e;
-  }
+function saveLog(log) {
+  try { localStorage.setItem('dighv_log', JSON.stringify(log)); } catch(e) {}
 }
 
 function updateLogTime() {
@@ -518,27 +497,23 @@ function initLogTab() {
     grid.querySelectorAll('.walker-btn').forEach(b => b.classList.remove('active'));
   });
 
-  document.getElementById('logSaveBtn').addEventListener('click', async () => {
-    const log = await getLog();
+  document.getElementById('logSaveBtn').addEventListener('click', () => {
+    const log = getLog();
     log.unshift({ id: Date.now(), timestamp: new Date().toISOString(), people: [...selectedWalkers] });
-    try {
-      await saveLog(log);
-      selectedWalkers.clear();
-      grid.querySelectorAll('.walker-btn').forEach(b => b.classList.remove('active'));
-      await renderLogHistory();
-      const saveBtn = document.getElementById('logSaveBtn');
-      saveBtn.textContent = '✓ Opgeslagen';
-      setTimeout(() => { saveBtn.textContent = 'Opslaan'; }, 1800);
-    } catch (e) {
-      alert('Fout bij opslaan: ' + e.message);
-    }
+    saveLog(log);
+    selectedWalkers.clear();
+    grid.querySelectorAll('.walker-btn').forEach(b => b.classList.remove('active'));
+    renderLogHistory();
+    const saveBtn = document.getElementById('logSaveBtn');
+    saveBtn.textContent = '✓ Opgeslagen';
+    setTimeout(() => { saveBtn.textContent = 'Opslaan'; }, 1800);
   });
 }
 
-async function renderLogHistory() {
+function renderLogHistory() {
   const el = document.getElementById('logHistory');
   if (!el) return;
-  const log = await getLog();
+  const log = getLog();
 
   if (log.length === 0) {
     el.innerHTML = '<div class="log-empty">Nog geen pauzes geregistreerd.</div>';
@@ -573,14 +548,10 @@ async function renderLogHistory() {
 
   el.innerHTML = html;
   el.querySelectorAll('.log-delete-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const updated = (await getLog()).filter(e => e.id !== Number(btn.dataset.id));
-      try {
-        await saveLog(updated);
-        await renderLogHistory();
-      } catch (e) {
-        alert('Fout bij verwijderen: ' + e.message);
-      }
+    btn.addEventListener('click', () => {
+      const updated = getLog().filter(e => e.id !== Number(btn.dataset.id));
+      saveLog(updated);
+      renderLogHistory();
     });
   });
 }
