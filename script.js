@@ -64,7 +64,7 @@ const LAT = 52.0907;
 const LON = 4.2676;
 
 async function fetchWeather() {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,weather_code&minutely_15=precipitation,precipitation_probability&hourly=temperature_2m,precipitation_probability,precipitation,wind_speed_10m,weather_code&timezone=Europe/Amsterdam&forecast_days=1`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,weather_code&minutely_15=precipitation,precipitation_probability&hourly=temperature_2m,precipitation_probability,precipitation,wind_speed_10m,weather_code&daily=sunrise,sunset&timezone=Europe/Amsterdam&forecast_days=1`;
 
   try {
     const res = await fetch(url);
@@ -80,9 +80,16 @@ async function fetchWeather() {
   render();
 }
 
-function getWeatherIcon(code, size = 'small') {
+function isDayTime(date) {
+  if (!weatherData || !weatherData.daily) return true; // Default to day
+  const sunrise = new Date(weatherData.daily.sunrise[0]);
+  const sunset = new Date(weatherData.daily.sunset[0]);
+  return date >= sunrise && date <= sunset;
+}
+
+function getWeatherIcon(code, size = 'small', isDay = true) {
   const icons = {
-    0:  { small: '☀️', large: '☀️' },
+    0:  isDay ? { small: '☀️', large: '☀️' } : { small: '🌙', large: '🌙' },
     1:  { small: '🌤️', large: '🌤️' },
     2:  { small: '⛅', large: '⛅' },
     3:  { small: '☁️', large: '☁️' },
@@ -143,7 +150,9 @@ function renderLunchCountdown() {
       const temp = Math.round(hourly.temperature_2m[idx]);
       const rain = hourly.precipitation_probability[idx] || 0;
       const code = hourly.weather_code?.[idx] || 0;
-      preview = `<div class="countdown-preview">${getWeatherIcon(code)} ${temp}°C · ${rain}% regen</div>`;
+      const hourTime = new Date(hourly.time[idx]);
+      const isDay = isDayTime(hourTime);
+      preview = `<div class="countdown-preview">${getWeatherIcon(code, 'small', isDay)} ${temp}°C · ${rain}% regen</div>`;
     }
   }
 
@@ -186,12 +195,13 @@ function renderBestTime() {
   const temp = Math.round(hourly.temperature_2m[bestIdx]);
   const rain = hourly.precipitation_probability[bestIdx] || 0;
   const code = hourly.weather_code?.[bestIdx] || 0;
+  const isDay = isDayTime(bestHour);
 
   el.innerHTML = `
     <div class="best-time-row">
       <div class="best-time-main">
         <span class="best-time-value">${timeStr}</span>
-        <span class="best-time-icon">${getWeatherIcon(code)}</span>
+        <span class="best-time-icon">${getWeatherIcon(code, 'small', isDay)}</span>
       </div>
       <div class="best-time-detail">${temp}°C · ${rain}% kans op regen</div>
     </div>
@@ -358,14 +368,16 @@ function renderForecast() {
     });
   }
 
-  const html = slots.map(s => `
+  const html = slots.map(s => {
+    const isDay = isDayTime(s.time);
+    return `
     <div class="slot ${s.isNow ? 'now' : ''}">
       <div class="slot-time">${s.isNow ? 'NU' : String(s.time.getHours()).padStart(2,'0') + ':00'}</div>
-      <div class="slot-icon">${getWeatherIcon(s.weatherCode)}</div>
+      <div class="slot-icon">${getWeatherIcon(s.weatherCode, 'small', isDay)}</div>
       <div class="slot-temp">${Math.round(s.temp)}°</div>
       <div class="slot-rain">${s.rain}%</div>
     </div>
-  `).join('');
+  `}).join('');
   document.getElementById('forecast').innerHTML = html;
 }
 
@@ -448,7 +460,8 @@ function renderAdvice() {
 
   tips.unshift({ text: jacketType, yellow: true });
 
-  const weatherIcon = getWeatherIcon(c.weather_code, 'large');
+  const isDay = isDayTime(new Date());
+  const weatherIcon = getWeatherIcon(c.weather_code, 'large', isDay);
   document.getElementById('verdict').innerHTML = `<span class="fade-in">${verdict}</span><div class="weather-illustration">${weatherIcon}</div>`;
   document.getElementById('detail').textContent = detail;
   document.getElementById('tips').innerHTML = tips.map(t =>
