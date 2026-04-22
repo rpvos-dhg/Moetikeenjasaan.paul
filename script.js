@@ -750,31 +750,6 @@ function renderChecklist() {
     });
   });
 }
-    html += `<div class="checklist-group">
-      <div class="checklist-group-title">${groupLabel}</div>`;
-    grouped[group].forEach(item => {
-      const isChecked = checked[item.id];
-      html += `<div class="checklist-item">
-        <input type="checkbox" id="check_${item.id}" ${isChecked ? 'checked' : ''}>
-        <label for="check_${item.id}">${item.icon} ${item.label}</label>
-      </div>`;
-    });
-    html += '</div>';
-  });
-
-  checklist.innerHTML = html;
-
-  // Add event listeners
-  checklist.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-    checkbox.addEventListener('change', (e) => {
-      const id = e.target.id.replace('check_', '');
-      checked[id] = e.target.checked;
-      try {
-        localStorage.setItem('dighv_checklist', JSON.stringify(checked));
-      } catch(e) {}
-    });
-  });
-}
 
 // ─── Looplog ───────────────────────────────────────────
 function getLog() {
