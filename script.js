@@ -100,8 +100,8 @@ updateClock();
 setInterval(updateClock, 30000);
 
 // Den Haag - ANWB HQ (Wassenaarseweg)
-const LAT = 52.0907;
-const LON = 4.2676;
+const LAT = 52.0964;
+const LON = 4.3268;
 
 async function fetchWeather() {
   const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,weather_code&minutely_15=precipitation,precipitation_probability&hourly=temperature_2m,precipitation_probability,precipitation,wind_speed_10m,weather_code,uv_index&daily=sunrise,sunset&timezone=Europe/Amsterdam&forecast_days=1`;
