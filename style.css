@@ -326,6 +326,112 @@ main {
   letter-spacing: 0.1em;
 }
 
+/* Pollen card */
+.pollen-card {
+  background: white;
+  border: 2px solid #e6cc80;
+  border-radius: 16px;
+  padding: 18px 20px;
+  background: linear-gradient(135deg, rgba(255, 204, 0, 0.05) 0%, rgba(255, 153, 0, 0.05) 100%);
+}
+
+.pollen-card .card-title {
+  margin-bottom: 16px;
+}
+
+.pollen-info {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.pollen-level {
+  flex: 1;
+  padding-right: 12px;
+  border-right: 1px solid var(--line);
+}
+
+.pollen-allergens {
+  flex: 1;
+}
+
+.pollen-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pollen-item {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+  transition: all 0.2s;
+}
+
+.pollen-item.high {
+  border-left: 4px solid #d97706;
+  background: rgba(217, 119, 6, 0.05);
+}
+
+.pollen-item.medium {
+  border-left: 4px solid #f59e0b;
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.pollen-item.low {
+  border-left: 4px solid #2e7d57;
+  background: rgba(46, 125, 87, 0.05);
+}
+
+.pollen-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.pollen-name {
+  flex: 1;
+}
+
+.pollen-value {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.pollen-bar {
+  height: 8px;
+  background: var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.pollen-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+  transition: width 0.3s;
+}
+
+.pollen-item.high .pollen-bar-fill {
+  background: #d97706;
+}
+
+.pollen-item.medium .pollen-bar-fill {
+  background: #f59e0b;
+}
+
+.pollen-item.low .pollen-bar-fill {
+  background: #2e7d57;
+}
+
 /* Weather panel */
 .weather-panel {
   display: flex;
