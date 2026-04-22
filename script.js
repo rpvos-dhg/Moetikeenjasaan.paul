@@ -11,6 +11,12 @@ let userPref = localStorage_safe_get('dighv_pref') || 'normal';
 let selectedWalkers = new Set();
 let darkModeForced = localStorage_safe_get('dighv_dark_force') || 'auto'; // 'auto', 'dark', 'light'
 
+// Listen for device dark mode preference
+const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+darkModeMediaQuery.addEventListener('change', () => {
+  if (darkModeForced === 'auto') applyDarkMode();
+});
+
 // Apply dark mode
 function applyDarkMode() {
   let darkMode;
@@ -18,8 +24,10 @@ function applyDarkMode() {
     darkMode = true;
   } else if (darkModeForced === 'light') {
     darkMode = false;
-  } else { // auto
-    darkMode = !isDayTime(new Date());
+  } else { // auto: device preference + sunset
+    const deviceDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const sunsetDark = !isDayTime(new Date());
+    darkMode = deviceDark || sunsetDark;
   }
   document.body.classList.toggle('dark', darkMode);
   const btn = document.getElementById('darkModeToggle');
@@ -104,7 +112,24 @@ async function fetchWeather() {
   applyDarkMode(); // Update dark mode with new sunrise data
 }
 
-function isDayTime(date) {
+function getPollenTip() {
+  const month = new Date().getMonth() + 1; // 1-12
+  const pollenData = {
+    1: { level: 'laag', allergens: 'hazelaar, els' },
+    2: { level: 'matig-hoog', allergens: 'hazelaar, els, berken' },
+    3: { level: 'hoog', allergens: 'els, berk, iep' },
+    4: { level: 'zeer hoog', allergens: 'berk, grassen, taxus' },
+    5: { level: 'zeer hoog', allergens: 'grassen, taxus' },
+    6: { level: 'hoog', allergens: 'grassen' },
+    7: { level: 'matig', allergens: 'grassen, onkruid' },
+    8: { level: 'matig', allergens: 'grassen, onkruid' },
+    9: { level: 'matig', allergens: 'onkruid, schimmelsporen' },
+    10: { level: 'laag-matig', allergens: 'schimmelsporen, taxus' },
+    11: { level: 'laag', allergens: 'schimmelsporen' },
+    12: { level: 'laag', allergens: 'hazelaar' }
+  };
+  return pollenData[month] || { level: 'onbekend', allergens: '--' };
+}
   if (!weatherData || !weatherData.daily) return true; // Default to day
   const sunrise = new Date(weatherData.daily.sunrise[0]);
   const sunset = new Date(weatherData.daily.sunset[0]);
@@ -495,12 +520,16 @@ function renderAdvice() {
     tips.push({ text: 'Middel UV: bescherm je huid', yellow: false });
   }
 
-  // Pollen tip (simpel gebaseerd op seizoen)
-  const month = new Date().getMonth() + 1; // 1-12
-  if (month >= 3 && month <= 6) { // Lente
-    tips.push({ text: '🌸 Hoge pollen: allergie medicatie?', yellow: false });
-  } else if (month >= 7 && month <= 9) { // Zomer
-    tips.push({ text: '🌾 Matige pollen in zomer', yellow: false });
+  // Pollen tip (specifieke allergens per seizoen)
+  const pollen = getPollenTip();
+  if (pollen.level === 'zeer hoog') {
+    tips.push({ text: `🌸 ZEER HOGE POLLEN: ${pollen.allergens}. Allergie medicatie aangeraden!`, yellow: false });
+  } else if (pollen.level === 'hoog') {
+    tips.push({ text: `🌸 Hoge pollen: ${pollen.allergens}. Let op je allergieën!`, yellow: false });
+  } else if (pollen.level === 'matig-hoog') {
+    tips.push({ text: `🌾 Matig-hoge pollen: ${pollen.allergens}`, yellow: false });
+  } else if (pollen.level === 'matig') {
+    tips.push({ text: `🌾 Matige pollen: ${pollen.allergens}`, yellow: false });
   }
 
   tips.unshift({ text: jacketType, yellow: true });

@@ -603,24 +603,150 @@ footer strong { color: var(--anwb-yellow); }
 
 /* Dark mode */
 body.dark {
-  --ink: #e0e7ff;
+  --ink: #f1f5f9;
   --paper: #0f172a;
-  --muted: #94a3b8;
-  --line: #334155;
+  --muted: #cbd5e1;
+  --line: #1e293b;
   --good: #4ade80;
   --warn: #fbbf24;
-  --bad: #f87171;
-  --anwb-yellow-soft: #1e293b;
+  --bad: #ff6b6b;
+  --anwb-yellow-soft: #1e3a5f;
 }
 
 body.dark::before {
   background-image:
-    linear-gradient(rgba(255, 204, 0, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 204, 0, 0.05) 1px, transparent 1px);
+    linear-gradient(rgba(255, 204, 0, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 204, 0, 0.08) 1px, transparent 1px);
 }
 
 body.dark header {
-  background: var(--anwb-navy-dark);
+  background: #0a1428;
+  border-bottom: 1px solid #1e293b;
+}
+
+body.dark .tabs {
+  background: #0f172a;
+  border-bottom: 1px solid #1e293b;
+}
+
+body.dark .tab {
+  color: #94a3b8;
+}
+
+body.dark .tab.active {
+  color: #ffcc00;
+  border-color: #ffcc00;
+}
+
+body.dark .advice-card,
+body.dark .weather-card,
+body.dark .pref-card,
+body.dark .lunch-card,
+body.dark .rain-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark .card-title {
+  color: #e2e8f0;
+}
+
+body.dark .verdict {
+  color: #fbbf24;
+}
+
+body.dark .metric-label {
+  color: #cbd5e1;
+}
+
+body.dark .forecast .slot {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark .forecast .slot.now {
+  background: #334155;
+  border-color: #475569;
+}
+
+body.dark input, body.dark button {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+body.dark .walker-btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+body.dark .walker-btn.active {
+  background: #0c4a6e;
+  border-color: #0ea5e9;
+  color: #0ea5e9;
+}
+
+body.dark .explain-content {
+  color: #e2e8f0;
+}
+
+body.dark .explain-section {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+body.dark .explain-section h3 {
+  color: #0ea5e9;
+}
+
+body.dark .explain-section code {
+  background: #0f172a;
+  color: #fbbf24;
+  border-color: #334155;
+}
+
+body.dark .callout {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+body.dark .threshold-table {
+  border: 1px solid #334155;
+}
+
+body.dark .threshold-table th {
+  background: #1e293b;
+  color: #0ea5e9;
+}
+
+body.dark .threshold-table td {
+  border-color: #334155;
+}
+
+body.dark .badge-inline {
+  background: #0c4a6e;
+  color: #0ea5e9;
+}
+
+body.dark .log-entry {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark .log-day-header {
+  color: #0ea5e9;
+}
+
+body.dark .tip {
+  background: #1e293b;
+  color: #cbd5e1;
+}
+
+body.dark .tip.yellow {
+  background: #7c2d12;
+  color: #fbbf24;
 }
 
 .dark-mode-btn {
