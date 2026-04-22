@@ -5,8 +5,8 @@ const WALKERS = [
   'Remco', 'Sjors', 'Steven', 'Tessa', 'Timke'
 ];
 
-// Backend URL - replace with your deployed backend URL
-const BACKEND_URL = 'https://your-backend-url.vercel.app';
+// Backend URL - replace with your Netlify site URL
+const BACKEND_URL = 'https://your-netlify-site.netlify.app';
 
 // State
 let weatherData = null;
@@ -462,7 +462,7 @@ function renderAdvice() {
 // ─── Looplog ───────────────────────────────────────────
 async function getLog() {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/log`);
+    const response = await fetch(`${BACKEND_URL}/.netlify/functions/log`);
     if (!response.ok) throw new Error('Failed to fetch log');
     return await response.json();
   } catch (e) {
@@ -473,7 +473,7 @@ async function getLog() {
 
 async function saveLog(log) {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/log`, {
+    const response = await fetch(`${BACKEND_URL}/.netlify/functions/log`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(log)
