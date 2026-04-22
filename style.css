@@ -78,7 +78,7 @@ header {
 
 /* Hero */
 .hero {
-  padding: 80px 32px 40px;
+  padding: 40px 32px 24px;
   max-width: 1200px;
   margin: 0 auto;
   position: relative;
@@ -134,12 +134,13 @@ h1 .accent::after {
 
 /* Main grid */
 main {
-  padding: 40px 32px 80px;
+  padding: 16px 32px 60px;
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1.2fr 1fr;
-  gap: 40px;
+  gap: 28px;
+  align-items: start;
 }
 
 @media (max-width: 900px) {
@@ -151,10 +152,10 @@ main {
   background: var(--anwb-navy);
   color: white;
   border-radius: 20px;
-  padding: 40px;
+  padding: 32px;
   position: relative;
   overflow: hidden;
-  min-height: 480px;
+  min-height: 400px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -234,14 +235,14 @@ main {
 .weather-panel {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
 }
 
 .weather-card {
   background: white;
   border: 1px solid var(--line);
   border-radius: 16px;
-  padding: 24px;
+  padding: 18px 20px;
 }
 
 .card-title {
@@ -354,7 +355,7 @@ main {
   background: white;
   border: 1px solid var(--line);
   border-radius: 16px;
-  padding: 24px;
+  padding: 18px 20px;
 }
 
 .pref-options {
@@ -739,7 +740,7 @@ code {
 .lunch-card {
   background: var(--anwb-navy);
   border-radius: 16px;
-  padding: 20px 24px;
+  padding: 16px 20px;
   color: white;
 }
 
@@ -759,7 +760,7 @@ code {
 
 .countdown-value {
   font-family: 'Bricolage Grotesque', sans-serif;
-  font-size: 40px;
+  font-size: 34px;
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1;
