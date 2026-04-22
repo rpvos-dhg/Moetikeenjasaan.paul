@@ -59,10 +59,11 @@ async function fetchWeather() {
     weatherData = data;
     lastUpdate = new Date();
     updateClock();
-    render();
   } catch (err) {
     document.getElementById('verdict').innerHTML = `<div class="error">Kon weerdata niet ophalen. Probeer later opnieuw.</div>`;
+    return;
   }
+  render();
 }
 
 function getWeatherIcon(code, size = 'small') {
