@@ -198,6 +198,15 @@
     line-height: 0.95;
     letter-spacing: -0.02em;
     margin-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .weather-illustration {
+    font-size: 64px;
+    opacity: 0.8;
   }
 
   .verdict-detail {
@@ -331,6 +340,11 @@
     color: var(--muted);
     font-weight: 600;
     margin-bottom: 4px;
+  }
+
+  .slot-icon {
+    font-size: 20px;
+    margin-bottom: 2px;
   }
 
   .slot-temp {
@@ -1038,7 +1052,7 @@
   const LON = 4.2676;
 
   async function fetchWeather() {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,weather_code&minutely_15=precipitation,precipitation_probability&hourly=temperature_2m,precipitation_probability,precipitation,wind_speed_10m&timezone=Europe/Amsterdam&forecast_days=1`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,weather_code&minutely_15=precipitation,precipitation_probability&hourly=temperature_2m,precipitation_probability,precipitation,wind_speed_10m,weather_code&timezone=Europe/Amsterdam&forecast_days=1`;
     
     try {
       const res = await fetch(url);
@@ -1051,6 +1065,47 @@
     } catch (err) {
       document.getElementById('verdict').innerHTML = `<div class="error">Kon weerdata niet ophalen. Probeer later opnieuw.</div>`;
     }
+  }
+
+  function getWeatherIcon(code, size = 'small') {
+    const icons = {
+      // Clear sky
+      0: { small: '☀️', large: '☀️' },
+      // Mainly clear
+      1: { small: '🌤️', large: '🌤️' },
+      // Partly cloudy
+      2: { small: '⛅', large: '⛅' },
+      // Overcast
+      3: { small: '☁️', large: '☁️' },
+      // Fog
+      45: { small: '🌫️', large: '🌫️' },
+      48: { small: '🌫️', large: '🌫️' },
+      // Drizzle
+      51: { small: '🌦️', large: '🌦️' },
+      53: { small: '🌦️', large: '🌦️' },
+      55: { small: '🌦️', large: '🌦️' },
+      // Rain
+      61: { small: '🌧️', large: '🌧️' },
+      63: { small: '🌧️', large: '🌧️' },
+      65: { small: '🌧️', large: '🌧️' },
+      // Snow
+      71: { small: '❄️', large: '❄️' },
+      73: { small: '❄️', large: '❄️' },
+      75: { small: '❄️', large: '❄️' },
+      77: { small: '❄️', large: '❄️' },
+      // Rain showers
+      80: { small: '🌦️', large: '🌦️' },
+      81: { small: '🌦️', large: '🌦️' },
+      82: { small: '🌦️', large: '🌦️' },
+      // Snow showers
+      85: { small: '🌨️', large: '🌨️' },
+      86: { small: '🌨️', large: '🌨️' },
+      // Thunderstorm
+      95: { small: '⛈️', large: '⛈️' },
+      96: { small: '⛈️', large: '⛈️' },
+      99: { small: '⛈️', large: '⛈️' }
+    };
+    return icons[code]?.[size] || (size === 'large' ? '☀️' : '☀️');
   }
 
   function render() {
@@ -1166,6 +1221,7 @@
         time: new Date(hourly.time[idx]),
         temp: hourly.temperature_2m[idx],
         rain: hourly.precipitation_probability[idx] || 0,
+        weatherCode: hourly.weather_code?.[idx] || 0,
         isNow: i === 0
       });
     }
@@ -1173,6 +1229,7 @@
     const html = slots.map(s => `
       <div class="slot ${s.isNow ? 'now' : ''}">
         <div class="slot-time">${s.isNow ? 'NU' : String(s.time.getHours()).padStart(2,'0') + ':00'}</div>
+        <div class="slot-icon">${getWeatherIcon(s.weatherCode)}</div>
         <div class="slot-temp">${Math.round(s.temp)}°</div>
         <div class="slot-rain">${s.rain}%</div>
       </div>
@@ -1269,7 +1326,8 @@
     tips.unshift({ text: jacketType, yellow: true });
 
     // Render
-    document.getElementById('verdict').innerHTML = `<span class="fade-in">${verdict}</span>`;
+    const weatherIcon = getWeatherIcon(c.weather_code, 'large');
+    document.getElementById('verdict').innerHTML = `<span class="fade-in">${verdict}</span><div class="weather-illustration">${weatherIcon}</div>`;
     document.getElementById('detail').textContent = detail;
     document.getElementById('tips').innerHTML = tips.map(t => 
       `<span class="tip ${t.yellow ? 'yellow' : ''}">${t.text}</span>`
