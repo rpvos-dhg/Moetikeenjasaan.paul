@@ -12,6 +12,14 @@ let userPref = localStorage_safe_get('dighv_pref') || 'normal';
 let selectedWalkers = new Set();
 let darkModeForced = localStorage_safe_get('dighv_dark_force') || 'auto'; // 'auto', 'dark', 'light'
 
+// Check if current time is daytime based on sunrise/sunset
+function isDayTime(date) {
+  if (!weatherData || !weatherData.daily) return true; // Default to day
+  const sunrise = new Date(weatherData.daily.sunrise[0]);
+  const sunset = new Date(weatherData.daily.sunset[0]);
+  return date >= sunrise && date <= sunset;
+}
+
 // Listen for device dark mode preference
 const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 darkModeMediaQuery.addEventListener('change', () => {
@@ -180,13 +188,6 @@ function getPollenTip() {
   }
   
   return tip;
-}
-
-function isDayTime(date) {
-  if (!weatherData || !weatherData.daily) return true; // Default to day
-  const sunrise = new Date(weatherData.daily.sunrise[0]);
-  const sunset = new Date(weatherData.daily.sunset[0]);
-  return date >= sunrise && date <= sunset;
 }
 
 function getWeatherIcon(code, size = 'small', isDay = true) {
