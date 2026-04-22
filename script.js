@@ -681,14 +681,7 @@ function renderChecklist() {
     { group: 'Wind', icon: '💨', label: 'Stevig jasje (wind > 25 km/u)', id: 'stevig_jasje', condition: () => weatherData?.current?.wind_speed_10m > 25 },
     
     // Pollen-based items
-    { group: 'Allergie', icon: '🌸', label: 'Allergiemedicatie (hoge pollen)', id: 'allergie_medicatie', condition: () => {
-      const pollen = getPollenTip();
-      return pollen.level === 'zeer hoog' || pollen.level === 'hoog';
-    } },
-    { group: 'Allergie', icon: '😷', label: 'Mondkapje (zeer hoge pollen)', id: 'mondkapje', condition: () => {
-      const pollen = getPollenTip();
-      return pollen.level === 'zeer hoog';
-    } },
+    { group: 'Allergie', icon: '💊', label: 'Medicatie (als je last hebt van hooikoorts)', id: 'allergie_medicatie' },
     
     // Info items
     { group: 'Info', icon: '📍', label: 'Route: bij bezoekerspas → rotonde naar buiten', id: 'route_info' },
