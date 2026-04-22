@@ -601,6 +601,44 @@ footer strong { color: var(--anwb-yellow); }
   border-bottom: 1px solid var(--line);
 }
 
+/* Dark mode */
+body.dark {
+  --ink: #e0e7ff;
+  --paper: #0f172a;
+  --muted: #94a3b8;
+  --line: #334155;
+  --good: #4ade80;
+  --warn: #fbbf24;
+  --bad: #f87171;
+  --anwb-yellow-soft: #1e293b;
+}
+
+body.dark::before {
+  background-image:
+    linear-gradient(rgba(255, 204, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 204, 0, 0.05) 1px, transparent 1px);
+}
+
+body.dark header {
+  background: var(--anwb-navy-dark);
+}
+
+.dark-mode-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  margin-right: 16px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.dark-mode-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .threshold-table th {
   background: var(--paper);
   font-weight: 700;

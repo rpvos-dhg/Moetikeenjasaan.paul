@@ -9,6 +9,15 @@ const WALKERS = [
 let weatherData = null;
 let userPref = localStorage_safe_get('dighv_pref') || 'normal';
 let selectedWalkers = new Set();
+let darkMode = localStorage_safe_get('dighv_dark') === 'true';
+
+// Apply dark mode
+function applyDarkMode() {
+  document.body.classList.toggle('dark', darkMode);
+  const btn = document.getElementById('darkModeToggle');
+  if (btn) btn.textContent = darkMode ? '☀️' : '🌙';
+}
+applyDarkMode(); // Init
 
 // Safe storage wrapper (fallback to in-memory)
 const memStore = {};
@@ -329,6 +338,7 @@ function renderRainChart() {
 
 function renderMetrics() {
   const c = weatherData.current;
+  const uv = weatherData.hourly.uv_index[0] || 0;
   document.getElementById('metrics').innerHTML = `
     <div class="metric fade-in">
       <span class="metric-label">Temperatuur</span>
@@ -345,6 +355,10 @@ function renderMetrics() {
     <div class="metric fade-in">
       <span class="metric-label">Neerslag</span>
       <span class="metric-value">${c.precipitation.toFixed(1)}<span class="metric-unit">mm</span></span>
+    </div>
+    <div class="metric fade-in">
+      <span class="metric-label">UV-index</span>
+      <span class="metric-value">${Math.round(uv)}<span class="metric-unit"></span></span>
     </div>
   `;
 }
@@ -456,6 +470,22 @@ function renderAdvice() {
     tips.push({ text: '🧤 Handschoenen', yellow: false });
   } else if (minTemp <= 8) {
     tips.push({ text: 'Sjaal is fijn', yellow: false });
+  }
+
+  // UV tip
+  const uv = weatherData.hourly.uv_index[0] || 0;
+  if (uv >= 7) {
+    tips.push({ text: '🧴 Hoge UV: zonnebrand smeren!', yellow: false });
+  } else if (uv >= 3) {
+    tips.push({ text: 'Middel UV: bescherm je huid', yellow: false });
+  }
+
+  // Pollen tip (simpel gebaseerd op seizoen)
+  const month = new Date().getMonth() + 1; // 1-12
+  if (month >= 3 && month <= 6) { // Lente
+    tips.push({ text: '🌸 Hoge pollen: allergie medicatie?', yellow: false });
+  } else if (month >= 7 && month <= 9) { // Zomer
+    tips.push({ text: '🌾 Matige pollen in zomer', yellow: false });
   }
 
   tips.unshift({ text: jacketType, yellow: true });
@@ -582,6 +612,13 @@ document.querySelectorAll('.pref-btn').forEach(btn => {
     localStorage_safe_set('dighv_pref', userPref);
     if (weatherData) renderAdvice();
   });
+});
+
+// Dark mode toggle
+document.getElementById('darkModeToggle').addEventListener('click', () => {
+  darkMode = !darkMode;
+  localStorage_safe_set('dighv_dark', darkMode);
+  applyDarkMode();
 });
 
 // Init
