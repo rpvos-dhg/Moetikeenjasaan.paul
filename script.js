@@ -680,9 +680,6 @@ function renderChecklist() {
     // Wind-based items
     { group: 'Wind', icon: '💨', label: 'Stevig jasje (wind > 25 km/u)', id: 'stevig_jasje', condition: () => weatherData?.current?.wind_speed_10m > 25 },
     
-    // Pollen-based items
-    { group: 'Allergie', icon: '💊', label: 'Medicatie (als je last hebt van hooikoorts)', id: 'allergie_medicatie' },
-    
     // Info items
     { group: 'Info', icon: '📍', label: 'Route: bij bezoekerspas → rotonde naar buiten', id: 'route_info' },
   ];
