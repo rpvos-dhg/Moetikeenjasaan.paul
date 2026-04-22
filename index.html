@@ -46,6 +46,8 @@
 </section>
 
 <main>
+
+  <!-- Rij 1: Advies + Checklist -->
   <div class="advice-card" id="advice">
     <div>
       <div class="advice-label">Advies voor nu + 30 min</div>
@@ -59,21 +61,22 @@
   </div>
 
   <div class="checklist-card">
-    <div class="card-title">✓ Wat mee naar buiten?</div>
+    <div class="card-title" role="heading" aria-level="2">✓ Wat mee naar buiten?</div>
     <div class="checklist-items" id="checklist"></div>
   </div>
 
-  <div class="weather-panel">
+  <!-- Rij 2: Weercondities + Pollen/Info -->
+  <div class="conditions-panel">
 
     <div class="lunch-card">
-      <div class="card-title">Volgende pauze</div>
+      <div class="card-title" role="heading" aria-level="2">Volgende pauze</div>
       <div id="lunchCountdown"></div>
     </div>
 
     <div class="weather-card">
-      <div class="card-title">
+      <div class="card-title" role="heading" aria-level="2">
         Huidige condities
-        <span class="dot"></span>
+        <span class="dot" aria-label="Live data"></span>
       </div>
       <div class="metrics" id="metrics">
         <div class="metric">
@@ -96,17 +99,12 @@
     </div>
 
     <div class="weather-card">
-      <div class="card-title">Komende uren</div>
-      <div class="forecast" id="forecast"></div>
-    </div>
-
-    <div class="pollen-card">
-      <div class="card-title">🌸 Pollenoverzicht</div>
-      <div class="pollen-grid" id="pollenGrid"></div>
+      <div class="card-title" role="heading" aria-level="2">Komende uren</div>
+      <div class="forecast" id="forecast" role="list" aria-label="Uurverwachting"></div>
     </div>
 
     <div class="weather-card">
-      <div class="card-title">
+      <div class="card-title" role="heading" aria-level="2">
         Beste pauzetijd
         <span style="font-size: 11px; color: var(--muted); font-weight: 500;">komende 4 uur</span>
       </div>
@@ -114,17 +112,26 @@
     </div>
 
     <div class="rain-card visible" id="rainCard">
-      <div class="card-title">
+      <div class="card-title" role="heading" aria-level="2">
         Regen per 15 minuten
         <span style="font-size: 11px; color: var(--muted); font-weight: 500;">komende 2 uur</span>
       </div>
-      <div class="rain-chart" id="rainChart"></div>
+      <div class="rain-chart" id="rainChart" role="img" aria-label="Regenradar grafiek"></div>
       <div class="rain-summary" id="rainSummary"></div>
     </div>
 
+  </div>
+
+  <div class="info-panel">
+
+    <div class="pollen-card">
+      <div class="card-title" role="heading" aria-level="2">🌸 Pollenoverzicht</div>
+      <div class="pollen-grid" id="pollenGrid"></div>
+    </div>
+
     <div class="pref-card">
-      <div class="card-title">Jouw type</div>
-      <div class="pref-options">
+      <div class="card-title" role="heading" aria-level="2">Jouw type</div>
+      <div class="pref-options" role="group" aria-label="Temperatuurvoorkeur">
         <button class="pref-btn" data-pref="cold">Kouwelijk</button>
         <button class="pref-btn active" data-pref="normal">Normaal</button>
         <button class="pref-btn" data-pref="warm">Warmbloedig</button>
@@ -132,6 +139,7 @@
     </div>
 
   </div>
+
 </main>
 </div>
 
