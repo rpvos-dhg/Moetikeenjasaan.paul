@@ -181,6 +181,8 @@ function getPollenTip() {
   
   return tip;
 }
+
+function isDayTime(date) {
   if (!weatherData || !weatherData.daily) return true; // Default to day
   const sunrise = new Date(weatherData.daily.sunrise[0]);
   const sunset = new Date(weatherData.daily.sunset[0]);
