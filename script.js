@@ -1,6 +1,14 @@
+// ─── Personen — voeg hier namen toe of verwijder ze ───
+const WALKERS = [
+  'Adam', 'Bob', 'David', 'Frank H', 'Frank vd H', 'Fred',
+  'Gijs', 'Jeffrey', 'Louise', 'Muttalib', 'Noëlla', 'Nynke',
+  'Remco', 'Sjors', 'Steven', 'Tessa', 'Timke'
+];
+
 // State
 let weatherData = null;
 let userPref = localStorage_safe_get('dighv_pref') || 'normal';
+let selectedWalkers = new Set();
 
 // Safe storage wrapper (fallback to in-memory)
 const memStore = {};
@@ -20,6 +28,11 @@ document.querySelectorAll('.tab').forEach(tab => {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     if (target === 'advice') {
       document.getElementById('view-advice-wrap').classList.add('active');
+    } else if (target === 'log') {
+      document.getElementById('view-log').classList.add('active');
+      initLogTab();
+      renderLogHistory();
+      updateLogTime();
     } else {
       document.getElementById('view-explain').classList.add('active');
     }
@@ -41,6 +54,7 @@ function updateClock() {
   }
   document.getElementById('clock').textContent = label;
   renderLunchCountdown();
+  updateLogTime();
 }
 updateClock();
 setInterval(updateClock, 30000);
@@ -440,6 +454,105 @@ function renderAdvice() {
   document.getElementById('tips').innerHTML = tips.map(t =>
     `<span class="tip ${t.yellow ? 'yellow' : ''}">${t.text}</span>`
   ).join('');
+}
+
+// ─── Looplog ───────────────────────────────────────────
+function getLog() {
+  try { return JSON.parse(localStorage.getItem('dighv_log') || '[]'); } catch(e) { return []; }
+}
+function saveLog(log) {
+  try { localStorage.setItem('dighv_log', JSON.stringify(log)); } catch(e) {}
+}
+
+function updateLogTime() {
+  const el = document.getElementById('logTime');
+  if (!el) return;
+  const now = new Date();
+  el.textContent = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+}
+
+function initLogTab() {
+  const grid = document.getElementById('walkerGrid');
+  if (!grid || grid.children.length > 0) return;
+
+  WALKERS.forEach(name => {
+    const btn = document.createElement('button');
+    btn.className = 'walker-btn';
+    btn.textContent = name;
+    btn.addEventListener('click', () => {
+      if (selectedWalkers.has(name)) {
+        selectedWalkers.delete(name);
+        btn.classList.remove('active');
+      } else {
+        selectedWalkers.add(name);
+        btn.classList.add('active');
+      }
+    });
+    grid.appendChild(btn);
+  });
+
+  document.getElementById('logClearBtn').addEventListener('click', () => {
+    selectedWalkers.clear();
+    grid.querySelectorAll('.walker-btn').forEach(b => b.classList.remove('active'));
+  });
+
+  document.getElementById('logSaveBtn').addEventListener('click', () => {
+    const log = getLog();
+    log.unshift({ id: Date.now(), timestamp: new Date().toISOString(), people: [...selectedWalkers] });
+    saveLog(log);
+    selectedWalkers.clear();
+    grid.querySelectorAll('.walker-btn').forEach(b => b.classList.remove('active'));
+    renderLogHistory();
+    const saveBtn = document.getElementById('logSaveBtn');
+    saveBtn.textContent = '✓ Opgeslagen';
+    setTimeout(() => { saveBtn.textContent = 'Opslaan'; }, 1800);
+  });
+}
+
+function renderLogHistory() {
+  const el = document.getElementById('logHistory');
+  if (!el) return;
+  const log = getLog();
+
+  if (log.length === 0) {
+    el.innerHTML = '<div class="log-empty">Nog geen pauzes geregistreerd.</div>';
+    return;
+  }
+
+  const days = {};
+  log.forEach(entry => {
+    const d = new Date(entry.timestamp);
+    const key = d.toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    if (!days[key]) days[key] = [];
+    days[key].push(entry);
+  });
+
+  let html = '';
+  for (const [day, entries] of Object.entries(days)) {
+    html += `<div class="log-day-header">${day}</div>`;
+    entries.forEach(entry => {
+      const d = new Date(entry.timestamp);
+      const time = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+      const peopleStr = entry.people.length === 0 ? '<em>Niemand meegelopen</em>' : entry.people.join(', ');
+      html += `
+        <div class="log-entry">
+          <div class="log-entry-main">
+            <span class="log-entry-time">${time}</span>
+            <span class="log-entry-people">${peopleStr}</span>
+          </div>
+          <button class="log-delete-btn" data-id="${entry.id}" title="Verwijderen">×</button>
+        </div>`;
+    });
+  }
+
+  el.innerHTML = html;
+  el.querySelectorAll('.log-delete-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const updated = getLog().filter(e => e.id !== Number(btn.dataset.id));
+      saveLog(updated);
+      renderLogHistory();
+    });
+  });
 }
 
 // Preference buttons

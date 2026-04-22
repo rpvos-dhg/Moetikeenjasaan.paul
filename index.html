@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=3">
+<link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 <div class="wrapper">
@@ -28,6 +28,7 @@
 
 <nav class="tabs">
   <button class="tab active" data-tab="advice">Advies</button>
+  <button class="tab" data-tab="log">Looplog</button>
   <button class="tab" data-tab="explain">Hoe werkt dit?</button>
 </nav>
 
@@ -271,12 +272,32 @@
   </div>
 </div>
 
+<div class="view" id="view-log">
+  <div class="log-content">
+
+    <div class="log-register-card">
+      <div class="log-register-header">
+        <h2 class="log-title">Wie gaat er mee?</h2>
+        <span class="log-time" id="logTime">--:--</span>
+      </div>
+      <div class="walker-grid" id="walkerGrid"></div>
+      <div class="log-actions">
+        <button class="log-clear-btn" id="logClearBtn">Niemand</button>
+        <button class="log-save-btn" id="logSaveBtn">Opslaan</button>
+      </div>
+    </div>
+
+    <div id="logHistory"></div>
+
+  </div>
+</div>
+
 <footer>
   Gebouwd door en voor <strong>DIGHV</strong> · Weerdata via Open-Meteo · Niet officieel ANWB
 </footer>
 
 </div>
 
-<script src="script.js?v=3"></script>
+<script src="script.js?v=4"></script>
 </body>
 </html>
