@@ -104,7 +104,8 @@ const LAT = 52.0907;
 const LON = 4.2676;
 
 async function fetchWeather() {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,weather_code&minutely_15=precipitation,precipitation_probability&hourly=temperature_2m,precipitation_probability,precipitation,wind_speed_10m,weather_code,uv_index&daily=sunrise,sunset&timezone=Europe/Amsterdam&forecast_days=1`;
+  // All data from Open-Meteo (reliable, no API key needed)
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,weather_code&minutely_15=precipitation,precipitation_probability&hourly=temperature_2m,precipitation_probability,precipitation,wind_speed_10m,weather_code,uv_index&daily=sunrise,sunset,pollen_tree,pollen_grass,pollen_weed&timezone=Europe/Amsterdam&forecast_days=1`;
 
   try {
     const res = await fetch(url);
@@ -113,47 +114,26 @@ async function fetchWeather() {
     weatherData = data;
     lastUpdate = new Date();
     updateClock();
+    
+    // Extract pollen data from Open-Meteo if available
+    if (data.daily && data.daily.pollen_tree && data.daily.pollen_tree[0] !== undefined) {
+      pollenData = {
+        tree: data.daily.pollen_tree[0] || 0,
+        grass: data.daily.pollen_grass[0] || 0,
+        weed: data.daily.pollen_weed[0] || 0,
+        timestamp: new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
+      };
+    } else {
+      pollenData = null; // Will use seasonal fallback
+    }
   } catch (err) {
+    console.error('Weerdata fetch error:', err);
     document.getElementById('verdict').innerHTML = `<div class="error">Kon weerdata niet ophalen. Probeer later opnieuw.</div>`;
     return;
   }
   
-  // Fetch pollen data in parallel
-  await fetchPollenData();
-  
   render();
   applyDarkMode(); // Update dark mode with new sunrise data
-}
-
-async function fetchPollenData() {
-  try {
-    // Try to fetch from Tomorrow.io (free tier - limited requests)
-    // Sign up for free API key at https://www.tomorrow.io
-    const apiKey = 'rC2jbN7JbVYX6l7Qkc2U3eHkNdHk'; // Free tier API key (replace with your own)
-    const response = await fetch(
-      `https://api.tomorrow.io/v4/weather/forecast?location=${LAT},${LON}&fields=pollenAndAirQuality&timesteps=daily&units=metric&apikey=${apiKey}`
-    );
-    
-    if (response.ok) {
-      const data = await response.json();
-      if (data.timelines && data.timelines.daily && data.timelines.daily.length > 0) {
-        const today = data.timelines.daily[0];
-        if (today.values) {
-          pollenData = {
-            tree: today.values.treePollenForecast || 0,
-            grass: today.values.grassPollenForecast || 0,
-            weed: today.values.weedPollenForecast || 0,
-            timestamp: new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
-          };
-          return;
-        }
-      }
-    }
-  } catch (e) {
-    console.warn('Pollen API not available, using seasonal fallback');
-  }
-  // Fallback: use seasonal data (no live API call)
-  pollenData = null;
 }
 
 function getPollenTip() {
