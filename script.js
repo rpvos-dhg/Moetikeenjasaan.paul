@@ -104,19 +104,40 @@ const LAT = 52.0907;
 const LON = 4.2676;
 
 async function fetchWeather() {
-  // Use only valid Open-Meteo parameters (pollen is not available in this API)
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,weather_code&minutely_15=precipitation,precipitation_probability&hourly=temperature_2m,precipitation_probability,precipitation,wind_speed_10m,weather_code,uv_index&daily=sunrise,sunset&timezone=Europe/Amsterdam&forecast_days=1`;
+  const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,weather_code&minutely_15=precipitation,precipitation_probability&hourly=temperature_2m,precipitation_probability,precipitation,wind_speed_10m,weather_code,uv_index&daily=sunrise,sunset&timezone=Europe/Amsterdam&forecast_days=1`;
+  
+  const airQualityUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&current=alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,ragweed_pollen,olive_pollen&past_days=0&forecast_days=1`;
 
   try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('Network error');
-    const data = await res.json();
-    weatherData = data;
+    // Fetch both weather and air quality data in parallel
+    const [weatherRes, airQualityRes] = await Promise.all([
+      fetch(weatherUrl),
+      fetch(airQualityUrl)
+    ]);
+    
+    if (!weatherRes.ok) throw new Error('Weather network error');
+    const weatherData_new = await weatherRes.json();
+    weatherData = weatherData_new;
     lastUpdate = new Date();
     updateClock();
     
-    // Pollen data: Open-Meteo doesn't provide pollen, so we use seasonal fallback only
-    pollenData = null;
+    // Extract pollen data from air quality API if available
+    if (airQualityRes.ok) {
+      const airQualityData = await airQualityRes.json();
+      if (airQualityData.current) {
+        pollenData = {
+          alder: airQualityData.current.alder_pollen || 0,
+          birch: airQualityData.current.birch_pollen || 0,
+          grass: airQualityData.current.grass_pollen || 0,
+          mugwort: airQualityData.current.mugwort_pollen || 0,
+          ragweed: airQualityData.current.ragweed_pollen || 0,
+          olive: airQualityData.current.olive_pollen || 0,
+          timestamp: new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
+        };
+      }
+    } else {
+      pollenData = null; // Fallback to seasonal data
+    }
   } catch (err) {
     console.error('Weerdata fetch error:', err);
     document.getElementById('verdict').innerHTML = `<div class="error">Kon weerdata niet ophalen. Probeer later opnieuw.</div>`;
@@ -146,16 +167,22 @@ function getPollenTip() {
   
   let tip = seasonalData[month] || { level: 'onbekend', allergens: '--' };
   
-  // If live pollen data available, enhance
+  // If live pollen data available, enhance with actual measurements
   if (pollenData) {
-    const liveLevels = [];
-    if (pollenData.tree > 3) liveLevels.push('bomen');
-    if (pollenData.grass > 3) liveLevels.push('grassen');
-    if (pollenData.weed > 3) liveLevels.push('onkruid');
+    const highPollen = [];
+    // Thresholds for high pollen (in µg/m³ - typical values)
+    if (pollenData.alder > 20) highPollen.push('els');
+    if (pollenData.birch > 20) highPollen.push('berk');
+    if (pollenData.grass > 50) highPollen.push('grassen');
+    if (pollenData.mugwort > 10) highPollen.push('bijvoet');
+    if (pollenData.ragweed > 10) highPollen.push('ragweed');
+    if (pollenData.olive > 20) highPollen.push('olijf');
     
-    if (liveLevels.length > 0) {
-      tip.live = `${liveLevels.join(', ')} (gemeten ${pollenData.timestamp})`;
-    }
+    const summary = highPollen.length > 0 
+      ? `Hoog: ${highPollen.join(', ')}` 
+      : 'Alle pollen laag';
+    
+    tip.live = `${summary} (gemeten ${pollenData.timestamp})`;
   }
   
   return tip;

@@ -132,7 +132,7 @@
 
     <div class="explain-section">
       <h3>1. Databron</h3>
-      <p>De tool haalt elke 10 minuten actuele weerdata op van <strong>Open-Meteo</strong>, een gratis open-source weer-API die data combineert van diverse Europese meteorologische instituten (waaronder het KNMI).</p>
+      <p>De tool haalt elke 10 minuten actuele weerdata op van <strong>Open-Meteo</strong> (forecast API) en live pollen-gegevens van de <strong>Open-Meteo Air Quality API</strong>. Deze APIs combineren data van diverse Europese meteorologische instituten (waaronder het KNMI).</p>
       <p>Locatie: <code>52.0907° N, 4.2676° O</code> — ANWB hoofdkantoor aan de Wassenaarseweg in Den Haag.</p>
       <div class="callout">
         <strong>Live check:</strong> de tijd in de header update continu en het groene LIVE-bolletje pulseert zolang de data vers is.
@@ -241,7 +241,7 @@
 
     <div class="explain-section">
       <h3>7. Extra tips</h3>
-      <p>Op basis van wind, temperatuur, UV-index en <strong>seizoensgebonden pollen-data</strong> komen er extra aanbevelingen bij:</p>
+      <p>Op basis van wind, temperatuur, UV-index en <strong>live pollen-data via Open-Meteo Air Quality API</strong> komen er extra aanbevelingen bij:</p>
       <table class="threshold-table">
         <tr>
           <th>Conditie</th>
@@ -272,8 +272,8 @@
           <td>Bescherm je huid</td>
         </tr>
         <tr>
-          <td>Hoge pollen (seizoen)</td>
-          <td>Pollen-specifieke allergie medicatie. Gebaseerd op jaarlijkse trends.</td>
+          <td>Hoge pollen (live)</td>
+          <td>Actuele pollen-concentraties (els, berk, grassen, bijvoet, ragweed, olijf) in µg/m³. Pollen-specifieke medicatie aanbevolen bij hoge waarden.</td>
         </tr>
       </table>
     </div>
