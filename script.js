@@ -577,19 +577,19 @@ function renderAdvice() {
   if (pollen.level === 'zeer hoog') {
     let msg = `🌸 ZEER HOGE POLLEN: ${pollen.allergens}. Allergie medicatie aangeraden!`;
     if (pollen.live) msg += ` LIVE: ${pollen.live}`;
-    tips.push({ text: msg, yellow: false });
+    tips.push({ text: msg, yellow: false, pollen: true });
   } else if (pollen.level === 'hoog') {
     let msg = `🌸 Hoge pollen: ${pollen.allergens}. Let op je allergieën!`;
     if (pollen.live) msg += ` LIVE: ${pollen.live}`;
-    tips.push({ text: msg, yellow: false });
+    tips.push({ text: msg, yellow: false, pollen: true });
   } else if (pollen.level === 'matig-hoog') {
     let msg = `🌾 Matig-hoge pollen: ${pollen.allergens}`;
     if (pollen.live) msg += ` LIVE: ${pollen.live}`;
-    tips.push({ text: msg, yellow: false });
+    tips.push({ text: msg, yellow: false, pollen: false });
   } else if (pollen.level === 'matig') {
     let msg = `🌾 Matige pollen: ${pollen.allergens}`;
     if (pollen.live) msg += ` LIVE: ${pollen.live}`;
-    tips.push({ text: msg, yellow: false });
+    tips.push({ text: msg, yellow: false, pollen: false });
   }
 
   tips.unshift({ text: jacketType, yellow: true });
@@ -599,8 +599,79 @@ function renderAdvice() {
   document.getElementById('verdict').innerHTML = `<span class="fade-in">${verdict}</span><div class="weather-illustration">${weatherIcon}</div>`;
   document.getElementById('detail').textContent = detail;
   document.getElementById('tips').innerHTML = tips.map(t =>
-    `<span class="tip ${t.yellow ? 'yellow' : ''}">${t.text}</span>`
+    `<span class="tip ${t.yellow ? 'yellow' : ''} ${t.pollen ? 'pollen' : ''}">${t.text}</span>`
   ).join('');
+  
+  renderChecklist();
+}
+
+function renderChecklist() {
+  const items = [
+    { group: 'Always', icon: '🔑', label: 'Personeelspas', id: 'personeelspas' },
+    { group: 'Always', icon: '🎫', label: 'Bezoekerspas (check: heeft iemand een pas?)', id: 'bezoekerspas' },
+    { group: 'Always', icon: '📱', label: 'Telefoon', id: 'telefoon' },
+    { group: 'Weather', icon: '🕶️', label: 'Zonnebril', id: 'zonnebril', condition: () => weatherData?.hourly?.uv_index?.[0] >= 3 },
+    { group: 'Weather', icon: '🧴', label: 'Zonnebrandcreme', id: 'zonnebrandcreme', condition: () => weatherData?.hourly?.uv_index?.[0] >= 3 },
+    { group: 'Weather', icon: '☂️', label: 'Paraplu', id: 'paraplu', condition: () => {
+      if (!weatherData) return false;
+      const c = weatherData.current;
+      const hourly = weatherData.hourly;
+      const now = new Date();
+      const currentHour = now.getHours();
+      const idxNow = hourly.time.findIndex(t => new Date(t).getHours() === currentHour);
+      const rainProb = Math.max(hourly.precipitation_probability?.[idxNow] ?? 0, hourly.precipitation_probability?.[idxNow + 1] ?? 0);
+      return rainProb >= 30;
+    } },
+    { group: 'Weather', icon: '🧣', label: 'Sjaal', id: 'sjaal', condition: () => weatherData?.current?.temperature_2m <= 8 },
+    { group: 'Weather', icon: '🧤', label: 'Handschoenen', id: 'handschoenen', condition: () => weatherData?.current?.temperature_2m <= 3 },
+    { group: 'Info', icon: '📍', label: 'Route: rotonde naar buiten (bij bezoekerspas)', id: 'route_info' },
+  ];
+
+  const checklist = document.getElementById('checklist');
+  if (!checklist) return;
+
+  // Get checked items from storage
+  let checked = {};
+  try {
+    checked = JSON.parse(localStorage.getItem('dighv_checklist') || '{}');
+  } catch(e) {}
+
+  // Group items
+  const grouped = {};
+  items.forEach(item => {
+    if (!grouped[item.group]) grouped[item.group] = [];
+    const shouldShow = !item.condition || item.condition();
+    if (shouldShow) grouped[item.group].push(item);
+  });
+
+  let html = '';
+  Object.keys(grouped).forEach(group => {
+    if (grouped[group].length === 0) return;
+    const groupLabel = group === 'Always' ? 'Altijd mee' : group === 'Weather' ? 'Afhankelijk weer' : 'Belangrijk';
+    html += `<div class="checklist-group">
+      <div class="checklist-group-title">${groupLabel}</div>`;
+    grouped[group].forEach(item => {
+      const isChecked = checked[item.id];
+      html += `<div class="checklist-item">
+        <input type="checkbox" id="check_${item.id}" ${isChecked ? 'checked' : ''}>
+        <label for="check_${item.id}">${item.icon} ${item.label}</label>
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  checklist.innerHTML = html;
+
+  // Add event listeners
+  checklist.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+    checkbox.addEventListener('change', (e) => {
+      const id = e.target.id.replace('check_', '');
+      checked[id] = e.target.checked;
+      try {
+        localStorage.setItem('dighv_checklist', JSON.stringify(checked));
+      } catch(e) {}
+    });
+  });
 }
 
 // ─── Looplog ───────────────────────────────────────────
