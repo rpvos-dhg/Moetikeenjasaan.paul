@@ -7,6 +7,7 @@ const WALKERS = [
 
 // State
 let weatherData = null;
+let pollenData = null;
 let userPref = localStorage_safe_get('dighv_pref') || 'normal';
 let selectedWalkers = new Set();
 let darkModeForced = localStorage_safe_get('dighv_dark_force') || 'auto'; // 'auto', 'dark', 'light'
@@ -108,13 +109,48 @@ async function fetchWeather() {
     document.getElementById('verdict').innerHTML = `<div class="error">Kon weerdata niet ophalen. Probeer later opnieuw.</div>`;
     return;
   }
+  
+  // Fetch pollen data in parallel
+  await fetchPollenData();
+  
   render();
   applyDarkMode(); // Update dark mode with new sunrise data
 }
 
+async function fetchPollenData() {
+  try {
+    // Try to fetch from Tomorrow.io (free tier - limited requests)
+    // Sign up for free API key at https://www.tomorrow.io
+    const apiKey = 'rC2jbN7JbVYX6l7Qkc2U3eHkNdHk'; // Free tier API key (replace with your own)
+    const response = await fetch(
+      `https://api.tomorrow.io/v4/weather/forecast?location=${LAT},${LON}&fields=pollenAndAirQuality&timesteps=daily&units=metric&apikey=${apiKey}`
+    );
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.timelines && data.timelines.daily && data.timelines.daily.length > 0) {
+        const today = data.timelines.daily[0];
+        if (today.values) {
+          pollenData = {
+            tree: today.values.treePollenForecast || 0,
+            grass: today.values.grassPollenForecast || 0,
+            weed: today.values.weedPollenForecast || 0,
+            timestamp: new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
+          };
+          return;
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Pollen API not available, using seasonal fallback');
+  }
+  // Fallback: use seasonal data (no live API call)
+  pollenData = null;
+}
+
 function getPollenTip() {
   const month = new Date().getMonth() + 1; // 1-12
-  const pollenData = {
+  const seasonalData = {
     1: { level: 'laag', allergens: 'hazelaar, els' },
     2: { level: 'matig-hoog', allergens: 'hazelaar, els, berken' },
     3: { level: 'hoog', allergens: 'els, berk, iep' },
@@ -128,7 +164,22 @@ function getPollenTip() {
     11: { level: 'laag', allergens: 'schimmelsporen' },
     12: { level: 'laag', allergens: 'hazelaar' }
   };
-  return pollenData[month] || { level: 'onbekend', allergens: '--' };
+  
+  let tip = seasonalData[month] || { level: 'onbekend', allergens: '--' };
+  
+  // If live pollen data available, enhance
+  if (pollenData) {
+    const liveLevels = [];
+    if (pollenData.tree > 3) liveLevels.push('bomen');
+    if (pollenData.grass > 3) liveLevels.push('grassen');
+    if (pollenData.weed > 3) liveLevels.push('onkruid');
+    
+    if (liveLevels.length > 0) {
+      tip.live = `${liveLevels.join(', ')} (gemeten ${pollenData.timestamp})`;
+    }
+  }
+  
+  return tip;
 }
   if (!weatherData || !weatherData.daily) return true; // Default to day
   const sunrise = new Date(weatherData.daily.sunrise[0]);
@@ -523,13 +574,21 @@ function renderAdvice() {
   // Pollen tip (specifieke allergens per seizoen)
   const pollen = getPollenTip();
   if (pollen.level === 'zeer hoog') {
-    tips.push({ text: `🌸 ZEER HOGE POLLEN: ${pollen.allergens}. Allergie medicatie aangeraden!`, yellow: false });
+    let msg = `🌸 ZEER HOGE POLLEN: ${pollen.allergens}. Allergie medicatie aangeraden!`;
+    if (pollen.live) msg += ` LIVE: ${pollen.live}`;
+    tips.push({ text: msg, yellow: false });
   } else if (pollen.level === 'hoog') {
-    tips.push({ text: `🌸 Hoge pollen: ${pollen.allergens}. Let op je allergieën!`, yellow: false });
+    let msg = `🌸 Hoge pollen: ${pollen.allergens}. Let op je allergieën!`;
+    if (pollen.live) msg += ` LIVE: ${pollen.live}`;
+    tips.push({ text: msg, yellow: false });
   } else if (pollen.level === 'matig-hoog') {
-    tips.push({ text: `🌾 Matig-hoge pollen: ${pollen.allergens}`, yellow: false });
+    let msg = `🌾 Matig-hoge pollen: ${pollen.allergens}`;
+    if (pollen.live) msg += ` LIVE: ${pollen.live}`;
+    tips.push({ text: msg, yellow: false });
   } else if (pollen.level === 'matig') {
-    tips.push({ text: `🌾 Matige pollen: ${pollen.allergens}`, yellow: false });
+    let msg = `🌾 Matige pollen: ${pollen.allergens}`;
+    if (pollen.live) msg += ` LIVE: ${pollen.live}`;
+    tips.push({ text: msg, yellow: false });
   }
 
   tips.unshift({ text: jacketType, yellow: true });
