@@ -242,68 +242,73 @@ main {
 
 /* Checklist */
 .checklist-card {
-  background: white;
-  border: 1px solid var(--line);
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 3px solid var(--anwb-yellow);
   border-radius: 16px;
-  padding: 18px 20px;
+  padding: 20px 22px;
+  box-shadow: 0 4px 12px rgba(255, 204, 0, 0.15);
 }
 
 .checklist-card .card-title {
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--muted);
-  margin-bottom: 14px;
+  letter-spacing: 0.1em;
+  color: var(--anwb-navy);
+  margin-bottom: 16px;
 }
 
 .checklist-items {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .checklist-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  background: var(--paper);
-  border-radius: 8px;
-  border: 1px solid var(--line);
+  gap: 12px;
+  padding: 12px 14px;
+  background: white;
+  border-radius: 10px;
+  border: 2px solid var(--line);
   cursor: pointer;
   transition: all 0.2s;
+  font-weight: 500;
 }
 
 .checklist-item:hover {
-  background: var(--anwb-yellow-soft);
-  border-color: var(--anwb-yellow);
+  background: #fafafa;
+  border-color: var(--anwb-navy);
+  transform: translateX(2px);
 }
 
 .checklist-item input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   cursor: pointer;
   accent-color: var(--anwb-navy);
+  flex-shrink: 0;
 }
 
 .checklist-item label {
   cursor: pointer;
   flex: 1;
   font-weight: 500;
-  font-size: 14px;
+  font-size: 15px;
+  color: var(--ink);
 }
 
 .checklist-item input[type="checkbox"]:checked + label {
   color: var(--good);
   text-decoration: line-through;
-  opacity: 0.6;
+  opacity: 0.7;
 }
 
 .checklist-group {
-  margin-bottom: 12px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--line);
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid rgba(255, 204, 0, 0.3);
 }
 
 .checklist-group:last-child {
@@ -313,12 +318,12 @@ main {
 }
 
 .checklist-group-title {
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 800;
   text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 8px;
-  letter-spacing: 0.05em;
+  color: var(--anwb-navy);
+  margin-bottom: 10px;
+  letter-spacing: 0.1em;
 }
 
 /* Weather panel */
