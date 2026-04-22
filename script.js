@@ -610,11 +610,15 @@ function renderChecklist() {
     { group: 'Always', icon: '🔑', label: 'Personeelspas', id: 'personeelspas' },
     { group: 'Always', icon: '🎫', label: 'Bezoekerspas (check: heeft iemand een pas?)', id: 'bezoekerspas' },
     { group: 'Always', icon: '📱', label: 'Telefoon', id: 'telefoon' },
-    { group: 'Weather', icon: '🕶️', label: 'Zonnebril', id: 'zonnebril', condition: () => weatherData?.hourly?.uv_index?.[0] >= 3 },
-    { group: 'Weather', icon: '🧴', label: 'Zonnebrandcreme', id: 'zonnebrandcreme', condition: () => weatherData?.hourly?.uv_index?.[0] >= 3 },
-    { group: 'Weather', icon: '☂️', label: 'Paraplu', id: 'paraplu', condition: () => {
+    
+    // UV-based items
+    { group: 'Zon', icon: '🕶️', label: 'Zonnebril (hoge UV)', id: 'zonnebril', condition: () => weatherData?.hourly?.uv_index?.[0] >= 3 },
+    { group: 'Zon', icon: '🧴', label: 'Zonnebrandcreme SPF50+', id: 'zonnebrandcreme', condition: () => weatherData?.hourly?.uv_index?.[0] >= 3 },
+    { group: 'Zon', icon: '👒', label: 'Hoed/pet (zeer hoge UV)', id: 'hoed', condition: () => weatherData?.hourly?.uv_index?.[0] >= 7 },
+    
+    // Rain-based items
+    { group: 'Regen', icon: '☂️', label: 'Paraplu', id: 'paraplu', condition: () => {
       if (!weatherData) return false;
-      const c = weatherData.current;
       const hourly = weatherData.hourly;
       const now = new Date();
       const currentHour = now.getHours();
@@ -622,9 +626,36 @@ function renderChecklist() {
       const rainProb = Math.max(hourly.precipitation_probability?.[idxNow] ?? 0, hourly.precipitation_probability?.[idxNow + 1] ?? 0);
       return rainProb >= 30;
     } },
-    { group: 'Weather', icon: '🧣', label: 'Sjaal', id: 'sjaal', condition: () => weatherData?.current?.temperature_2m <= 8 },
-    { group: 'Weather', icon: '🧤', label: 'Handschoenen', id: 'handschoenen', condition: () => weatherData?.current?.temperature_2m <= 3 },
-    { group: 'Info', icon: '📍', label: 'Route: rotonde naar buiten (bij bezoekerspas)', id: 'route_info' },
+    { group: 'Regen', icon: '🎒', label: 'Waterdichte tas/rugzak', id: 'waterdichte_tas', condition: () => {
+      if (!weatherData) return false;
+      const hourly = weatherData.hourly;
+      const now = new Date();
+      const currentHour = now.getHours();
+      const idxNow = hourly.time.findIndex(t => new Date(t).getHours() === currentHour);
+      const rainProb = Math.max(hourly.precipitation_probability?.[idxNow] ?? 0, hourly.precipitation_probability?.[idxNow + 1] ?? 0);
+      return rainProb >= 50;
+    } },
+    
+    // Cold-based items
+    { group: 'Kou', icon: '🧣', label: 'Sjaal', id: 'sjaal', condition: () => weatherData?.current?.temperature_2m <= 8 },
+    { group: 'Kou', icon: '🧤', label: 'Handschoenen', id: 'handschoenen', condition: () => weatherData?.current?.temperature_2m <= 3 },
+    { group: 'Kou', icon: '🧥', label: 'Winterjas (< 0°C)', id: 'winterjas_extra', condition: () => weatherData?.current?.temperature_2m < 0 },
+    
+    // Wind-based items
+    { group: 'Wind', icon: '💨', label: 'Stevig jasje (wind > 25 km/u)', id: 'stevig_jasje', condition: () => weatherData?.current?.wind_speed_10m > 25 },
+    
+    // Pollen-based items
+    { group: 'Allergie', icon: '🌸', label: 'Allergiemedicatie (hoge pollen)', id: 'allergie_medicatie', condition: () => {
+      const pollen = getPollenTip();
+      return pollen.level === 'zeer hoog' || pollen.level === 'hoog';
+    } },
+    { group: 'Allergie', icon: '😷', label: 'Mondkapje (zeer hoge pollen)', id: 'mondkapje', condition: () => {
+      const pollen = getPollenTip();
+      return pollen.level === 'zeer hoog';
+    } },
+    
+    // Info items
+    { group: 'Info', icon: '📍', label: 'Route: bij bezoekerspas → rotonde naar buiten', id: 'route_info' },
   ];
 
   const checklist = document.getElementById('checklist');
@@ -645,9 +676,44 @@ function renderChecklist() {
   });
 
   let html = '';
-  Object.keys(grouped).forEach(group => {
-    if (grouped[group].length === 0) return;
-    const groupLabel = group === 'Always' ? 'Altijd mee' : group === 'Weather' ? 'Afhankelijk weer' : 'Belangrijk';
+  const groupOrder = ['Always', 'Zon', 'Regen', 'Kou', 'Wind', 'Allergie', 'Info'];
+  const groupLabels = {
+    'Always': '✓ Altijd mee',
+    'Zon': '☀️ Zon',
+    'Regen': '🌧️ Regen',
+    'Kou': '❄️ Kou',
+    'Wind': '💨 Wind',
+    'Allergie': '🌸 Allergie',
+    'Info': '📍 Info'
+  };
+
+  groupOrder.forEach(group => {
+    if (!grouped[group] || grouped[group].length === 0) return;
+    html += `<div class="checklist-group">
+      <div class="checklist-group-title">${groupLabels[group]}</div>`;
+    grouped[group].forEach(item => {
+      const isChecked = checked[item.id];
+      html += `<div class="checklist-item">
+        <input type="checkbox" id="check_${item.id}" ${isChecked ? 'checked' : ''}>
+        <label for="check_${item.id}">${item.label}</label>
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  checklist.innerHTML = html;
+
+  // Add event listeners
+  checklist.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+    checkbox.addEventListener('change', (e) => {
+      const id = e.target.id.replace('check_', '');
+      checked[id] = e.target.checked;
+      try {
+        localStorage.setItem('dighv_checklist', JSON.stringify(checked));
+      } catch(e) {}
+    });
+  });
+}
     html += `<div class="checklist-group">
       <div class="checklist-group-title">${groupLabel}</div>`;
     grouped[group].forEach(item => {
