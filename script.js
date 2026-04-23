@@ -104,8 +104,8 @@ const LAT = 52.0964;
 const LON = 4.3268;
 
 async function fetchWeather() {
-  const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,weather_code&minutely_15=precipitation,precipitation_probability&hourly=temperature_2m,precipitation_probability,precipitation,wind_speed_10m,weather_code,uv_index&daily=sunrise,sunset&timezone=Europe/Amsterdam&forecast_days=1`;
-  
+  const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,weather_code&minutely_15=precipitation,precipitation_probability&hourly=temperature_2m,precipitation_probability,precipitation,wind_speed_10m,weather_code,uv_index&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,weather_code&timezone=Europe/Amsterdam&forecast_days=2`;
+
   const airQualityUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&current=alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,ragweed_pollen,olive_pollen&past_days=0&forecast_days=1`;
 
   try {
@@ -364,6 +364,7 @@ function render() {
   renderWachtFf();
   renderBestTime();
   renderLunchCountdown();
+  renderWeatherComparison();
 }
 
 function renderRainChart() {
@@ -603,7 +604,7 @@ function renderPollenCard() {
     { name: 'Berk', icon: '🌳', value: pollenData?.birch || 0, threshold: 20, season: true },
     { name: 'Grassen', icon: '🌾', value: pollenData?.grass || 0, threshold: 50, season: true },
     { name: 'Bijvoet', icon: '🌱', value: pollenData?.mugwort || 0, threshold: 10, season: true },
-    { name: 'Ragweed', icon: '🌱', value: pollenData?.ragweed || 0, threshold: 10, season: true },
+    { name: 'Ambrosia', icon: '🌱', value: pollenData?.ragweed || 0, threshold: 10, season: true },
     { name: 'Olijf', icon: '🌳', value: pollenData?.olive || 0, threshold: 20, season: false },
   ];
 
@@ -868,6 +869,55 @@ document.getElementById('darkModeToggle').addEventListener('click', () => {
   localStorage_safe_set('dighv_dark_force', darkModeForced);
   applyDarkMode();
 });
+
+function renderWeatherComparison() {
+  const el = document.getElementById('comparisonGrid');
+  if (!el || !weatherData || !weatherData.daily) return;
+
+  const today = weatherData.daily;
+  const todayIdx = 0;
+  const tomorrowIdx = 1;
+
+  // Check if tomorrow data exists
+  if (!today.time[tomorrowIdx]) return;
+
+  const todayTempMax = today.temperature_2m_max?.[todayIdx];
+  const tomorrowTempMax = today.temperature_2m_max?.[tomorrowIdx];
+  const todayCode = today.weather_code?.[todayIdx];
+  const tomorrowCode = today.weather_code?.[tomorrowIdx];
+  const todayRain = today.precipitation_sum?.[todayIdx] || 0;
+  const tomorrowRain = today.precipitation_sum?.[tomorrowIdx] || 0;
+  const todayWind = today.wind_speed_10m_max?.[todayIdx] || 0;
+  const tomorrowWind = today.wind_speed_10m_max?.[tomorrowIdx] || 0;
+
+  // Determine if tomorrow is better for a break
+  const todayScore = (todayTempMax ?? 15) - (todayRain > 0.5 ? 5 : 0) - (todayWind > 25 ? 3 : 0);
+  const tomorrowScore = (tomorrowTempMax ?? 15) - (tomorrowRain > 0.5 ? 5 : 0) - (tomorrowWind > 25 ? 3 : 0);
+  const tomorrowBetter = tomorrowScore > todayScore;
+
+  const todayDate = new Date(today.time[todayIdx]).toLocaleDateString('nl-NL', { weekday: 'short' });
+  const tomorrowDate = new Date(today.time[tomorrowIdx]).toLocaleDateString('nl-NL', { weekday: 'short' });
+
+  el.innerHTML = `
+    <div class="comparison-day today">
+      <div class="comparison-label">${todayDate}</div>
+      <div class="comparison-icon">${getWeatherIcon(todayCode, 'small', true)}</div>
+      <div class="comparison-temp">${Math.round(todayTempMax ?? 15)}°C</div>
+      <div class="comparison-detail">Wind: ${Math.round(todayWind)} km/u</div>
+      <div class="comparison-detail">Regen: ${todayRain.toFixed(1)} mm</div>
+    </div>
+    <div class="comparison-day">
+      <div class="comparison-label">${tomorrowDate}</div>
+      <div class="comparison-icon">${getWeatherIcon(tomorrowCode, 'small', true)}</div>
+      <div class="comparison-temp">${Math.round(tomorrowTempMax ?? 15)}°C</div>
+      <div class="comparison-detail">Wind: ${Math.round(tomorrowWind)} km/u</div>
+      <div class="comparison-detail">Regen: ${tomorrowRain.toFixed(1)} mm</div>
+      <div class="comparison-verdict ${tomorrowBetter ? '' : 'worse'}">
+        ${tomorrowBetter ? '✓ Beter!' : '✗ Slechter'}
+      </div>
+    </div>
+  `;
+}
 
 // Init
 fetchWeather();

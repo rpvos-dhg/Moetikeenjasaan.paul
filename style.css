@@ -587,12 +587,84 @@ main {
   margin-top: 2px;
 }
 
-/* Preference control */
-.pref-card {
+/* Comparison card */
+.comparison-card {
   background: white;
   border: 1px solid var(--line);
   border-radius: 16px;
   padding: 18px 20px;
+}
+
+.comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.comparison-day {
+  background: var(--paper);
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+  border: 1px solid var(--line);
+}
+
+.comparison-day.today {
+  background: rgba(255, 204, 0, 0.05);
+  border-color: var(--anwb-yellow);
+}
+
+.comparison-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.comparison-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.comparison-temp {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--anwb-navy);
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+
+.comparison-detail {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.comparison-verdict {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--good);
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.comparison-verdict.worse {
+  color: var(--warn);
+}
+
+body.dark .comparison-day {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark .comparison-day.today {
+  background: rgba(255, 204, 0, 0.1);
+  border-color: var(--anwb-yellow);
 }
 
 .pref-options {
