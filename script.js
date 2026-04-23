@@ -104,7 +104,7 @@ const LAT = 52.0964;
 const LON = 4.3268;
 
 async function fetchWeather() {
-  const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,weather_code&minutely_15=precipitation,precipitation_probability&hourly=temperature_2m,precipitation_probability,precipitation,wind_speed_10m,weather_code,uv_index&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,weather_code&timezone=Europe/Amsterdam&forecast_days=2`;
+  const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,weather_code&minutely_15=precipitation,precipitation_probability&hourly=temperature_2m,precipitation_probability,precipitation,wind_speed_10m,weather_code,uv_index&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,weather_code&timezone=Europe/Amsterdam&past_days=1&forecast_days=2`;
 
   const airQualityUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&current=alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,ragweed_pollen,olive_pollen&past_days=0&forecast_days=1`;
 
@@ -874,46 +874,64 @@ function renderWeatherComparison() {
   const el = document.getElementById('comparisonGrid');
   if (!el || !weatherData || !weatherData.daily) return;
 
-  const today = weatherData.daily;
-  const todayIdx = 0;
-  const tomorrowIdx = 1;
+  const daily = weatherData.daily;
 
-  // Check if tomorrow data exists
-  if (!today.time[tomorrowIdx]) return;
+  // Index: 0 = yesterday, 1 = today, 2 = tomorrow
+  const yesterdayIdx = 0;
+  const todayIdx = 1;
+  const tomorrowIdx = 2;
 
-  const todayTempMax = today.temperature_2m_max?.[todayIdx];
-  const tomorrowTempMax = today.temperature_2m_max?.[tomorrowIdx];
-  const todayCode = today.weather_code?.[todayIdx];
-  const tomorrowCode = today.weather_code?.[tomorrowIdx];
-  const todayRain = today.precipitation_sum?.[todayIdx] || 0;
-  const tomorrowRain = today.precipitation_sum?.[tomorrowIdx] || 0;
-  const todayWind = today.wind_speed_10m_max?.[todayIdx] || 0;
-  const tomorrowWind = today.wind_speed_10m_max?.[tomorrowIdx] || 0;
+  // Check if all data exists
+  if (!daily.time[tomorrowIdx]) return;
 
-  // Determine if tomorrow is better for a break
-  const todayScore = (todayTempMax ?? 15) - (todayRain > 0.5 ? 5 : 0) - (todayWind > 25 ? 3 : 0);
-  const tomorrowScore = (tomorrowTempMax ?? 15) - (tomorrowRain > 0.5 ? 5 : 0) - (tomorrowWind > 25 ? 3 : 0);
-  const tomorrowBetter = tomorrowScore > todayScore;
+  const getData = (idx) => ({
+    tempMax: daily.temperature_2m_max?.[idx],
+    code: daily.weather_code?.[idx],
+    rain: daily.precipitation_sum?.[idx] || 0,
+    wind: daily.wind_speed_10m_max?.[idx] || 0,
+    date: new Date(daily.time[idx])
+  });
 
-  const todayDate = new Date(today.time[todayIdx]).toLocaleDateString('nl-NL', { weekday: 'short' });
-  const tomorrowDate = new Date(today.time[tomorrowIdx]).toLocaleDateString('nl-NL', { weekday: 'short' });
+  const yesterday = getData(yesterdayIdx);
+  const today = getData(todayIdx);
+  const tomorrow = getData(tomorrowIdx);
+
+  // Calculate weather score (higher = better for outdoor break)
+  const calcScore = (day) => {
+    return (day.tempMax ?? 15) - (day.rain > 0.5 ? 5 : 0) - (day.wind > 25 ? 3 : 0);
+  };
+
+  const yesterdayScore = calcScore(yesterday);
+  const todayScore = calcScore(today);
+  const tomorrowScore = calcScore(tomorrow);
+
+  const formatDate = (d) => d.toLocaleDateString('nl-NL', { weekday: 'short', month: 'short', day: 'numeric' });
 
   el.innerHTML = `
+    <div class="comparison-day">
+      <div class="comparison-label">Gisteren</div>
+      <div class="comparison-icon">${getWeatherIcon(yesterday.code, 'small', true)}</div>
+      <div class="comparison-temp">${Math.round(yesterday.tempMax ?? 15)}°C</div>
+      <div class="comparison-detail">Wind: ${Math.round(yesterday.wind)} km/u</div>
+      <div class="comparison-detail">Regen: ${yesterday.rain.toFixed(1)} mm</div>
+      <div class="comparison-verdict" style="opacity: 0.7;">Score: ${Math.round(yesterdayScore)}</div>
+    </div>
     <div class="comparison-day today">
-      <div class="comparison-label">${todayDate}</div>
-      <div class="comparison-icon">${getWeatherIcon(todayCode, 'small', true)}</div>
-      <div class="comparison-temp">${Math.round(todayTempMax ?? 15)}°C</div>
-      <div class="comparison-detail">Wind: ${Math.round(todayWind)} km/u</div>
-      <div class="comparison-detail">Regen: ${todayRain.toFixed(1)} mm</div>
+      <div class="comparison-label">Vandaag</div>
+      <div class="comparison-icon">${getWeatherIcon(today.code, 'small', true)}</div>
+      <div class="comparison-temp">${Math.round(today.tempMax ?? 15)}°C</div>
+      <div class="comparison-detail">Wind: ${Math.round(today.wind)} km/u</div>
+      <div class="comparison-detail">Regen: ${today.rain.toFixed(1)} mm</div>
+      <div class="comparison-verdict">Score: ${Math.round(todayScore)}</div>
     </div>
     <div class="comparison-day">
-      <div class="comparison-label">${tomorrowDate}</div>
-      <div class="comparison-icon">${getWeatherIcon(tomorrowCode, 'small', true)}</div>
-      <div class="comparison-temp">${Math.round(tomorrowTempMax ?? 15)}°C</div>
-      <div class="comparison-detail">Wind: ${Math.round(tomorrowWind)} km/u</div>
-      <div class="comparison-detail">Regen: ${tomorrowRain.toFixed(1)} mm</div>
-      <div class="comparison-verdict ${tomorrowBetter ? '' : 'worse'}">
-        ${tomorrowBetter ? '✓ Beter!' : '✗ Slechter'}
+      <div class="comparison-label">Morgen</div>
+      <div class="comparison-icon">${getWeatherIcon(tomorrow.code, 'small', true)}</div>
+      <div class="comparison-temp">${Math.round(tomorrow.tempMax ?? 15)}°C</div>
+      <div class="comparison-detail">Wind: ${Math.round(tomorrow.wind)} km/u</div>
+      <div class="comparison-detail">Regen: ${tomorrow.rain.toFixed(1)} mm</div>
+      <div class="comparison-verdict ${tomorrowScore > todayScore ? '' : 'worse'}">
+        ${tomorrowScore > todayScore ? '✓ Beter!' : '✗ Minder goed'}
       </div>
     </div>
   `;
