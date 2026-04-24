@@ -223,7 +223,8 @@ function renderLunchCountdown() {
   if (!el) return;
 
   const now = new Date();
-  const h = now.getHours();
+  const amsterdamDate = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Amsterdam"}));
+const h = amsterdamDate.getHours();
 
   let targetHour, label;
   if (h < 12) {
