@@ -1455,6 +1455,151 @@ code {
   color: var(--ink);
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Mobile scaling improvements */
+@media (max-width: 640px) {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    min-height: 100vh;
+  }
+
+  .wrapper {
+    padding: 0 14px;
+  }
+
+  header {
+    padding: 16px 0 12px;
+  }
+
+  .header-right {
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    justify-content: flex-end;
+  }
+
+  .tabs {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0 0.5rem;
+  }
+
+  .tabs .tab {
+    flex: 1 1 120px;
+    min-width: 100px;
+  }
+
+  .hero {
+    padding: 1rem 0 1.2rem;
+  }
+
+  .hero .location-badge,
+  .hero h1,
+  .hero .lead {
+    width: 100%;
+    text-align: center;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.1rem, 8vw, 2.8rem);
+    line-height: 1.05;
+  }
+
+  .hero .lead {
+    font-size: 1rem;
+    max-width: 100%;
+  }
+
+  main,
+  .view,
+  .advice-card,
+  .checklist-card,
+  .conditions-panel,
+  .weather-card,
+  .comparison-card,
+  .pollen-card,
+  .pref-card,
+  .log-register-card,
+  .info-panel,
+  .explain-content {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .advice-card,
+  .checklist-card,
+  .weather-card,
+  .comparison-card,
+  .pollen-card,
+  .pref-card,
+  .lunch-card,
+  .rain-card,
+  .log-register-card,
+  .info-panel,
+  .explain-content {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .conditions-panel {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .metric {
+    min-width: 0;
+  }
+
+  .forecast {
+    max-width: 100%;
+    padding-bottom: 0.5rem;
+  }
+
+  .comparison-grid,
+  .pollen-grid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .walker-grid {
+    justify-content: stretch;
+  }
+
+  .threshold-table {
+    font-size: 0.95rem;
+  }
+
+  .dark-mode-btn {
+    padding: 0.6rem 0.75rem;
+    font-size: 1.1rem;
+  }
+
+  .card-title {
+    font-size: clamp(1rem, 3.5vw, 1.15rem);
+  }
+
+  .lead,
+  .verdict-detail,
+  .rain-summary,
+  .log-title,
+  .pollen-grid,
+  .pref-options {
+    font-size: 1rem;
+  }
+}
+
   white-space: nowrap;
 }
 
