@@ -25,23 +25,6 @@ body {
   overflow-x: hidden;
 }
 
-.wrapper,
-main,
-.advice-card,
-.checklist-card,
-.conditions-panel,
-.info-panel,
-.weather-card,
-.comparison-card,
-.pollen-card,
-.pref-card,
-.lunch-card,
-.rain-card,
-.log-register-card,
-.log-entry {
-  min-width: 0;
-}
-
 /* Subtle grid background */
 body::before {
   content: '';
@@ -128,6 +111,7 @@ h1 .accent {
   font-style: italic;
   position: relative;
   display: inline-block;
+  isolation: isolate;
 }
 
 h1 .accent::after {
@@ -155,14 +139,14 @@ main {
   max-width: 1280px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: 1fr 1fr;
   grid-template-rows: auto auto;
   gap: 20px;
   align-items: start;
 }
 
 @media (max-width: 960px) {
-  main { grid-template-columns: minmax(0, 1fr); }
+  main { grid-template-columns: 1fr; }
 }
 
 /* Accessibility: keyboard focus rings */
@@ -257,8 +241,6 @@ main {
   font-weight: 500;
   backdrop-filter: blur(4px);
   line-height: 1.4;
-  white-space: normal;
-  overflow-wrap: anywhere;
 }
 
 .tip.yellow {
@@ -283,7 +265,6 @@ main {
   border-radius: 16px;
   padding: 20px 22px;
   box-shadow: 0 4px 12px rgba(255, 204, 0, 0.15);
-  min-width: 0;
 }
 
 .checklist-card .card-title {
@@ -303,7 +284,7 @@ main {
 
 .checklist-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
   padding: 12px 14px;
   background: white;
@@ -312,7 +293,6 @@ main {
   cursor: pointer;
   transition: all 0.2s;
   font-weight: 500;
-  min-width: 0;
 }
 
 .checklist-item:hover {
@@ -332,12 +312,9 @@ main {
 .checklist-item label {
   cursor: pointer;
   flex: 1;
-  min-width: 0;
   font-weight: 500;
   font-size: 15px;
   color: var(--ink);
-  line-height: 1.35;
-  overflow-wrap: anywhere;
 }
 
 .checklist-item input[type="checkbox"]:checked + label {
@@ -840,7 +817,6 @@ footer strong { color: var(--anwb-yellow); }
 .location-badge {
   display: inline-flex;
   align-items: center;
-  flex-wrap: wrap;
   gap: 8px;
   background: white;
   border: 1px solid var(--line);
@@ -851,7 +827,6 @@ footer strong { color: var(--anwb-yellow); }
   color: var(--ink);
   margin-bottom: 12px;
   box-shadow: 0 1px 3px rgba(0, 58, 113, 0.04);
-  max-width: 100%;
 }
 
 .location-badge svg {
@@ -976,85 +951,21 @@ body.dark .tab.active {
 body.dark .advice-card,
 body.dark .weather-card,
 body.dark .pref-card,
-body.dark .comparison-card,
-body.dark .pollen-card,
 body.dark .lunch-card,
-body.dark .log-register-card,
 body.dark .rain-card {
   background: #1e293b;
   border-color: #334155;
-}
-
-body.dark .checklist-card {
-  background: linear-gradient(135deg, #162033 0%, #1e293b 100%);
-  border-color: #ffcc00;
-  box-shadow: 0 4px 18px rgba(255, 204, 0, 0.08);
 }
 
 body.dark .card-title {
   color: #e2e8f0;
 }
 
-body.dark .checklist-card .card-title,
-body.dark .checklist-group-title {
-  color: #ffcc00;
-}
-
-body.dark .checklist-group {
-  border-bottom-color: rgba(255, 204, 0, 0.2);
-}
-
-body.dark .checklist-item,
-body.dark .pollen-info,
-body.dark .pollen-item,
-body.dark .comparison-day,
-body.dark .location-badge {
-  background: #0f172a;
-  border-color: #334155;
-  color: #f1f5f9;
-}
-
-body.dark .checklist-item:hover {
-  background: #162033;
-  border-color: #ffcc00;
-}
-
-body.dark .checklist-item label,
-body.dark .pollen-name,
-body.dark .comparison-detail,
-body.dark .source-badge,
-body.dark .location-badge {
-  color: #e2e8f0;
-}
-
-body.dark .location-badge svg,
-body.dark h1,
-body.dark .metric-value,
-body.dark .slot-temp,
-body.dark .comparison-temp,
-body.dark .best-time-value,
-body.dark .rain-summary strong,
-body.dark .log-title,
-body.dark .log-time,
-body.dark .log-entry-time,
-body.dark .threshold-table th,
-body.dark code,
-body.dark .callout strong {
-  color: #ffcc00;
-}
-
 body.dark .verdict {
   color: #fbbf24;
 }
 
-body.dark .metric-label,
-body.dark .lead,
-body.dark .slot-time,
-body.dark .slot-rain,
-body.dark .pollen-value,
-body.dark .best-time-detail,
-body.dark .rain-summary,
-body.dark .log-entry-people {
+body.dark .metric-label {
   color: #cbd5e1;
 }
 
@@ -1068,26 +979,10 @@ body.dark .forecast .slot.now {
   border-color: #475569;
 }
 
-body.dark input,
-body.dark button,
-body.dark .pref-btn,
-body.dark .log-clear-btn {
+body.dark input, body.dark button {
   background: #1e293b;
   border-color: #334155;
   color: #f1f5f9;
-}
-
-body.dark .pref-btn:hover,
-body.dark .log-clear-btn:hover {
-  border-color: #ffcc00;
-  color: #ffcc00;
-}
-
-body.dark .pref-btn.active,
-body.dark .log-save-btn {
-  background: #ffcc00;
-  border-color: #ffcc00;
-  color: #002551;
 }
 
 body.dark .walker-btn {
@@ -1562,253 +1457,6 @@ code {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-/* Mobile scaling improvements */
-@media (max-width: 640px) {
-  *, *::before, *::after {
-    box-sizing: border-box;
-  }
-
-  .wrapper {
-    padding: 0;
-    width: 100%;
-    overflow-x: clip;
-  }
-
-  header {
-    padding: 14px 16px 12px;
-    align-items: flex-start;
-    gap: 12px;
-    width: 100%;
-    max-width: 430px;
-    margin: 0 auto;
-  }
-
-  .logo {
-    min-width: 0;
-    gap: 10px;
-    font-size: 17px;
-    line-height: 1.15;
-  }
-
-  .logo > span:last-child {
-    min-width: 0;
-  }
-
-  .logo-badge {
-    flex-shrink: 0;
-  }
-
-  .header-right {
-    flex: 0 0 auto;
-    flex-wrap: wrap;
-    gap: 6px;
-    justify-content: flex-end;
-    max-width: none;
-  }
-
-  .dark-mode-btn {
-    margin-right: 0;
-    width: 34px;
-    height: 34px;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .live-indicator {
-    display: none;
-  }
-
-  .header-meta {
-    display: none;
-  }
-
-  .tabs {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0;
-    padding: 0 16px;
-    width: 100%;
-    max-width: 430px;
-    margin: 0 auto;
-  }
-
-  .tabs .tab {
-    min-width: 0;
-    padding: 14px 6px;
-    line-height: 1.15;
-    overflow-wrap: anywhere;
-  }
-
-  .hero {
-    padding: 18px 16px 16px;
-    width: 100%;
-    max-width: 430px;
-    margin: 0 auto;
-  }
-
-  .hero .location-badge {
-    display: flex;
-    justify-content: center;
-    border-radius: 18px;
-    padding: 10px 12px;
-    text-align: center;
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .hero h1,
-  .hero .lead {
-    text-align: center;
-    max-width: 100%;
-  }
-
-  .hero h1 {
-    font-size: clamp(2rem, 9vw, 2.35rem);
-    line-height: 1.08;
-    overflow-wrap: normal;
-  }
-
-  .hero .lead {
-    font-size: 0.98rem;
-    max-width: 100%;
-    overflow-wrap: anywhere;
-  }
-
-  .advice-card,
-  .checklist-card,
-  .conditions-panel,
-  .weather-card,
-  .comparison-card,
-  .pollen-card,
-  .pref-card,
-  .log-register-card,
-  .info-panel,
-  .explain-content {
-    width: 100%;
-    max-width: 100%;
-    margin-left: 0;
-    margin-right: 0;
-  }
-
-  main {
-    width: 100%;
-    max-width: 430px;
-    margin: 0 auto;
-    padding: 14px 16px 32px;
-    gap: 16px;
-  }
-
-  .advice-card,
-  .checklist-card,
-  .weather-card,
-  .comparison-card,
-  .pollen-card,
-  .pref-card,
-  .lunch-card,
-  .rain-card,
-  .log-register-card,
-  .info-panel,
-  .explain-content {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-
-  .advice-card {
-    min-height: auto;
-    border-radius: 16px;
-    padding-top: 22px;
-    padding-bottom: 22px;
-  }
-
-  .verdict {
-    font-size: clamp(2.2rem, 10vw, 3rem);
-    text-align: center;
-  }
-
-  .weather-illustration {
-    font-size: 52px;
-  }
-
-  .verdict-detail {
-    margin-bottom: 24px;
-  }
-
-  .checklist-card {
-    border-radius: 14px;
-    padding: 16px;
-  }
-
-  .checklist-items {
-    gap: 10px;
-  }
-
-  .checklist-item {
-    padding: 12px;
-    gap: 10px;
-  }
-
-  .checklist-item:hover {
-    transform: none;
-  }
-
-  .conditions-panel {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .metrics {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.75rem;
-  }
-
-  .metric {
-    min-width: 0;
-  }
-
-  .forecast {
-    max-width: 100%;
-    padding-bottom: 0.5rem;
-  }
-
-  .comparison-grid,
-  .pollen-grid {
-    grid-template-columns: 1fr;
-    gap: 0.85rem;
-  }
-
-  .walker-grid {
-    justify-content: stretch;
-  }
-
-  .threshold-table {
-    font-size: 0.95rem;
-  }
-
-  .dark-mode-btn {
-    padding: 0.6rem 0.75rem;
-    font-size: 1.1rem;
-  }
-
-  .card-title {
-    font-size: clamp(1rem, 3.5vw, 1.15rem);
-  }
-
-  .lead,
-  .verdict-detail,
-  .rain-summary,
-  .log-title {
-    font-size: 1rem;
-  }
-
-  .pref-options {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
 }
 
 .log-delete-btn {
