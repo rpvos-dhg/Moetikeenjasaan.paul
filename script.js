@@ -461,24 +461,34 @@ function renderBestTime() {
   const hourly = weatherData.hourly;
   const now = new Date();
   const currentHour = now.getHours();
+  const BREAK_START = 11;
+  const BREAK_END = 15;
+
+  if (currentHour > BREAK_END) {
+    el.innerHTML = '<div class="best-time-detail" style="color:var(--muted)">Geen pauzetijden meer vandaag</div>';
+    return;
+  }
+
   const startIdx = hourly.time.findIndex(t => new Date(t).getHours() === currentHour);
+  if (startIdx === -1) { el.innerHTML = '--'; return; }
 
   let bestIdx = -1;
   let bestScore = -Infinity;
 
-  for (let i = 0; i < 4; i++) {
-    const idx = startIdx + i;
-    if (idx >= hourly.time.length) break;
-    const temp = hourly.temperature_2m[idx];
-    const rain = hourly.precipitation_probability[idx] || 0;
+  for (let i = startIdx; i < hourly.time.length; i++) {
+    const h = new Date(hourly.time[i]).getHours();
+    if (h > BREAK_END) break;
+    if (h < BREAK_START) continue;
+    const temp = hourly.temperature_2m[i];
+    const rain = hourly.precipitation_probability[i] || 0;
     const score = temp - rain * 0.3;
-    if (score > bestScore) {
-      bestScore = score;
-      bestIdx = idx;
-    }
+    if (score > bestScore) { bestScore = score; bestIdx = i; }
   }
 
-  if (bestIdx === -1) { el.innerHTML = '--'; return; }
+  if (bestIdx === -1) {
+    el.innerHTML = '<div class="best-time-detail" style="color:var(--muted)">Pauzetijden starten om 11:00</div>';
+    return;
+  }
 
   const bestHour = new Date(hourly.time[bestIdx]);
   const isNow = bestHour.getHours() === currentHour;
