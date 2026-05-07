@@ -9,9 +9,59 @@ const WALKERS = [
 let weatherData = null;
 let pollenData = null;
 const memStore = {};
+const DEFAULT_LOCATION = Object.freeze({
+  mode: 'default',
+  label: 'ANWB HQ · Wassenaarseweg, Den Haag',
+  lat: 52.0964,
+  lon: 4.3268
+});
+const LOCATION_STORAGE_KEY = 'dighv_location';
 let userPref = localStorage_safe_get('dighv_pref') || 'normal';
 let selectedWalkers = new Set();
 let darkModeForced = localStorage_safe_get('dighv_dark_force') || 'auto'; // 'auto', 'dark', 'light'
+let currentLocation = getStoredLocation();
+let weatherRequestSeq = 0;
+
+function sanitizeLocation(location) {
+  if (!location || typeof location !== 'object') return { ...DEFAULT_LOCATION };
+  const lat = Number(location.lat);
+  const lon = Number(location.lon);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+    return { ...DEFAULT_LOCATION };
+  }
+  const mode = location.mode === 'current' ? 'current' : 'default';
+  return {
+    mode,
+    label: mode === 'current' ? 'Huidige locatie' : DEFAULT_LOCATION.label,
+    lat: Number(lat.toFixed(6)),
+    lon: Number(lon.toFixed(6))
+  };
+}
+
+function getStoredLocation() {
+  try {
+    const stored = localStorage_safe_get(LOCATION_STORAGE_KEY);
+    return stored ? sanitizeLocation(JSON.parse(stored)) : { ...DEFAULT_LOCATION };
+  } catch (e) {
+    return { ...DEFAULT_LOCATION };
+  }
+}
+
+function persistLocation(location) {
+  if (location.mode === 'default') {
+    localStorage_safe_remove(LOCATION_STORAGE_KEY);
+  } else {
+    localStorage_safe_set(LOCATION_STORAGE_KEY, JSON.stringify(location));
+  }
+}
+
+function formatCoords(location = currentLocation) {
+  return `${location.lat.toFixed(4)}, ${location.lon.toFixed(4)}`;
+}
+
+function isDefaultLocation(location = currentLocation) {
+  return location.mode === 'default';
+}
 
 function getAmsterdamDateKey(date) {
   const parts = new Intl.DateTimeFormat('en-GB', {
@@ -84,6 +134,117 @@ function localStorage_safe_get(key) {
 function localStorage_safe_set(key, val) {
   try { localStorage.setItem(key, val); } catch(e) { memStore[key] = val; }
 }
+function localStorage_safe_remove(key) {
+  try { localStorage.removeItem(key); } catch(e) { delete memStore[key]; }
+}
+
+function setLocationPanelOpen(open) {
+  const panel = document.getElementById('locationPanel');
+  const btn = document.getElementById('locationEditBtn');
+  if (!panel || !btn) return;
+  panel.hidden = !open;
+  btn.setAttribute('aria-expanded', String(open));
+}
+
+function setLocationStatus(message) {
+  const status = document.getElementById('locationStatus');
+  if (status) status.textContent = message || '';
+}
+
+function setLocationButtonsDisabled(disabled) {
+  ['useCurrentLocationBtn', 'resetLocationBtn', 'locationEditBtn'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.disabled = disabled || (id === 'resetLocationBtn' && isDefaultLocation());
+  });
+}
+
+function renderLocationUi(message = '') {
+  const label = document.getElementById('locationLabel');
+  const coords = document.getElementById('locationCoords');
+  const panelCoords = document.getElementById('locationPanelCoords');
+  const resetBtn = document.getElementById('resetLocationBtn');
+  if (label) label.textContent = currentLocation.label;
+  if (coords) coords.textContent = formatCoords();
+  if (panelCoords) panelCoords.textContent = formatCoords();
+  if (resetBtn) resetBtn.disabled = isDefaultLocation();
+  setLocationStatus(message);
+}
+
+function showWeatherLoading() {
+  const verdict = document.getElementById('verdict');
+  const detail = document.getElementById('detail');
+  const tips = document.getElementById('tips');
+  if (verdict) verdict.innerHTML = `<div class="loading"><span class="spinner"></span>Weer ophalen...</div>`;
+  if (detail) detail.textContent = '';
+  if (tips) tips.innerHTML = '';
+}
+
+function setAppLocation(location, message) {
+  currentLocation = sanitizeLocation(location);
+  persistLocation(currentLocation);
+  weatherData = null;
+  pollenData = null;
+  lastUpdate = null;
+  showWeatherLoading();
+  updateClock();
+  renderLocationUi(message || '');
+  fetchWeather();
+}
+
+function useCurrentLocation() {
+  if (!navigator.geolocation) {
+    setLocationStatus('Huidige locatie is niet beschikbaar in deze browser.');
+    return;
+  }
+
+  setLocationButtonsDisabled(true);
+  setLocationStatus('Locatie ophalen...');
+  navigator.geolocation.getCurrentPosition(
+    position => {
+      setLocationButtonsDisabled(false);
+      setAppLocation({
+        mode: 'current',
+        label: 'Huidige locatie',
+        lat: position.coords.latitude,
+        lon: position.coords.longitude
+      }, 'Huidige locatie actief.');
+    },
+    error => {
+      setLocationButtonsDisabled(false);
+      const denied = error.code === error.PERMISSION_DENIED;
+      setLocationStatus(denied ? 'Locatietoegang geweigerd.' : 'Locatie kon niet worden opgehaald.');
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 5 * 60 * 1000 }
+  );
+}
+
+function bindLocationControls() {
+  const editBtn = document.getElementById('locationEditBtn');
+  const currentBtn = document.getElementById('useCurrentLocationBtn');
+  const resetBtn = document.getElementById('resetLocationBtn');
+
+  editBtn?.addEventListener('click', () => {
+    const panel = document.getElementById('locationPanel');
+    setLocationPanelOpen(panel?.hidden !== false);
+  });
+
+  currentBtn?.addEventListener('click', useCurrentLocation);
+
+  resetBtn?.addEventListener('click', () => {
+    setAppLocation({ ...DEFAULT_LOCATION }, 'ANWB HQ actief.');
+  });
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') setLocationPanelOpen(false);
+  });
+
+  document.addEventListener('click', event => {
+    const control = document.querySelector('.location-control');
+    if (control && !control.contains(event.target)) setLocationPanelOpen(false);
+  });
+
+  renderLocationUi();
+}
 
 // Tab switching
 document.querySelectorAll('.tab').forEach(tab => {
@@ -125,14 +286,12 @@ function updateClock() {
 updateClock();
 setInterval(updateClock, 30000);
 
-// Den Haag - ANWB HQ (Wassenaarseweg)
-const LAT = 52.0964;
-const LON = 4.3268;
-
 async function fetchWeather() {
-  const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,weather_code&minutely_15=precipitation,precipitation_probability&hourly=temperature_2m,precipitation_probability,precipitation,wind_speed_10m,weather_code,uv_index&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,weather_code&timezone=Europe/Amsterdam&past_days=1&forecast_days=2`;
+  const requestId = ++weatherRequestSeq;
+  const { lat, lon } = currentLocation;
+  const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,weather_code&minutely_15=precipitation,precipitation_probability&hourly=temperature_2m,precipitation_probability,precipitation,wind_speed_10m,weather_code,uv_index&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,weather_code&timezone=Europe/Amsterdam&past_days=1&forecast_days=2`;
 
-  const airQualityUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&current=alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,ragweed_pollen,olive_pollen&past_days=0&forecast_days=1`;
+  const airQualityUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,ragweed_pollen,olive_pollen&past_days=0&forecast_days=1`;
 
   try {
     // Fetch both weather and air quality data in parallel
@@ -141,8 +300,10 @@ async function fetchWeather() {
       fetch(airQualityUrl)
     ]);
     
+    if (requestId !== weatherRequestSeq) return;
     if (!weatherRes.ok) throw new Error('Weather network error');
     const weatherData_new = await weatherRes.json();
+    if (requestId !== weatherRequestSeq) return;
     weatherData = weatherData_new;
     lastUpdate = new Date();
     updateClock();
@@ -150,6 +311,7 @@ async function fetchWeather() {
     // Extract pollen data from air quality API if available
     if (airQualityRes.ok) {
       const airQualityData = await airQualityRes.json();
+      if (requestId !== weatherRequestSeq) return;
       if (airQualityData.current) {
         pollenData = {
           alder: airQualityData.current.alder_pollen || 0,
@@ -165,6 +327,7 @@ async function fetchWeather() {
       pollenData = null; // Fallback to seasonal data
     }
   } catch (err) {
+    if (requestId !== weatherRequestSeq) return;
     console.error('Weerdata fetch error:', err);
     document.getElementById('verdict').innerHTML = `<div class="error">Kon weerdata niet ophalen. Probeer later opnieuw.</div>`;
     return;
@@ -543,7 +706,7 @@ function renderAdvice() {
   let verdict, detail, jacketType;
   const tips = [];
 
-  if (effectiveFeel >= 18) {
+  if (effectiveFeel >= 17) {
     verdict = 'Geen jas nodig';
     jacketType = 'Lekker zo';
     detail = 'Het is aangenaam warm. Perfect voor een rondje buiten.';
@@ -965,5 +1128,6 @@ function renderWeatherComparison() {
 }
 
 // Init
+bindLocationControls();
 fetchWeather();
 setInterval(fetchWeather, 10 * 60 * 1000);

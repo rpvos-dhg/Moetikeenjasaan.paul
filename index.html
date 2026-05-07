@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=6">
+<link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
 <div class="wrapper">
@@ -35,11 +35,29 @@
 
 <div class="view active" id="view-advice-wrap">
 <section class="hero">
-  <div class="location-badge">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-    <span>ANWB HQ · Wassenaarseweg, Den Haag</span>
-    <span class="dot-sep">·</span>
-    <span class="source-badge">Live data via Open-Meteo</span>
+  <div class="location-control">
+    <div class="location-badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span id="locationLabel">ANWB HQ · Wassenaarseweg, Den Haag</span>
+      <span class="dot-sep">·</span>
+      <span class="location-coords" id="locationCoords">52.0964, 4.3268</span>
+      <span class="dot-sep">·</span>
+      <span class="source-badge">Live data via Open-Meteo</span>
+      <button id="locationEditBtn" class="location-edit-btn" type="button" title="Locatie wijzigen" aria-label="Locatie wijzigen" aria-expanded="false" aria-controls="locationPanel">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+      </button>
+    </div>
+    <div class="location-panel" id="locationPanel" hidden>
+      <div class="location-panel-head">
+        <span>Locatie</span>
+        <span id="locationPanelCoords">52.0964, 4.3268</span>
+      </div>
+      <div class="location-actions">
+        <button id="useCurrentLocationBtn" class="location-action-btn" type="button">Huidige locatie</button>
+        <button id="resetLocationBtn" class="location-action-btn secondary" type="button">ANWB HQ</button>
+      </div>
+      <div class="location-status" id="locationStatus" role="status" aria-live="polite"></div>
+    </div>
   </div>
   <h1>Jas aan of <span class="accent">niet?</span></h1>
   <p class="lead">De officieuze DIGHV pauze-scanner. Even checken voor je naar buiten loopt.</p>
@@ -47,7 +65,7 @@
 
 <main>
 
-  <!-- Rij 1: Advies + Checklist -->
+  <!-- Rij 1: Advies + voorkeur -->
   <div class="advice-card" id="advice">
     <div>
       <div class="advice-label">Advies voor nu + 30 min</div>
@@ -60,9 +78,22 @@
     <div class="tips" id="tips"></div>
   </div>
 
+  <div class="top-side-panel">
+
+  <div class="pref-card">
+    <div class="card-title" role="heading" aria-level="2">Jouw type</div>
+    <div class="pref-options" role="group" aria-label="Temperatuurvoorkeur">
+      <button class="pref-btn" data-pref="cold">Kouwelijk</button>
+      <button class="pref-btn active" data-pref="normal">Normaal</button>
+      <button class="pref-btn" data-pref="warm">Warmbloedig</button>
+    </div>
+  </div>
+
   <div class="checklist-card">
     <div class="card-title" role="heading" aria-level="2">✓ Wat mee naar buiten?</div>
     <div class="checklist-items" id="checklist"></div>
+  </div>
+
   </div>
 
   <!-- Rij 2: Weercondities + Pollen/Info -->
@@ -129,15 +160,6 @@
       <div class="pollen-grid" id="pollenGrid"></div>
     </div>
 
-    <div class="pref-card">
-      <div class="card-title" role="heading" aria-level="2">Jouw type</div>
-      <div class="pref-options" role="group" aria-label="Temperatuurvoorkeur">
-        <button class="pref-btn" data-pref="cold">Kouwelijk</button>
-        <button class="pref-btn active" data-pref="normal">Normaal</button>
-        <button class="pref-btn" data-pref="warm">Warmbloedig</button>
-      </div>
-    </div>
-
     <div class="comparison-card">
       <div class="card-title" role="heading" aria-level="2">Vandaag vs Morgen</div>
       <div class="comparison-grid" id="comparisonGrid"></div>
@@ -156,7 +178,7 @@
     <div class="explain-section">
       <h3>1. Databron</h3>
       <p>De tool haalt elke 10 minuten actuele weerdata op van <strong>Open-Meteo</strong> (forecast API) en live pollen-gegevens van de <strong>Open-Meteo Air Quality API</strong>. Deze APIs combineren data van diverse Europese meteorologische instituten (waaronder het KNMI).</p>
-      <p>Locatie: <code>52.0964° N, 4.3268° O</code> — ANWB hoofdkantoor aan de Wassenaarseweg in Den Haag.</p>
+      <p>Standaardlocatie: <code>52.0964° N, 4.3268° O</code> — ANWB hoofdkantoor aan de Wassenaarseweg in Den Haag. Via de locatieknop kan de app tijdelijk je huidige coordinaten gebruiken.</p>
       <div class="callout">
         <strong>Live check:</strong> de tijd in de header update continu en het groene LIVE-bolletje pulseert zolang de data vers is.
       </div>
@@ -198,11 +220,11 @@
           <th>Advies</th>
         </tr>
         <tr>
-          <td>18 °C of warmer</td>
+          <td>17 °C of warmer</td>
           <td><span class="badge-inline">Geen jas</span></td>
         </tr>
         <tr>
-          <td>12 tot 18 °C</td>
+          <td>12 tot 17 °C</td>
           <td><span class="badge-inline">Dun jasje</span> (vest of windjack)</td>
         </tr>
         <tr>
@@ -434,6 +456,6 @@
 
 </div>
 
-<script src="script.js?v=5"></script>
+<script src="script.js?v=8"></script>
 </body>
 </html>
