@@ -28,6 +28,7 @@ body {
 .wrapper,
 main,
 .advice-card,
+.top-side-panel,
 .checklist-card,
 .conditions-panel,
 .info-panel,
@@ -141,6 +142,12 @@ h1 .accent::after {
   background: var(--anwb-yellow);
   z-index: -1;
   transform: skewX(-10deg);
+}
+
+.top-side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 body.dark h1 .accent::after {
@@ -844,6 +851,13 @@ footer strong { color: var(--anwb-yellow); }
 }
 
 /* Location badge */
+.location-control {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 12px;
+}
+
 .location-badge {
   display: inline-flex;
   align-items: center;
@@ -856,7 +870,6 @@ footer strong { color: var(--anwb-yellow); }
   font-size: 13px;
   font-weight: 500;
   color: var(--ink);
-  margin-bottom: 12px;
   box-shadow: 0 1px 3px rgba(0, 58, 113, 0.04);
   max-width: 100%;
 }
@@ -871,6 +884,99 @@ footer strong { color: var(--anwb-yellow); }
 }
 
 .source-badge {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.location-coords {
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.location-edit-btn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--anwb-navy);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.location-edit-btn:hover {
+  background: var(--anwb-yellow);
+  border-color: var(--anwb-yellow);
+}
+
+.location-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 30;
+  width: min(360px, calc(100vw - 32px));
+  padding: 14px;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 14px 30px rgba(15, 29, 46, 0.16);
+  text-align: left;
+}
+
+.location-panel-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.location-panel-head span:last-child {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.location-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.location-action-btn {
+  min-height: 40px;
+  padding: 9px 12px;
+  border: 2px solid var(--anwb-navy);
+  border-radius: 10px;
+  background: var(--anwb-navy);
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.location-action-btn.secondary {
+  background: white;
+  color: var(--anwb-navy);
+}
+
+.location-action-btn:disabled,
+.location-edit-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.location-status {
+  min-height: 18px;
+  margin-top: 10px;
   color: var(--muted);
   font-size: 12px;
 }
@@ -1023,7 +1129,8 @@ body.dark .checklist-item,
 body.dark .pollen-info,
 body.dark .pollen-item,
 body.dark .comparison-day,
-body.dark .location-badge {
+body.dark .location-badge,
+body.dark .location-panel {
   background: #0f172a;
   border-color: #334155;
   color: #f1f5f9;
@@ -1038,8 +1145,18 @@ body.dark .checklist-item label,
 body.dark .pollen-name,
 body.dark .comparison-detail,
 body.dark .source-badge,
+body.dark .location-coords,
+body.dark .location-status,
 body.dark .location-badge {
   color: #e2e8f0;
+}
+
+body.dark .location-panel-head {
+  color: #f1f5f9;
+}
+
+body.dark .location-panel-head span:last-child {
+  color: #cbd5e1;
 }
 
 body.dark .location-badge svg,
@@ -1096,6 +1213,30 @@ body.dark .dark-mode-btn {
   background: rgba(255, 255, 255, 0.08);
   border-color: transparent;
   color: #fff;
+}
+
+body.dark .location-edit-btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #ffcc00;
+}
+
+body.dark .location-edit-btn:hover {
+  background: #ffcc00;
+  border-color: #ffcc00;
+  color: #002551;
+}
+
+body.dark .location-action-btn {
+  background: #ffcc00;
+  border-color: #ffcc00;
+  color: #002551;
+}
+
+body.dark .location-action-btn.secondary {
+  background: #1e293b;
+  border-color: #475569;
+  color: #f1f5f9;
 }
 
 body.dark .pref-btn:hover,
@@ -1684,6 +1825,10 @@ code {
     margin: 0;
   }
 
+  .location-control {
+    width: 100%;
+  }
+
   .hero .location-badge {
     display: flex;
     justify-content: center;
@@ -1692,6 +1837,19 @@ code {
     text-align: center;
     width: 100%;
     max-width: 100%;
+  }
+
+  .location-edit-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .location-panel {
+    width: 100%;
+  }
+
+  .location-actions {
+    grid-template-columns: 1fr;
   }
 
   .hero h1,
@@ -1712,7 +1870,12 @@ code {
     overflow-wrap: anywhere;
   }
 
+  .top-side-panel {
+    gap: 16px;
+  }
+
   .advice-card,
+  .top-side-panel,
   .checklist-card,
   .conditions-panel,
   .weather-card,
