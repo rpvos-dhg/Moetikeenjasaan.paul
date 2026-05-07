@@ -491,7 +491,7 @@ function renderBestTime() {
   }
 
   const bestHour = new Date(hourly.time[bestIdx]);
-  const isNow = bestHour.getHours() === currentHour;
+  const isNow = bestHour.getHours() === currentHour && currentHour >= BREAK_START && currentHour <= BREAK_END;
   const timeStr = isNow ? 'Nu meteen' : `${String(bestHour.getHours()).padStart(2, '0')}:00`;
   const temp = Math.round(hourly.temperature_2m[bestIdx]);
   const rain = hourly.precipitation_probability[bestIdx] || 0;
