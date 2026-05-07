@@ -214,7 +214,7 @@ function useCurrentLocation() {
       const denied = error.code === error.PERMISSION_DENIED;
       setLocationStatus(denied ? 'Locatietoegang geweigerd.' : 'Locatie kon niet worden opgehaald.');
     },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 5 * 60 * 1000 }
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
   );
 }
 
