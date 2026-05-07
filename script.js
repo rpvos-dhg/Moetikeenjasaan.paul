@@ -8,15 +8,38 @@ const WALKERS = [
 // State
 let weatherData = null;
 let pollenData = null;
+const memStore = {};
 let userPref = localStorage_safe_get('dighv_pref') || 'normal';
 let selectedWalkers = new Set();
 let darkModeForced = localStorage_safe_get('dighv_dark_force') || 'auto'; // 'auto', 'dark', 'light'
 
+function getAmsterdamDateKey(date) {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Amsterdam',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(date).reduce((acc, part) => {
+    if (part.type !== 'literal') acc[part.type] = part.value;
+    return acc;
+  }, {});
+  return `${parts.year}-${parts.month}-${parts.day}`;
+}
+
 // Check if current time is daytime based on sunrise/sunset
 function isDayTime(date) {
   if (!weatherData || !weatherData.daily) return true; // Default to day
-  const sunrise = new Date(weatherData.daily.sunrise[0]);
-  const sunset = new Date(weatherData.daily.sunset[0]);
+  const daily = weatherData.daily;
+  const todayKey = getAmsterdamDateKey(date);
+  const todayIndex = Array.isArray(daily.time)
+    ? daily.time.findIndex(day => day === todayKey)
+    : -1;
+  const index = todayIndex >= 0 ? todayIndex : 0;
+  const sunrise = new Date(daily.sunrise?.[index]);
+  const sunset = new Date(daily.sunset?.[index]);
+  if (Number.isNaN(sunrise.getTime()) || Number.isNaN(sunset.getTime())) {
+    return true;
+  }
   return date >= sunrise && date <= sunset;
 }
 
@@ -43,15 +66,18 @@ function applyDarkMode() {
   if (btn) {
     if (darkModeForced === 'auto') {
       btn.textContent = darkMode ? '🌙' : '☀️';
+      btn.title = `Dark mode: Auto (${darkMode ? 'donker' : 'licht'})`;
+      btn.setAttribute('aria-label', `Thema: auto ${darkMode ? 'donker' : 'licht'}. Klik voor altijd donker.`);
     } else {
       btn.textContent = darkModeForced === 'dark' ? '🌙' : '☀️';
+      btn.title = `Dark mode: altijd ${darkModeForced === 'dark' ? 'donker' : 'licht'}`;
+      btn.setAttribute('aria-label', `Thema: altijd ${darkModeForced === 'dark' ? 'donker' : 'licht'}. Klik voor ${darkModeForced === 'dark' ? 'altijd licht' : 'auto'}.`);
     }
   }
 }
 applyDarkMode(); // Init
 
 // Safe storage wrapper (fallback to in-memory)
-const memStore = {};
 function localStorage_safe_get(key) {
   try { return localStorage.getItem(key); } catch(e) { return memStore[key]; }
 }
