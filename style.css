@@ -179,6 +179,10 @@ main {
   main { grid-template-columns: minmax(0, 1fr); }
 }
 
+@media (min-width: 961px) {
+  .advice-card { align-self: stretch; }
+}
+
 /* Accessibility: keyboard focus rings */
 :focus-visible {
   outline: 3px solid var(--anwb-yellow);
