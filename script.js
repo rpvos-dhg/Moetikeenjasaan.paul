@@ -201,13 +201,23 @@ function useCurrentLocation() {
   setLocationStatus('Locatie ophalen...');
   navigator.geolocation.getCurrentPosition(
     position => {
-      setLocationButtonsDisabled(false);
-      setAppLocation({
-        mode: 'current',
-        label: 'Huidige locatie',
-        lat: position.coords.latitude,
-        lon: position.coords.longitude
-      }, 'Huidige locatie actief.');
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      setLocationStatus('Stad ophalen...');
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&accept-language=nl`)
+        .then(r => r.json())
+        .then(data => {
+          const a = data.address || {};
+          const city = a.city || a.town || a.village || a.municipality || a.county || null;
+          const label = city ? `Huidige locatie · ${city}` : 'Huidige locatie';
+          const msg = city ? `Huidige locatie actief (${city}).` : 'Huidige locatie actief.';
+          setLocationButtonsDisabled(false);
+          setAppLocation({ mode: 'current', label, lat, lon }, msg);
+        })
+        .catch(() => {
+          setLocationButtonsDisabled(false);
+          setAppLocation({ mode: 'current', label: 'Huidige locatie', lat, lon }, 'Huidige locatie actief.');
+        });
     },
     error => {
       setLocationButtonsDisabled(false);
