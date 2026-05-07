@@ -32,7 +32,7 @@ function sanitizeLocation(location) {
   const mode = location.mode === 'current' ? 'current' : 'default';
   return {
     mode,
-    label: mode === 'current' ? 'Huidige locatie' : DEFAULT_LOCATION.label,
+    label: location.label || (mode === 'current' ? 'Huidige locatie' : DEFAULT_LOCATION.label),
     lat: Number(lat.toFixed(6)),
     lon: Number(lon.toFixed(6))
   };
