@@ -62,7 +62,7 @@ body::before {
 header {
   background: var(--anwb-navy);
   color: white;
-  padding: 20px 32px;
+  padding: 20px max(32px, calc((100% - 1280px) / 2 + 32px));
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -495,7 +495,9 @@ main {
   gap: 14px;
 }
 
-.weather-card {
+
+.weather-card,
+.pref-card {
   background: white;
   border: 1px solid var(--line);
   border-radius: 16px;
@@ -821,7 +823,7 @@ footer strong { color: var(--anwb-yellow); }
 .tabs {
   background: white;
   border-bottom: 1px solid var(--line);
-  padding: 0 32px;
+  padding: 0 max(32px, calc((100% - 1280px) / 2 + 32px));
   display: flex;
   gap: 4px;
   position: sticky;
