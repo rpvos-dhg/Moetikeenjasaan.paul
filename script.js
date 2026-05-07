@@ -56,7 +56,7 @@ function persistLocation(location) {
 }
 
 function formatCoords(location = currentLocation) {
-  return `${location.lat.toFixed(4)}, ${location.lon.toFixed(4)}`;
+  return `${location.lat.toFixed(6)}, ${location.lon.toFixed(6)}`;
 }
 
 function isDefaultLocation(location = currentLocation) {
