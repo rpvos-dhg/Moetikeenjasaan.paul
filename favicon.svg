@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Navy background -->
+  <rect width="32" height="32" rx="7" fill="#003a71"/>
+
+  <!-- Left jacket panel: shoulder curve + body + V-collar -->
+  <path d="M4,27 L4,12 C4,7 7,5 11,5 L14.5,5 L16,13 L16,27 Z" fill="#ffcc00"/>
+
+  <!-- Right jacket panel: shoulder curve + body + V-collar -->
+  <path d="M28,27 L28,12 C28,7 25,5 21,5 L17.5,5 L16,13 L16,27 Z" fill="#ffcc00"/>
+
+  <!-- Inner lapel fold shadows to give depth -->
+  <path d="M14.5,5 L16,13 L16,9 Z" fill="rgba(0,0,0,0.15)"/>
+  <path d="M17.5,5 L16,13 L16,9 Z" fill="rgba(0,0,0,0.15)"/>
+</svg>
