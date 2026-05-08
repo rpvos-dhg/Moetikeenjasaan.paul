@@ -1352,6 +1352,24 @@ body.dark .tip.yellow {
   background: rgba(255, 255, 255, 0.1);
 }
 
+.lang-btn {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.lang-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
 .threshold-table th {
   background: var(--paper);
   font-weight: 700;
@@ -1797,6 +1815,11 @@ code {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+  }
+
+  .lang-btn {
+    height: 44px;
+    padding: 0 10px;
   }
 
   .live-indicator {
