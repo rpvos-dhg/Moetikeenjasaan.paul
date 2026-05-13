@@ -247,13 +247,54 @@ function applyTranslations() {
   if (weatherData) render();
 }
 
+let liveChangelogReleases = [];
+
+async function fetchChangelogUpdates() {
+  try {
+    const res = await fetch(
+      'https://api.github.com/repos/rpvos-dhg/Moetikeenjasaan.paul/commits?since=2026-05-14T00:00:00Z&per_page=100'
+    );
+    if (!res.ok) return;
+    const commits = await res.json();
+    if (!commits.length) return;
+
+    const byDate = {};
+    for (const commit of commits) {
+      const isoDate = new Date(commit.commit.author.date)
+        .toLocaleDateString('sv', { timeZone: 'Europe/Amsterdam' });
+      if (!byDate[isoDate]) byDate[isoDate] = [];
+      const subject = commit.commit.message.split('\n')[0];
+      byDate[isoDate].push(subject);
+    }
+
+    liveChangelogReleases = Object.entries(byDate)
+      .sort(([a], [b]) => b.localeCompare(a))
+      .map(([isoDate, messages]) => {
+        const d = new Date(isoDate + 'T12:00:00Z');
+        return {
+          isoDate,
+          date:   d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }),
+          dateEn: d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
+          items: {
+            nl: messages.map(msg => ({ type: 'new', text: msg })),
+            en: messages.map(msg => ({ type: 'new', text: msg })),
+          }
+        };
+      });
+
+    const changelogEl = document.querySelector('.changelog-content');
+    if (changelogEl) changelogEl.innerHTML = renderChangelogHtml();
+  } catch {
+    // silently ignore — changelog still shows curated history
+  }
+}
+
 function renderChangelogHtml() {
   const releases = [
     {
+      isoDate: '2026-05-13',
       date: '13 mei 2026',
       dateEn: 'May 13, 2026',
-      tag: 'Vandaag',
-      tagEn: 'Today',
       items: {
         nl: [
           { type: 'fix',     text: 'Pollenbadge toonde altijd "zeer hoog" in april/mei door hardcoded maandtabel — nu gebaseerd op live meetwaarden' },
@@ -280,6 +321,7 @@ function renderChangelogHtml() {
       }
     },
     {
+      isoDate: '2026-05-08',
       date: '8 mei 2026',
       dateEn: 'May 8, 2026',
       items: {
@@ -306,6 +348,7 @@ function renderChangelogHtml() {
       }
     },
     {
+      isoDate: '2026-05-07',
       date: '7 mei 2026',
       dateEn: 'May 7, 2026',
       items: {
@@ -324,6 +367,7 @@ function renderChangelogHtml() {
       }
     },
     {
+      isoDate: '2026-04-28',
       date: '28 april 2026',
       dateEn: 'April 28, 2026',
       items: {
@@ -336,6 +380,7 @@ function renderChangelogHtml() {
       }
     },
     {
+      isoDate: '2026-04-24',
       date: '24 april 2026',
       dateEn: 'April 24, 2026',
       items: {
@@ -356,6 +401,7 @@ function renderChangelogHtml() {
       }
     },
     {
+      isoDate: '2026-04-23',
       date: '23 april 2026',
       dateEn: 'April 23, 2026',
       items: {
@@ -376,6 +422,7 @@ function renderChangelogHtml() {
       }
     },
     {
+      isoDate: '2026-04-22',
       date: '22 april 2026',
       dateEn: 'April 22, 2026',
       tag: 'Eerste versie',
@@ -416,6 +463,9 @@ function renderChangelogHtml() {
     security: { label: lang === 'en' ? 'Security'   : 'Security',   cls: 'cl-security' },
   };
 
+  const today = new Date().toLocaleDateString('sv', { timeZone: 'Europe/Amsterdam' });
+  const allReleases = [...liveChangelogReleases, ...releases];
+
   const title = lang === 'en' ? 'Release log' : 'Releaselog';
   const intro = lang === 'en'
     ? 'An overview of all changes, grouped by release date.'
@@ -423,9 +473,12 @@ function renderChangelogHtml() {
 
   let html = `<h2>${title}</h2><p class="intro">${intro}</p>`;
 
-  for (const release of releases) {
+  for (const release of allReleases) {
     const date = lang === 'en' ? release.dateEn : release.date;
-    const tag  = lang === 'en' ? release.tagEn  : release.tag;
+    const isToday = release.isoDate === today;
+    const todayTag = isToday ? (lang === 'en' ? 'Today' : 'Vandaag') : null;
+    const staticTag = lang === 'en' ? release.tagEn : release.tag;
+    const tag = todayTag || staticTag;
     const items = lang === 'en' ? release.items.en : release.items.nl;
 
     html += `<div class="cl-release">
@@ -1768,4 +1821,5 @@ applyTranslations();
 bindLocationControls();
 fetchWeather();
 fetchAppVersion();
+fetchChangelogUpdates();
 setInterval(fetchWeather, 10 * 60 * 1000);
