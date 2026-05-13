@@ -36,7 +36,7 @@ const i18n = {
     comingHours: 'Komende uren', bestBreakTime: 'Beste pauzetijd',
     rainPer15: 'Regen per 15 minuten', next2hours: 'komende 2 uur',
     pollenOverview: '🌸 Pollenoverzicht', todayVsTomorrow: 'Vandaag vs Morgen',
-    footerHtml: 'Gebouwd door en voor <strong>DIGHV</strong> · Weerdata via Open-Meteo · Niet officieel ANWB',
+    footerHtml: 'Gebouwd door en voor <strong>DIGHV</strong> · Weerdata via Open-Meteo · Niet officieel ANWB · <span id="appVersion"></span>',
     locationPanelTitle: 'Locatie',
     useCurrentLocationBtn: 'Huidige locatie', resetLocationBtn: 'ANWB HQ',
     locationDefaultLabel: 'Huidige locatie',
@@ -132,7 +132,7 @@ const i18n = {
     comingHours: 'Coming hours', bestBreakTime: 'Best break time',
     rainPer15: 'Rain per 15 minutes', next2hours: 'next 2 hours',
     pollenOverview: '🌸 Pollen overview', todayVsTomorrow: 'Today vs Tomorrow',
-    footerHtml: 'Built by and for <strong>DIGHV</strong> · Weather data via Open-Meteo · Not official ANWB',
+    footerHtml: 'Built by and for <strong>DIGHV</strong> · Weather data via Open-Meteo · Not official ANWB · <span id="appVersion"></span>',
     locationPanelTitle: 'Location',
     useCurrentLocationBtn: 'Current location', resetLocationBtn: 'ANWB HQ',
     locationDefaultLabel: 'Current location',
@@ -234,6 +234,7 @@ function applyTranslations() {
   document.documentElement.lang = lang;
   document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
   document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
+  if (appVersionText) setAppVersion(appVersionText);
   const explainEl = document.querySelector('.explain-content');
   if (explainEl) explainEl.innerHTML = renderExplainHtml();
   const langBtn = document.getElementById('langToggle');
@@ -1534,8 +1535,31 @@ function renderWeatherComparison() {
   `;
 }
 
+let appVersionText = '';
+function setAppVersion(text) {
+  appVersionText = text;
+  document.querySelectorAll('#appVersion').forEach(el => el.textContent = text);
+}
+
+async function fetchAppVersion() {
+  try {
+    const res = await fetch(
+      'https://api.github.com/repos/rpvos-dhg/Moetikeenjasaan.paul/commits?per_page=1'
+    );
+    if (!res.ok) return;
+    // GitHub returns total commit count in the Link header rel="last" page number
+    const link = res.headers.get('Link') || '';
+    const match = link.match(/[?&]page=(\d+)>;\s*rel="last"/);
+    const count = match ? parseInt(match[1]) : null;
+    if (count) setAppVersion(`v${count}`);
+  } catch {
+    // silently ignore — version is non-critical
+  }
+}
+
 // Init
 applyTranslations();
 bindLocationControls();
 fetchWeather();
+fetchAppVersion();
 setInterval(fetchWeather, 10 * 60 * 1000);
