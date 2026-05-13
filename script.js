@@ -115,10 +115,10 @@ const i18n = {
     checkScarf: 'Sjaal', checkGloves: 'Handschoenen',
     checkWinterJacket: 'Winterjas (< 0°C)', checkWindJacket: 'Stevig jasje (wind > 25 km/u)',
     checkRoute: 'Route: bij bezoekerspas → rotonde naar buiten',
-    darkAutoTitle: isDark => `Dark mode: Auto (${isDark ? 'donker' : 'licht'})`,
-    darkAutoAria: isDark => `Thema: auto ${isDark ? 'donker' : 'licht'}. Klik voor altijd donker.`,
-    darkForcedTitle: f => `Dark mode: altijd ${f === 'dark' ? 'donker' : 'licht'}`,
-    darkForcedAria: f => `Thema: altijd ${f === 'dark' ? 'donker' : 'licht'}. Klik voor ${f === 'dark' ? 'altijd licht' : 'auto'}.`,
+    darkAutoTitle: isDark => `Automatisch thema (nu ${isDark ? 'donker' : 'licht'}) — klik voor altijd ${isDark ? 'licht' : 'donker'}`,
+    darkAutoAria: isDark => `Thema automatisch, nu ${isDark ? 'donker' : 'licht'}. Klik voor altijd ${isDark ? 'licht' : 'donker'}.`,
+    darkForcedTitle: f => f === 'dark' ? 'Altijd donker — klik voor altijd licht' : 'Altijd licht — klik voor automatisch',
+    darkForcedAria: f => f === 'dark' ? 'Altijd donker. Klik voor altijd licht.' : 'Altijd licht. Klik voor automatisch.',
     dateLocale: 'nl-NL',
   },
   en: {
@@ -211,10 +211,10 @@ const i18n = {
     checkScarf: 'Scarf', checkGloves: 'Gloves',
     checkWinterJacket: 'Winter coat (< 0°C)', checkWindJacket: 'Sturdy jacket (wind > 25 km/h)',
     checkRoute: 'Route: with visitor pass → roundabout to exit',
-    darkAutoTitle: isDark => `Dark mode: Auto (${isDark ? 'dark' : 'light'})`,
-    darkAutoAria: isDark => `Theme: auto ${isDark ? 'dark' : 'light'}. Click for always dark.`,
-    darkForcedTitle: f => `Dark mode: always ${f === 'dark' ? 'dark' : 'light'}`,
-    darkForcedAria: f => `Theme: always ${f === 'dark' ? 'dark' : 'light'}. Click for ${f === 'dark' ? 'always light' : 'auto'}.`,
+    darkAutoTitle: isDark => `Automatic theme (now ${isDark ? 'dark' : 'light'}) — click for always ${isDark ? 'light' : 'dark'}`,
+    darkAutoAria: isDark => `Theme automatic, now ${isDark ? 'dark' : 'light'}. Click for always ${isDark ? 'light' : 'dark'}.`,
+    darkForcedTitle: f => f === 'dark' ? 'Always dark — click for always light' : 'Always light — click for automatic',
+    darkForcedAria: f => f === 'dark' ? 'Always dark. Click for always light.' : 'Always light. Click for automatic.',
     dateLocale: 'en-GB',
   }
 };
@@ -561,11 +561,13 @@ function applyDarkMode() {
   const btn = document.getElementById('darkModeToggle');
   if (btn) {
     if (darkModeForced === 'auto') {
-      btn.textContent = darkMode ? '🌙' : '☀️';
+      btn.textContent = 'AUTO';
+      btn.classList.add('dark-mode-auto');
       btn.title = t('darkAutoTitle', darkMode);
       btn.setAttribute('aria-label', t('darkAutoAria', darkMode));
     } else {
       btn.textContent = darkModeForced === 'dark' ? '🌙' : '☀️';
+      btn.classList.remove('dark-mode-auto');
       btn.title = t('darkForcedTitle', darkModeForced);
       btn.setAttribute('aria-label', t('darkForcedAria', darkModeForced));
     }
@@ -1460,9 +1462,15 @@ document.querySelectorAll('.pref-btn').forEach(btn => {
 
 // Dark mode toggle
 document.getElementById('darkModeToggle').addEventListener('click', () => {
-  if (darkModeForced === 'auto') darkModeForced = 'dark';
-  else if (darkModeForced === 'dark') darkModeForced = 'light';
-  else darkModeForced = 'auto';
+  if (darkModeForced === 'auto') {
+    // Toggle to the opposite of the current auto state
+    const currentlyDark = document.body.classList.contains('dark');
+    darkModeForced = currentlyDark ? 'light' : 'dark';
+  } else if (darkModeForced === 'dark') {
+    darkModeForced = 'light';
+  } else {
+    darkModeForced = 'auto';
+  }
   localStorage_safe_set('dighv_dark_force', darkModeForced);
   applyDarkMode();
 });
