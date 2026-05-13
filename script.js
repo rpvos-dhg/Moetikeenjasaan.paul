@@ -77,6 +77,8 @@ const i18n = {
     rainDry: '✓ Droog de komende 2 uur', rainPeakChance: 'Piek kans', rainTotal: 'Totaal',
     metricTemp: 'Temperatuur', metricFeels: 'Gevoelstemp.', metricWind: 'Wind',
     metricPrecip: 'Neerslag', metricUv: 'UV-index',
+    windDirs: ['N', 'NO', 'O', 'ZO', 'Z', 'ZW', 'W', 'NW'],
+    pollenTomorrow: 'Morgen', sunriseLabel: '🌅', sunsetLabel: '🌇',
     forecastNow: 'NU',
     lunchLabel: 'Lunch', afternoonLabel: 'Middagpauze', tomorrowLunch: 'Morgen lunch',
     countdownNow: 'Nu!', rainPreview: rain => `${rain}% regen`,
@@ -171,6 +173,8 @@ const i18n = {
     rainDry: '✓ Dry for the next 2 hours', rainPeakChance: 'Peak chance', rainTotal: 'Total',
     metricTemp: 'Temperature', metricFeels: 'Feels like', metricWind: 'Wind',
     metricPrecip: 'Precipitation', metricUv: 'UV index',
+    windDirs: ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'],
+    pollenTomorrow: 'Tomorrow', sunriseLabel: '🌅', sunsetLabel: '🌇',
     forecastNow: 'NOW',
     lunchLabel: 'Lunch', afternoonLabel: 'Afternoon break', tomorrowLunch: "Tomorrow's lunch",
     countdownNow: 'Now!', rainPreview: rain => `${rain}% rain`,
@@ -738,8 +742,8 @@ setInterval(updateClock, 30000);
 async function fetchWeather() {
   const requestId = ++weatherRequestSeq;
   const { lat, lon } = currentLocation;
-  const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,weather_code&minutely_15=precipitation,precipitation_probability&hourly=temperature_2m,precipitation_probability,precipitation,wind_speed_10m,weather_code,uv_index&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,weather_code&timezone=Europe/Amsterdam&past_days=1&forecast_days=2`;
-  const airQualityUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,ragweed_pollen,olive_pollen&past_days=0&forecast_days=1`;
+  const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,precipitation,wind_speed_10m,wind_direction_10m,weather_code&minutely_15=precipitation,precipitation_probability&hourly=temperature_2m,precipitation_probability,precipitation,wind_speed_10m,weather_code,uv_index&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,weather_code&timezone=Europe/Amsterdam&past_days=1&forecast_days=2`;
+  const airQualityUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,ragweed_pollen,olive_pollen&hourly=alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,ragweed_pollen,olive_pollen&past_days=0&forecast_days=2`;
 
   try {
     const [weatherRes, airQualityRes] = await Promise.all([fetch(weatherUrl), fetch(airQualityUrl)]);
@@ -754,6 +758,21 @@ async function fetchWeather() {
       const airQualityData = await airQualityRes.json();
       if (requestId !== weatherRequestSeq) return;
       if (airQualityData.current) {
+        let tomorrowPollen = null;
+        if (airQualityData.hourly?.time) {
+          const tomorrowStr = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+          const noonIdx = airQualityData.hourly.time.findIndex(ts => ts.startsWith(tomorrowStr + 'T12'));
+          if (noonIdx >= 0) {
+            tomorrowPollen = {
+              alder: airQualityData.hourly.alder_pollen?.[noonIdx] || 0,
+              birch: airQualityData.hourly.birch_pollen?.[noonIdx] || 0,
+              grass: airQualityData.hourly.grass_pollen?.[noonIdx] || 0,
+              mugwort: airQualityData.hourly.mugwort_pollen?.[noonIdx] || 0,
+              ragweed: airQualityData.hourly.ragweed_pollen?.[noonIdx] || 0,
+              olive: airQualityData.hourly.olive_pollen?.[noonIdx] || 0,
+            };
+          }
+        }
         pollenData = {
           alder: airQualityData.current.alder_pollen || 0,
           birch: airQualityData.current.birch_pollen || 0,
@@ -761,6 +780,7 @@ async function fetchWeather() {
           mugwort: airQualityData.current.mugwort_pollen || 0,
           ragweed: airQualityData.current.ragweed_pollen || 0,
           olive: airQualityData.current.olive_pollen || 0,
+          tomorrow: tomorrowPollen,
           fetchedAt: new Date()
         };
       }
@@ -887,13 +907,23 @@ function renderBestTime() {
   const BREAK_START = 11;
   const BREAK_END = 15;
 
+  const todayKey = now.toISOString().slice(0, 10);
+  const todayIdx = weatherData.daily?.time?.findIndex(d => d === todayKey) ?? -1;
+  let sunHtml = '';
+  if (todayIdx >= 0) {
+    const fmt = d => new Date(d).toLocaleTimeString(t('dateLocale'), { hour: '2-digit', minute: '2-digit' });
+    const sr = weatherData.daily.sunrise?.[todayIdx];
+    const ss = weatherData.daily.sunset?.[todayIdx];
+    if (sr && ss) sunHtml = `<div class="sunrise-sunset">${t('sunriseLabel')} ${fmt(sr)} &nbsp;·&nbsp; ${t('sunsetLabel')} ${fmt(ss)}</div>`;
+  }
+
   if (currentHour > BREAK_END) {
-    el.innerHTML = `<div class="best-time-detail" style="color:var(--muted)">${t('bestTimeNoMore')}</div>`;
+    el.innerHTML = `<div class="best-time-detail" style="color:var(--muted)">${t('bestTimeNoMore')}</div>${sunHtml}`;
     return;
   }
 
   const startIdx = hourly.time.findIndex(t => new Date(t).getHours() === currentHour);
-  if (startIdx === -1) { el.innerHTML = '--'; return; }
+  if (startIdx === -1) { el.innerHTML = `--${sunHtml}`; return; }
 
   let bestIdx = -1;
   let bestScore = -Infinity;
@@ -909,7 +939,7 @@ function renderBestTime() {
   }
 
   if (bestIdx === -1) {
-    el.innerHTML = `<div class="best-time-detail" style="color:var(--muted)">${t('bestTimePauseStart')}</div>`;
+    el.innerHTML = `<div class="best-time-detail" style="color:var(--muted)">${t('bestTimePauseStart')}</div>${sunHtml}`;
     return;
   }
 
@@ -929,6 +959,7 @@ function renderBestTime() {
       </div>
       <div class="best-time-detail">${t('bestTimeRainDetail', temp, rain)}</div>
     </div>
+    ${sunHtml}
   `;
 }
 
@@ -1041,6 +1072,10 @@ function renderRainChart() {
   }
 }
 
+function windDirection(deg) {
+  return t('windDirs')[Math.round(deg / 45) % 8];
+}
+
 function renderMetrics() {
   const c = weatherData.current;
   const uv = weatherData.hourly.uv_index[0] || 0;
@@ -1055,7 +1090,7 @@ function renderMetrics() {
     </div>
     <div class="metric fade-in">
       <span class="metric-label">${t('metricWind')}</span>
-      <span class="metric-value">${Math.round(c.wind_speed_10m)}<span class="metric-unit">km/u</span></span>
+      <span class="metric-value">${Math.round(c.wind_speed_10m)}<span class="metric-unit">km/u · ${windDirection(c.wind_direction_10m ?? 0)}</span></span>
     </div>
     <div class="metric fade-in">
       <span class="metric-label">${t('metricPrecip')}</span>
@@ -1220,6 +1255,21 @@ function renderPollenCard() {
     </div>`;
   });
   html += '</div>';
+
+  if (pollenData?.tomorrow) {
+    const tm = pollenData.tomorrow;
+    const highTomorrow = [];
+    if (tm.alder > 20) highTomorrow.push(lang === 'en' ? 'alder' : 'els');
+    if (tm.birch > 20) highTomorrow.push(lang === 'en' ? 'birch' : 'berk');
+    if (tm.grass > 50) highTomorrow.push(lang === 'en' ? 'grasses' : 'grassen');
+    if (tm.mugwort > 10) highTomorrow.push(lang === 'en' ? 'mugwort' : 'bijvoet');
+    if (tm.ragweed > 10) highTomorrow.push('ragweed');
+    if (tm.olive > 20) highTomorrow.push(lang === 'en' ? 'olive' : 'olijf');
+    const tomorrowText = highTomorrow.length > 0
+      ? `${t('pollenHighPrefix')}${highTomorrow.join(', ')}`
+      : t('pollenAllLow');
+    html += `<div class="pollen-tomorrow"><span class="pollen-tomorrow-label">${t('pollenTomorrow')}:</span> ${tomorrowText}</div>`;
+  }
 
   pollenGrid.innerHTML = html;
 }

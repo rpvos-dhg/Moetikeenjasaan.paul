@@ -479,6 +479,19 @@ main {
   transition: width 0.3s;
 }
 
+.pollen-tomorrow {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.pollen-tomorrow-label {
+  font-weight: 600;
+  color: var(--text);
+}
+
 .pollen-item.high .pollen-bar-fill {
   background: #d97706;
 }
@@ -1570,6 +1583,12 @@ code {
 .best-time-detail {
   font-size: 13px;
   color: var(--muted);
+}
+
+.sunrise-sunset {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 8px;
 }
 
 /* Wacht ff strip */
