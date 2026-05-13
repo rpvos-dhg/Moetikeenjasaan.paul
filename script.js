@@ -561,7 +561,7 @@ function applyDarkMode() {
   const btn = document.getElementById('darkModeToggle');
   if (btn) {
     if (darkModeForced === 'auto') {
-      btn.textContent = 'AUTO';
+      btn.textContent = darkMode ? '🌙' : '☀️';
       btn.classList.add('dark-mode-auto');
       btn.title = t('darkAutoTitle', darkMode);
       btn.setAttribute('aria-label', t('darkAutoAria', darkMode));
