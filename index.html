@@ -209,5 +209,10 @@
 </div>
 
 <script src="script.js?v=10"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/Moetikeenjasaan.paul/sw.js');
+  }
+</script>
 </body>
 </html>
