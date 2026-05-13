@@ -791,6 +791,15 @@ function getPollenTip() {
     if (pollenData.ragweed > 10) highPollen.push('ragweed');
     if (pollenData.olive > 20) highPollen.push(lang === 'en' ? 'olive' : 'olijf');
 
+    // Override level based on live measurements instead of seasonal hardcoding
+    if (highPollen.length >= 2) {
+      tip.level = lang === 'en' ? 'very high' : 'zeer hoog';
+    } else if (highPollen.length === 1) {
+      tip.level = lang === 'en' ? 'high' : 'hoog';
+    } else {
+      tip.level = lang === 'en' ? 'low' : 'laag';
+    }
+
     const summary = highPollen.length > 0
       ? `${t('pollenHighPrefix')}${highPollen.join(', ')}`
       : t('pollenAllLow');
