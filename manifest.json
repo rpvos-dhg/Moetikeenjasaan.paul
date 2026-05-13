@@ -3,6 +3,7 @@
   "short_name": "Pauze-advies",
   "description": "Jas aan of niet? De officieuze DIGHV pauze-scanner.",
   "start_url": "/Moetikeenjasaan.paul/",
+  "scope": "/Moetikeenjasaan.paul/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#003082",
