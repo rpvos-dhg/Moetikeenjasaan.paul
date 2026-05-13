@@ -26,7 +26,7 @@ let weatherRequestSeq = 0;
 // ─── i18n ────────────────────────────────────────────────────────────────────
 const i18n = {
   nl: {
-    tabAdvice: 'Advies', tabLog: 'Looplog', tabExplain: 'Hoe werkt dit?',
+    tabAdvice: 'Advies', tabLog: 'Looplog', tabExplain: 'Hoe werkt dit?', tabChangelog: 'Releaselog',
     h1Html: 'Jas aan of <span class="accent">niet?</span>',
     lead: 'De officieuze DIGHV pauze-scanner. Even checken voor je naar buiten loopt.',
     adviceLabel: 'Advies voor nu + 30 min',
@@ -122,7 +122,7 @@ const i18n = {
     dateLocale: 'nl-NL',
   },
   en: {
-    tabAdvice: 'Advice', tabLog: 'Walk log', tabExplain: 'How does this work?',
+    tabAdvice: 'Advice', tabLog: 'Walk log', tabExplain: 'How does this work?', tabChangelog: 'Release log',
     h1Html: 'Jacket on or <span class="accent">not?</span>',
     lead: 'The unofficial DIGHV break scanner. Check before you head outside.',
     adviceLabel: 'Advice for now + 30 min',
@@ -237,12 +237,216 @@ function applyTranslations() {
   if (appVersionText) setAppVersion(appVersionText);
   const explainEl = document.querySelector('.explain-content');
   if (explainEl) explainEl.innerHTML = renderExplainHtml();
+  const changelogEl = document.querySelector('.changelog-content');
+  if (changelogEl) changelogEl.innerHTML = renderChangelogHtml();
   const langBtn = document.getElementById('langToggle');
   if (langBtn) langBtn.textContent = lang === 'nl' ? 'EN' : 'NL';
   renderLocationUi();
   renderLogHistory();
   applyDarkMode();
   if (weatherData) render();
+}
+
+function renderChangelogHtml() {
+  const releases = [
+    {
+      date: '13 mei 2026',
+      dateEn: 'May 13, 2026',
+      tag: 'Vandaag',
+      tagEn: 'Today',
+      items: {
+        nl: [
+          { type: 'fix',     text: 'Pollenbadge toonde altijd "zeer hoog" in april/mei door hardcoded maandtabel — nu gebaseerd op live meetwaarden' },
+          { type: 'new',     text: 'Windrichting toegevoegd aan de windmetric (bv. ZW, NO)' },
+          { type: 'new',     text: 'Pollenkaart toont nu ook de verwachte pollenwaarden voor morgen' },
+          { type: 'new',     text: 'Zonsopgang en -ondergang zichtbaar in de "Beste pauzetijd"-kaart' },
+          { type: 'new',     text: 'PWA-ondersteuning: app is installeerbaar als standalone app op mobiel en desktop (via browser-menu of adresbalk)' },
+          { type: 'improve', text: 'Dark mode-knop toont nu het huidig thema-icoon (🌙/☀️) met een klein "A" superscript bij automatische modus — duidelijker onderscheid tussen auto en geforceerd' },
+          { type: 'improve', text: 'Dark mode-tooltip beschrijft nu wat klikken zal doen, niet alleen de huidige staat' },
+          { type: 'new',     text: 'Versienummer toegevoegd in de footer (automatisch oplopend op basis van commits)' },
+          { type: 'security','text': 'Gevoelige bestanden verwijderd uit repository: lokaal VS Code-configuratiebestand (met Windows-gebruikersnaam) en looplog-data' },
+        ],
+        en: [
+          { type: 'fix',     text: 'Pollen badge always showed "very high" in April/May due to hardcoded monthly table — now based on live measurements' },
+          { type: 'new',     text: 'Wind direction added to wind metric (e.g. SW, NE)' },
+          { type: 'new',     text: 'Pollen card now also shows tomorrow\'s expected pollen values' },
+          { type: 'new',     text: 'Sunrise and sunset times visible in the "Best break time" card' },
+          { type: 'new',     text: 'PWA support: app can be installed as standalone app on mobile and desktop (via browser menu or address bar)' },
+          { type: 'improve', text: 'Dark mode button now shows the current theme icon (🌙/☀️) with a small "A" superscript in automatic mode — clearer distinction between auto and forced' },
+          { type: 'improve', text: 'Dark mode tooltip now describes what clicking will do, not just the current state' },
+          { type: 'new',     text: 'Version number added to footer (auto-increments with each commit)' },
+          { type: 'security','text': 'Sensitive files removed from repository: local VS Code config (containing Windows username) and walk log data' },
+        ]
+      }
+    },
+    {
+      date: '8 mei 2026',
+      dateEn: 'May 8, 2026',
+      items: {
+        nl: [
+          { type: 'new',     text: 'Taalswitch NL/EN toegevoegd — volledige vertaling van de gehele interface' },
+          { type: 'new',     text: 'ANWB-stijl SVG-favicon toegevoegd' },
+          { type: 'new',     text: 'Stadsnaam zichtbaar in de locatiebadge bij gebruik van GPS ("Huidige locatie · Amsterdam")' },
+          { type: 'improve', text: 'GPS-nauwkeurigheid verbeterd: geen gecachte positie meer, langere timeout' },
+          { type: 'improve', text: 'Beste pauzetijd beperkt tot het venster 11:00–15:00' },
+          { type: 'fix',     text: '"Nu meteen" verscheen ook buiten pauzetijden — opgelost' },
+          { type: 'fix',     text: 'Ruimte onder advieskaart op desktop verwijderd' },
+          { type: 'new',     text: 'README toegevoegd aan de repository' },
+        ],
+        en: [
+          { type: 'new',     text: 'NL/EN language toggle added — full translation of the entire interface' },
+          { type: 'new',     text: 'ANWB-style SVG favicon added' },
+          { type: 'new',     text: 'City name visible in location badge when using GPS ("Current location · Amsterdam")' },
+          { type: 'improve', text: 'GPS accuracy improved: no cached position, longer timeout' },
+          { type: 'improve', text: 'Best break time now limited to the 11:00–15:00 window' },
+          { type: 'fix',     text: '"Right now" appeared outside break hours — fixed' },
+          { type: 'fix',     text: 'Gap below advice card on desktop removed' },
+          { type: 'new',     text: 'README added to the repository' },
+        ]
+      }
+    },
+    {
+      date: '7 mei 2026',
+      dateEn: 'May 7, 2026',
+      items: {
+        nl: [
+          { type: 'improve', text: 'Desktop-layout verbeterd: pref-card styling en brede-scherm uitlijning gecorrigeerd' },
+          { type: 'improve', text: 'Locatieknop en "Jouw type" naar boven verplaatst voor betere volgorde' },
+          { type: 'fix',     text: 'Dark mode hero-onderstreping aangepast' },
+          { type: 'fix',     text: 'Mobiel schalen en dark mode-problemen opgelost' },
+        ],
+        en: [
+          { type: 'improve', text: 'Desktop layout improved: pref-card styling and wide-screen alignment corrected' },
+          { type: 'improve', text: 'Location button and "Your type" moved up for better flow' },
+          { type: 'fix',     text: 'Dark mode hero underline adjusted' },
+          { type: 'fix',     text: 'Mobile scaling and dark mode issues fixed' },
+        ]
+      }
+    },
+    {
+      date: '28 april 2026',
+      dateEn: 'April 28, 2026',
+      items: {
+        nl: [
+          { type: 'improve', text: 'CSS opgeschoond: ongebruikte klassen verwijderd en grid geüpdatet' },
+        ],
+        en: [
+          { type: 'improve', text: 'CSS cleanup: removed unused classes and updated grid' },
+        ]
+      }
+    },
+    {
+      date: '24 april 2026',
+      dateEn: 'April 24, 2026',
+      items: {
+        nl: [
+          { type: 'improve', text: 'Dark mode volgt nu apparaatinstellingen (systeem dark mode) én schakelt automatisch bij zonsondergang' },
+          { type: 'new',     text: 'UV-index toegevoegd aan de weercondities en pollentips' },
+          { type: 'new',     text: 'Dag/nacht weericons op basis van zonsopgang en -ondergang' },
+          { type: 'fix',     text: 'Tijdberekening gecorrigeerd naar Amsterdam-tijdzone' },
+          { type: 'improve', text: 'Dark mode-knop toegankelijker gemaakt (aria-labels)' },
+        ],
+        en: [
+          { type: 'improve', text: 'Dark mode now follows device settings (system dark mode) and switches automatically at sunset' },
+          { type: 'new',     text: 'UV index added to weather conditions and pollen tips' },
+          { type: 'new',     text: 'Day/night weather icons based on sunrise and sunset' },
+          { type: 'fix',     text: 'Time calculation corrected to Amsterdam timezone' },
+          { type: 'improve', text: 'Dark mode button made more accessible (aria labels)' },
+        ]
+      }
+    },
+    {
+      date: '23 april 2026',
+      dateEn: 'April 23, 2026',
+      items: {
+        nl: [
+          { type: 'new',     text: 'Pollenoverzicht uitgebreid naar aparte kaart met volumebalk per allergeen (els, berk, grassen, bijvoet, ambrosia, olijf)' },
+          { type: 'new',     text: '"Vandaag vs Morgen" uitgebreid naar 3-daags overzicht: gisteren, vandaag, morgen' },
+          { type: 'improve', text: 'Checklist prominenter gemaakt met styling en automatische weercondities-koppeling' },
+          { type: 'improve', text: 'Layout omgezet naar echt 2×2 grid met toegankelijkheidsverbeteringen' },
+          { type: 'fix',     text: 'Medicatie-item verwijderd uit checklist; pollenwaarschuwingen blijven zichtbaar in het advies' },
+        ],
+        en: [
+          { type: 'new',     text: 'Pollen overview expanded into separate card with volume bar per allergen (alder, birch, grasses, mugwort, ragweed, olive)' },
+          { type: 'new',     text: '"Today vs Tomorrow" expanded to 3-day view: yesterday, today, tomorrow' },
+          { type: 'improve', text: 'Checklist made more prominent with styling and automatic weather condition linking' },
+          { type: 'improve', text: 'Layout converted to true 2×2 grid with accessibility improvements' },
+          { type: 'fix',     text: 'Medication item removed from checklist; pollen warnings remain visible in advice' },
+        ]
+      }
+    },
+    {
+      date: '22 april 2026',
+      dateEn: 'April 22, 2026',
+      tag: 'Eerste versie',
+      tagEn: 'First release',
+      items: {
+        nl: [
+          { type: 'new', text: 'Jasadvies op basis van gevoelstemperatuur (nu + 30 min), met persoonlijke voorkeur (kouwelijk / normaal / warmbloedig)' },
+          { type: 'new', text: 'Live weerdata via Open-Meteo: temperatuur, wind, neerslag, UV-index' },
+          { type: 'new', text: 'Uurverwachting voor de komende uren' },
+          { type: 'new', text: 'Regenradar per 15 minuten voor de komende 2 uur' },
+          { type: 'new', text: 'Live pollendata via Open-Meteo Air Quality API (els, berk, grassen, bijvoet, ambrosia, olijf)' },
+          { type: 'new', text: 'Beste pauzetijd: berekend op basis van temperatuur en regenkans' },
+          { type: 'new', text: 'Volgende pauze: countdown naar lunch of middagpauze' },
+          { type: 'new', text: 'Looplog: registreer wie er mee gaat op de wandeling, inclusief geschiedenis' },
+          { type: 'new', text: 'Dark mode: automatisch op basis van systeeminstelling en zonsondergang' },
+          { type: 'new', text: 'GPS-locatie: tijdelijk overschakelen naar huidige locatie' },
+        ],
+        en: [
+          { type: 'new', text: 'Jacket advice based on feels-like temperature (now + 30 min), with personal preference (sensitive to cold / normal / warm-blooded)' },
+          { type: 'new', text: 'Live weather data via Open-Meteo: temperature, wind, precipitation, UV index' },
+          { type: 'new', text: 'Hourly forecast for the coming hours' },
+          { type: 'new', text: 'Rain radar per 15 minutes for the next 2 hours' },
+          { type: 'new', text: 'Live pollen data via Open-Meteo Air Quality API (alder, birch, grasses, mugwort, ragweed, olive)' },
+          { type: 'new', text: 'Best break time: calculated based on temperature and rain probability' },
+          { type: 'new', text: 'Next break: countdown to lunch or afternoon break' },
+          { type: 'new', text: 'Walk log: register who joins the walk, including history' },
+          { type: 'new', text: 'Dark mode: automatic based on system settings and sunset' },
+          { type: 'new', text: 'GPS location: temporarily switch to current location' },
+        ]
+      }
+    },
+  ];
+
+  const typeConfig = {
+    new:      { label: lang === 'en' ? 'Nieuw'      : 'Nieuw',      cls: 'cl-new' },
+    fix:      { label: lang === 'en' ? 'Fix'        : 'Fix',        cls: 'cl-fix' },
+    improve:  { label: lang === 'en' ? 'Verbeterd'  : 'Verbeterd',  cls: 'cl-improve' },
+    security: { label: lang === 'en' ? 'Security'   : 'Security',   cls: 'cl-security' },
+  };
+
+  const title = lang === 'en' ? 'Release log' : 'Releaselog';
+  const intro = lang === 'en'
+    ? 'An overview of all changes, grouped by release date.'
+    : 'Een overzicht van alle wijzigingen, gegroepeerd per releasedatum.';
+
+  let html = `<h2>${title}</h2><p class="intro">${intro}</p>`;
+
+  for (const release of releases) {
+    const date = lang === 'en' ? release.dateEn : release.date;
+    const tag  = lang === 'en' ? release.tagEn  : release.tag;
+    const items = lang === 'en' ? release.items.en : release.items.nl;
+
+    html += `<div class="cl-release">
+      <div class="cl-header">
+        <span class="cl-date">${date}</span>
+        ${tag ? `<span class="cl-tag">${tag}</span>` : ''}
+      </div>
+      <ul class="cl-items">`;
+
+    for (const item of items) {
+      const cfg = typeConfig[item.type] || typeConfig.new;
+      html += `<li class="cl-item">
+        <span class="cl-badge ${cfg.cls}">${cfg.label}</span>
+        <span class="cl-text">${item.text}</span>
+      </li>`;
+    }
+
+    html += `</ul></div>`;
+  }
+
+  return html;
 }
 
 function renderExplainHtml() {
@@ -717,6 +921,8 @@ document.querySelectorAll('.tab').forEach(tab => {
       initLogTab();
       renderLogHistory();
       updateLogTime();
+    } else if (target === 'changelog') {
+      document.getElementById('view-changelog').classList.add('active');
     } else {
       document.getElementById('view-explain').classList.add('active');
     }
