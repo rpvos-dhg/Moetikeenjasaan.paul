@@ -1551,7 +1551,7 @@ async function fetchAppVersion() {
     const link = res.headers.get('Link') || '';
     const match = link.match(/[?&]page=(\d+)>;\s*rel="last"/);
     const count = match ? parseInt(match[1]) : null;
-    if (count) setAppVersion(`v${count}`);
+    if (count) setAppVersion(`Versie 1.${count}`);
   } catch {
     // silently ignore — version is non-critical
   }
