@@ -1004,8 +1004,16 @@ setInterval(updateClock, 30000);
 async function fetchWeather() {
   const requestId = ++weatherRequestSeq;
   const { lat, lon } = currentLocation;
- const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&models=knmi_harmonie_arome_netherlands&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,wind_speed_10m_max&forecast_days=3&timezone=Europe/Amsterdam`;
-  const airQualityUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=european_aqi,pm10,pm2_5,uv_index,grass_pollen,birch_pollen,alder_pollen&hourly=european_aqi,pm10,pm2_5,uv_index,grass_pollen,birch_pollen,alder_pollen&forecast_days=4&timezone=Europe/Amsterdam&domains=cams_europe`;
+  const isNetherlands =
+  lat >= 50.7 && lat <= 53.7 &&
+  lon >= 3.2 && lon <= 7.3;
+
+const modelParam = isNetherlands
+  ? '&models=knmi_harmonie_arome_netherlands'
+  : '';
+
+const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}${modelParam}&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,wind_speed_10m_max&forecast_days=3&timezone=auto`;
+ const airQualityUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=european_aqi,pm10,pm2_5,uv_index,grass_pollen,birch_pollen,alder_pollen&hourly=european_aqi,pm10,pm2_5,uv_index,grass_pollen,birch_pollen,alder_pollen&forecast_days=4&timezone=Europe/Amsterdam&domains=cams_europe`;
   try {
     const [weatherRes, airQualityRes] = await Promise.all([fetch(weatherUrl), fetch(airQualityUrl)]);
     if (requestId !== weatherRequestSeq) return;
