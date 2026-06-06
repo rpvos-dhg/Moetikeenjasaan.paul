@@ -1000,7 +1000,50 @@ function updateClock() {
 }
 updateClock();
 setInterval(updateClock, 30000);
+function isContinentalEurope(lat, lon) {
+  return (
+    lat >= 35.0 &&
+    lat <= 71.5 &&
+    lon >= -10.5 &&
+    lon <= 40.0
+  );
+}
 
+function buildAirQualityUrl(lat, lon) {
+  const isEurope = isContinentalEurope(lat, lon);
+
+  const baseFields = [
+    'european_aqi',
+    'pm10',
+    'pm2_5',
+    'uv_index'
+  ];
+
+  const pollenFields = [
+    'grass_pollen',
+    'birch_pollen',
+    'alder_pollen',
+    'mugwort_pollen',
+    'ragweed_pollen',
+    'olive_pollen'
+  ];
+
+  const fields = isEurope
+    ? [...baseFields, ...pollenFields]
+    : baseFields;
+
+  const params = new URLSearchParams({
+    latitude: lat,
+    longitude: lon,
+    current: fields.join(','),
+    hourly: fields.join(','),
+    forecast_days: isEurope ? '4' : '5',
+    timezone: 'auto',
+    domains: isEurope ? 'cams_europe' : 'auto'
+  });
+
+  return `https://air-quality-api.open-meteo.com/v1/air-quality?${params}`;
+}
 async function fetchWeather() {
   const requestId = ++weatherRequestSeq;
   const { lat, lon } = currentLocation;
@@ -1013,7 +1056,7 @@ const modelParam = isNetherlands
   : '';
 
 const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}${modelParam}&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,wind_speed_10m_max&forecast_days=3&timezone=auto`;
- const airQualityUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=european_aqi,pm10,pm2_5,uv_index,grass_pollen,birch_pollen,alder_pollen&hourly=european_aqi,pm10,pm2_5,uv_index,grass_pollen,birch_pollen,alder_pollen&forecast_days=4&timezone=Europe/Amsterdam&domains=cams_europe`;
+const airQualityUrl = buildAirQualityUrl(lat, lon);
   try {
     const [weatherRes, airQualityRes] = await Promise.all([fetch(weatherUrl), fetch(airQualityUrl)]);
     if (requestId !== weatherRequestSeq) return;
