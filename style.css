@@ -22,6 +22,7 @@ body {
   color: var(--ink);
   line-height: 1.5;
   min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
 }
 
@@ -183,15 +184,19 @@ main {
   .advice-card { align-self: stretch; }
 }
 
-/* Accessibility: keyboard focus rings */
+/* Accessibility: keyboard focus rings.
+   Two-tone (yellow outline + navy halo) so at least one ring always contrasts,
+   whether the focused control sits on a white, navy or yellow surface. */
 :focus-visible {
   outline: 3px solid var(--anwb-yellow);
   outline-offset: 2px;
-  border-radius: 4px;
+  box-shadow: 0 0 0 5px var(--anwb-navy);
+  border-radius: 6px;
 }
 
 .tab:focus-visible {
   outline-offset: -3px;
+  box-shadow: none;
 }
 
 .checklist-item:focus-within {
@@ -201,7 +206,7 @@ main {
 
 /* Advice card */
 .advice-card {
-  background: var(--anwb-navy);
+  background: linear-gradient(165deg, var(--anwb-navy) 0%, var(--anwb-navy-dark) 100%);
   color: white;
   border-radius: 20px;
   padding: 28px;
@@ -211,6 +216,7 @@ main {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  box-shadow: 0 2px 6px rgba(0, 37, 81, 0.15), 0 14px 30px rgba(0, 37, 81, 0.18);
 }
 
 .advice-card::before {
@@ -392,6 +398,7 @@ main {
   border-radius: 16px;
   padding: 18px 20px;
   background: linear-gradient(135deg, rgba(255, 204, 0, 0.05) 0%, rgba(255, 153, 0, 0.05) 100%);
+  box-shadow: 0 1px 2px rgba(0, 58, 113, 0.04), 0 6px 16px rgba(0, 58, 113, 0.05);
 }
 
 .pollen-card .card-title {
@@ -519,6 +526,7 @@ main {
   border: 1px solid var(--line);
   border-radius: 16px;
   padding: 18px 20px;
+  box-shadow: 0 1px 2px rgba(0, 58, 113, 0.04), 0 6px 16px rgba(0, 58, 113, 0.05);
 }
 
 .card-title {
@@ -650,6 +658,7 @@ main {
   border: 1px solid var(--line);
   border-radius: 16px;
   padding: 18px 20px;
+  box-shadow: 0 1px 2px rgba(0, 58, 113, 0.04), 0 6px 16px rgba(0, 58, 113, 0.05);
 }
 
 .comparison-grid {
@@ -1630,10 +1639,11 @@ code {
 
 /* Lunch countdown card */
 .lunch-card {
-  background: var(--anwb-navy);
+  background: linear-gradient(165deg, var(--anwb-navy) 0%, var(--anwb-navy-dark) 100%);
   border-radius: 16px;
   padding: 16px 20px;
   color: white;
+  box-shadow: 0 2px 6px rgba(0, 37, 81, 0.12), 0 8px 20px rgba(0, 37, 81, 0.12);
 }
 
 .lunch-card .card-title {

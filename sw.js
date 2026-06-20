@@ -1,10 +1,13 @@
-const CACHE = 'dighv-v2';
+const CACHE = 'dighv-v3';
 const PRECACHE = [
   '/Moetikeenjasaan.paul/',
   '/Moetikeenjasaan.paul/index.html',
   '/Moetikeenjasaan.paul/style.css',
   '/Moetikeenjasaan.paul/script.js',
   '/Moetikeenjasaan.paul/favicon.svg',
+  '/Moetikeenjasaan.paul/apple-touch-icon.png',
+  '/Moetikeenjasaan.paul/icon-192.png',
+  '/Moetikeenjasaan.paul/icon-512.png',
 ];
 
 self.addEventListener('install', event => {
