@@ -1393,7 +1393,13 @@ function renderRainChart() {
   card.classList.add('visible');
 
   const totalRain = slots.reduce((sum, s) => sum + s.precip, 0);
-  const maxProb = Math.max(...slots.map(s => s.prob));
+  // minutely_15 carries no probability, so derive the peak chance from the
+  // hourly feed across the window the chart covers (~current hour + next 2h).
+  const hourlyProb = weatherData.hourly?.precipitation_probability || [];
+  const probStart = Math.max(0, hourlyNowIndex());
+  const windowProb = [0, 1, 2].map(o => hourlyProb[probStart + o] ?? 0);
+  const minutelyProb = slots.map(s => s.prob);
+  const maxProb = Math.max(0, ...windowProb, ...minutelyProb);
   const maxPrecip = Math.max(1, ...slots.map(s => s.precip));
 
   const html = slots.map(s => {
