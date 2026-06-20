@@ -240,7 +240,18 @@ function applyTranslations() {
   const changelogEl = document.querySelector('.changelog-content');
   if (changelogEl) changelogEl.innerHTML = renderChangelogHtml();
   const langBtn = document.getElementById('langToggle');
-  if (langBtn) langBtn.textContent = lang === 'nl' ? 'EN' : 'NL';
+  if (langBtn) {
+    langBtn.textContent = lang === 'nl' ? 'EN' : 'NL';
+    langBtn.setAttribute('aria-label', lang === 'nl' ? 'Switch to English' : 'Schakel naar Nederlands');
+  }
+  // Translate static aria-labels that aren't visible text
+  const ariaMap = lang === 'en'
+    ? { prefGroup: 'Temperature preference', forecast: 'Hourly forecast', rainChart: 'Rain radar chart', liveDot: 'Live data' }
+    : { prefGroup: 'Temperatuurvoorkeur', forecast: 'Uurverwachting', rainChart: 'Regenradar grafiek', liveDot: 'Live data' };
+  document.querySelector('.pref-options')?.setAttribute('aria-label', ariaMap.prefGroup);
+  document.getElementById('forecast')?.setAttribute('aria-label', ariaMap.forecast);
+  document.getElementById('rainChart')?.setAttribute('aria-label', ariaMap.rainChart);
+  document.querySelector('.weather-card .dot')?.setAttribute('aria-label', ariaMap.liveDot);
   renderLocationUi();
   renderLogHistory();
   applyDarkMode();
@@ -457,10 +468,10 @@ function renderChangelogHtml() {
   ];
 
   const typeConfig = {
-    new:      { label: lang === 'en' ? 'Nieuw'      : 'Nieuw',      cls: 'cl-new' },
-    fix:      { label: lang === 'en' ? 'Fix'        : 'Fix',        cls: 'cl-fix' },
-    improve:  { label: lang === 'en' ? 'Verbeterd'  : 'Verbeterd',  cls: 'cl-improve' },
-    security: { label: lang === 'en' ? 'Security'   : 'Security',   cls: 'cl-security' },
+    new:      { label: lang === 'en' ? 'New'       : 'Nieuw',      cls: 'cl-new' },
+    fix:      { label: 'Fix',                                      cls: 'cl-fix' },
+    improve:  { label: lang === 'en' ? 'Improved'  : 'Verbeterd',  cls: 'cl-improve' },
+    security: { label: 'Security',                                 cls: 'cl-security' },
   };
 
   const today = new Date().toLocaleDateString('sv', { timeZone: 'Europe/Amsterdam' });
@@ -964,8 +975,12 @@ function bindLocationControls() {
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
     const target = tab.dataset.tab;
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => {
+      t.classList.remove('active');
+      t.setAttribute('aria-selected', 'false');
+    });
     tab.classList.add('active');
+    tab.setAttribute('aria-selected', 'true');
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     if (target === 'advice') {
       document.getElementById('view-advice-wrap').classList.add('active');
@@ -1055,7 +1070,7 @@ const modelParam = isNetherlands
   ? '&models=knmi_harmonie_arome_netherlands'
   : '';
 
-const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}${modelParam}&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,wind_speed_10m_max&forecast_days=3&timezone=auto`;
+const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}${modelParam}&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m&minutely_15=precipitation&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,wind_speed_10m_max&past_days=1&forecast_days=3&timezone=auto`;
 const airQualityUrl = buildAirQualityUrl(lat, lon);
   try {
     const [weatherRes, airQualityRes] = await Promise.all([fetch(weatherUrl), fetch(airQualityUrl)]);
@@ -1162,6 +1177,31 @@ function getWeatherIcon(code, size = 'small', isDay = true) {
   return icons[code]?.[size] || '☀️';
 }
 
+// Index of the hourly slot that contains "now" (the most recent slot whose
+// timestamp is <= now). Robust against past_days padding the array with
+// yesterday's hours, unlike a plain getHours() match.
+function hourlyNowIndex() {
+  const times = weatherData?.hourly?.time;
+  if (!times) return -1;
+  const now = new Date();
+  let idx = -1;
+  for (let i = 0; i < times.length; i++) {
+    if (new Date(times[i]) <= now) idx = i; else break;
+  }
+  return idx;
+}
+
+// First hourly index at or after "now" whose local hour matches targetHour.
+function hourlyIndexAtHour(targetHour) {
+  const times = weatherData?.hourly?.time;
+  if (!times) return -1;
+  const start = Math.max(0, hourlyNowIndex());
+  for (let i = start; i < times.length; i++) {
+    if (new Date(times[i]).getHours() === targetHour) return i;
+  }
+  return -1;
+}
+
 function renderLunchCountdown() {
   const el = document.getElementById('lunchCountdown');
   if (!el) return;
@@ -1191,7 +1231,7 @@ function renderLunchCountdown() {
   let preview = '';
   if (weatherData && h < 15) {
     const hourly = weatherData.hourly;
-    const idx = hourly.time.findIndex(t => new Date(t).getHours() === targetHour);
+    const idx = hourlyIndexAtHour(targetHour);
     if (idx !== -1) {
       const temp = Math.round(hourly.temperature_2m[idx]);
       const rain = hourly.precipitation_probability[idx] || 0;
@@ -1219,7 +1259,7 @@ function renderBestTime() {
   const BREAK_START = 11;
   const BREAK_END = 15;
 
-  const todayKey = now.toISOString().slice(0, 10);
+  const todayKey = getAmsterdamDateKey(now);
   const todayIdx = weatherData.daily?.time?.findIndex(d => d === todayKey) ?? -1;
   let sunHtml = '';
   if (todayIdx >= 0) {
@@ -1234,7 +1274,7 @@ function renderBestTime() {
     return;
   }
 
-  const startIdx = hourly.time.findIndex(t => new Date(t).getHours() === currentHour);
+  const startIdx = hourlyNowIndex();
   if (startIdx === -1) { el.innerHTML = `--${sunHtml}`; return; }
 
   let bestIdx = -1;
@@ -1283,8 +1323,7 @@ function renderWachtFf() {
   const minutely = weatherData.minutely_15;
   const hourly = weatherData.hourly;
   const now = new Date();
-  const currentHour = now.getHours();
-  const idxNow = hourly.time.findIndex(t => new Date(t).getHours() === currentHour);
+  const idxNow = hourlyNowIndex();
   const rainProb = hourly.precipitation_probability[idxNow] ?? 0;
 
   const isRaining = c.precipitation > 0.1 || rainProb >= 50;
@@ -1390,7 +1429,7 @@ function windDirection(deg) {
 
 function renderMetrics() {
   const c = weatherData.current;
-  const uv = weatherData.hourly.uv_index[0] || 0;
+  const uv = weatherData.hourly.uv_index?.[hourlyNowIndex()] ?? 0;
   document.getElementById('metrics').innerHTML = `
     <div class="metric fade-in">
       <span class="metric-label">${t('metricTemp')}</span>
@@ -1417,9 +1456,7 @@ function renderMetrics() {
 
 function renderForecast() {
   const hourly = weatherData.hourly;
-  const now = new Date();
-  const currentHour = now.getHours();
-  const startIdx = hourly.time.findIndex(t => new Date(t).getHours() === currentHour);
+  const startIdx = hourlyNowIndex();
   const slots = [];
   for (let i = 0; i < 7; i++) {
     const idx = startIdx + i;
@@ -1447,9 +1484,7 @@ function renderForecast() {
 function renderAdvice() {
   const c = weatherData.current;
   const hourly = weatherData.hourly;
-  const now = new Date();
-  const currentHour = now.getHours();
-  const idxNow = hourly.time.findIndex(t => new Date(t).getHours() === currentHour);
+  const idxNow = hourlyNowIndex();
 
   const temps = [c.temperature_2m, hourly.temperature_2m[idxNow + 1] ?? c.temperature_2m];
   const feels = c.apparent_temperature;
@@ -1499,7 +1534,7 @@ function renderAdvice() {
     tips.push({ text: t('tipScarfNice'), yellow: false });
   }
 
-  const uv = weatherData.hourly.uv_index[0] || 0;
+  const uv = weatherData.hourly.uv_index?.[idxNow] ?? 0;
   if (uv >= 7) {
     tips.push({ text: t('tipUvHigh'), yellow: false });
   } else if (uv >= 3) {
@@ -1587,25 +1622,20 @@ function renderPollenCard() {
 }
 
 function renderChecklist() {
+  const nowIdx = hourlyNowIndex();
+  const uvNow = weatherData?.hourly?.uv_index?.[nowIdx] ?? 0;
+  const hp = weatherData?.hourly?.precipitation_probability;
+  const rainProbNow = Math.max(hp?.[nowIdx] ?? 0, hp?.[nowIdx + 1] ?? 0);
+
   const items = [
     { group: 'Always', icon: '🔑', labelKey: 'checkPersPass', id: 'personeelspas' },
     { group: 'Always', icon: '🎫', labelKey: 'checkBezPass', id: 'bezoekerspas' },
     { group: 'Always', icon: '📱', labelKey: 'checkPhone', id: 'telefoon' },
-    { group: 'Zon', icon: '🕶️', labelKey: 'checkSunglasses', id: 'zonnebril', condition: () => weatherData?.hourly?.uv_index?.[0] >= 3 },
-    { group: 'Zon', icon: '🧴', labelKey: 'checkSunscreen', id: 'zonnebrandcreme', condition: () => weatherData?.hourly?.uv_index?.[0] >= 3 },
-    { group: 'Zon', icon: '👒', labelKey: 'checkHat', id: 'hoed', condition: () => weatherData?.hourly?.uv_index?.[0] >= 7 },
-    { group: 'Regen', icon: '☂️', labelKey: 'checkUmbrella', id: 'paraplu', condition: () => {
-      if (!weatherData) return false;
-      const hourly = weatherData.hourly; const now = new Date(); const currentHour = now.getHours();
-      const idxNow = hourly.time.findIndex(t => new Date(t).getHours() === currentHour);
-      return Math.max(hourly.precipitation_probability?.[idxNow] ?? 0, hourly.precipitation_probability?.[idxNow + 1] ?? 0) >= 30;
-    }},
-    { group: 'Regen', icon: '🎒', labelKey: 'checkWaterproof', id: 'waterdichte_tas', condition: () => {
-      if (!weatherData) return false;
-      const hourly = weatherData.hourly; const now = new Date(); const currentHour = now.getHours();
-      const idxNow = hourly.time.findIndex(t => new Date(t).getHours() === currentHour);
-      return Math.max(hourly.precipitation_probability?.[idxNow] ?? 0, hourly.precipitation_probability?.[idxNow + 1] ?? 0) >= 50;
-    }},
+    { group: 'Zon', icon: '🕶️', labelKey: 'checkSunglasses', id: 'zonnebril', condition: () => uvNow >= 3 },
+    { group: 'Zon', icon: '🧴', labelKey: 'checkSunscreen', id: 'zonnebrandcreme', condition: () => uvNow >= 3 },
+    { group: 'Zon', icon: '👒', labelKey: 'checkHat', id: 'hoed', condition: () => uvNow >= 7 },
+    { group: 'Regen', icon: '☂️', labelKey: 'checkUmbrella', id: 'paraplu', condition: () => rainProbNow >= 30 },
+    { group: 'Regen', icon: '🎒', labelKey: 'checkWaterproof', id: 'waterdichte_tas', condition: () => rainProbNow >= 50 },
     { group: 'Kou', icon: '🧣', labelKey: 'checkScarf', id: 'sjaal', condition: () => weatherData?.current?.temperature_2m <= 8 },
     { group: 'Kou', icon: '🧤', labelKey: 'checkGloves', id: 'handschoenen', condition: () => weatherData?.current?.temperature_2m <= 3 },
     { group: 'Kou', icon: '🧥', labelKey: 'checkWinterJacket', id: 'winterjas_extra', condition: () => weatherData?.current?.temperature_2m < 0 },
@@ -1680,13 +1710,16 @@ function initLogTab() {
     const btn = document.createElement('button');
     btn.className = 'walker-btn';
     btn.textContent = name;
+    btn.setAttribute('aria-pressed', 'false');
     btn.addEventListener('click', () => {
       if (selectedWalkers.has(name)) {
         selectedWalkers.delete(name);
         btn.classList.remove('active');
+        btn.setAttribute('aria-pressed', 'false');
       } else {
         selectedWalkers.add(name);
         btn.classList.add('active');
+        btn.setAttribute('aria-pressed', 'true');
       }
     });
     grid.appendChild(btn);
@@ -1694,7 +1727,10 @@ function initLogTab() {
 
   document.getElementById('logClearBtn').addEventListener('click', () => {
     selectedWalkers.clear();
-    grid.querySelectorAll('.walker-btn').forEach(b => b.classList.remove('active'));
+    grid.querySelectorAll('.walker-btn').forEach(b => {
+      b.classList.remove('active');
+      b.setAttribute('aria-pressed', 'false');
+    });
   });
 
   document.getElementById('logSaveBtn').addEventListener('click', () => {
@@ -1702,7 +1738,10 @@ function initLogTab() {
     log.unshift({ id: Date.now(), timestamp: new Date().toISOString(), people: [...selectedWalkers] });
     saveLog(log);
     selectedWalkers.clear();
-    grid.querySelectorAll('.walker-btn').forEach(b => b.classList.remove('active'));
+    grid.querySelectorAll('.walker-btn').forEach(b => {
+      b.classList.remove('active');
+      b.setAttribute('aria-pressed', 'false');
+    });
     renderLogHistory();
     const saveBtn = document.getElementById('logSaveBtn');
     saveBtn.textContent = t('logSaved');
@@ -1757,13 +1796,18 @@ function renderLogHistory() {
 
 // Preference buttons
 document.querySelectorAll('.pref-btn').forEach(btn => {
+  btn.setAttribute('aria-pressed', String(btn.dataset.pref === userPref));
   if (btn.dataset.pref === userPref) {
     document.querySelectorAll('.pref-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
   }
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.pref-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.pref-btn').forEach(b => {
+      b.classList.remove('active');
+      b.setAttribute('aria-pressed', 'false');
+    });
     btn.classList.add('active');
+    btn.setAttribute('aria-pressed', 'true');
     userPref = btn.dataset.pref;
     localStorage_safe_set('dighv_pref', userPref);
     if (weatherData) renderAdvice();
