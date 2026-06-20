@@ -16,7 +16,9 @@ Items marked **[fixed]** are addressed in this PR; the rest are recommendations.
 weather request never asked for it. The result: the headline "Regen per 15 minuten"
 card (`#rainCard`) was permanently hidden and the "wacht even, het droogt zo op" strip
 never appeared — two documented features that were effectively dead.
-Fix: added `&minutely_15=precipitation` to the forecast URL.
+Fix: added `&minutely_15=precipitation` to the forecast URL. Follow-up: the chart's
+"Piek kans" read 0% because `minutely_15` carries no probability field, so the peak chance
+is now derived from the hourly feed over the same ~2-hour window.
 
 ### 🔴 "Vandaag vs Morgen" compared the wrong days — **[fixed]**
 The request used `forecast_days=3` with no `past_days`, so `daily` index 0 was **today**,
@@ -74,10 +76,13 @@ Continuous `pulse` / `livePulse` animations and smooth-scroll ran for everyone. 
 `--muted` was `#5a6b80` (~4.6:1 on paper) used at 10–12px in several places — at or below
 the AA threshold for small text. Darkened to `#4d5d72` (~5.5:1) for margin.
 
-### 🔵 Remaining recommendations (not in this PR)
+### 🟡 Focus ring invisible on yellow surfaces — **[fixed]**
+The focus ring was a single yellow outline, invisible when the focused control was itself
+yellow. Replaced with a two-tone ring (yellow outline + navy halo) so at least one ring
+always contrasts on white, navy or yellow surfaces.
+
+### 🔵 Remaining recommendations (not yet done)
 - Tabs lack roving-`tabindex` / arrow-key navigation expected of an ARIA tablist.
-- Focus ring is yellow (`--anwb-yellow`) and has low contrast when the focused control is
-  itself yellow (checklist card, active pref). Consider a dark inner ring on yellow surfaces.
 - `role="heading" aria-level="2"` on `<div>`s works, but native `<h2>` is more robust.
 
 ---
@@ -96,10 +101,11 @@ the AA threshold for small text. Darkened to `#4d5d72` (~5.5:1) for margin.
 
 ## 4. PWA
 
-- 🟠 **iOS install icon** — manifest ships only an SVG icon (`sizes:"any"`); iOS ignores SVG
-  for the home-screen icon, producing a blank/letter icon. Added an `apple-touch-icon`
-  link as a stop-gap, but a real fix needs **PNG 180×180, 192×192 and 512×512** assets
-  (the 512 also `purpose:"maskable"`). Recommended follow-up — requires binary assets.
+- 🟠 **iOS install icon** — **[fixed]** manifest previously shipped only an SVG icon
+  (`sizes:"any"`), which iOS ignores for the home screen. Generated real PNGs from the
+  ANWB jacket motif — `apple-touch-icon.png` (180), `icon-192.png`, `icon-512.png` and a
+  full-bleed `icon-512-maskable.png` (`purpose:"maskable"`) — via `scripts/generate-icons.js`
+  (dependency-free; re-run to regenerate). Manifest + `<link>` + SW precache updated.
 - 🟡 Service worker registered at the hard-coded path `/Moetikeenjasaan.paul/sw.js`; fine on
   the current GitHub Pages project URL but breaks on a custom domain or local root. Prefer a
   path relative to the document.
