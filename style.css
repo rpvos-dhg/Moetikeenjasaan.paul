@@ -5,7 +5,7 @@
   --anwb-yellow-soft: #fff4b8;
   --ink: #0f1d2e;
   --paper: #fdfcf7;
-  --muted: #5a6b80;
+  --muted: #4d5d72;
   --line: #d8dee8;
   --good: #2e7d57;
   --warn: #d97706;
@@ -2249,4 +2249,26 @@ body.dark .log-delete-btn:hover {
   color: var(--muted);
   font-size: 14px;
   padding: 48px 0;
+}
+
+/* Safe-area insets for notched / rounded-corner devices */
+@supports (padding: max(0px)) {
+  header {
+    padding-top: max(20px, env(safe-area-inset-top));
+    padding-left: max(32px, calc((100% - 1280px) / 2 + 32px), env(safe-area-inset-left));
+    padding-right: max(32px, calc((100% - 1280px) / 2 + 32px), env(safe-area-inset-right));
+  }
+  footer {
+    padding-bottom: max(32px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

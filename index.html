@@ -2,17 +2,18 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Jas of geen jas? | DIGHV Pauze-advies</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="favicon.svg">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#003082">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Pauze-advies">
-<link rel="stylesheet" href="style.css?v=11">
+<link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
 <div class="wrapper">
@@ -33,11 +34,11 @@
   </div>
 </header>
 
-<nav class="tabs">
-  <button class="tab active" data-tab="advice" data-i18n="tabAdvice">Advies</button>
-  <button class="tab" data-tab="log" data-i18n="tabLog">Looplog</button>
-  <button class="tab" data-tab="explain" data-i18n="tabExplain">Hoe werkt dit?</button>
-  <button class="tab" data-tab="changelog" data-i18n="tabChangelog">Releaselog</button>
+<nav class="tabs" role="tablist" aria-label="Hoofdnavigatie">
+  <button class="tab active" data-tab="advice" data-i18n="tabAdvice" role="tab" aria-selected="true" aria-controls="view-advice-wrap">Advies</button>
+  <button class="tab" data-tab="log" data-i18n="tabLog" role="tab" aria-selected="false" aria-controls="view-log">Looplog</button>
+  <button class="tab" data-tab="explain" data-i18n="tabExplain" role="tab" aria-selected="false" aria-controls="view-explain">Hoe werkt dit?</button>
+  <button class="tab" data-tab="changelog" data-i18n="tabChangelog" role="tab" aria-selected="false" aria-controls="view-changelog">Releaselog</button>
 </nav>
 
 <div class="view active" id="view-advice-wrap">
@@ -215,7 +216,7 @@
 
 </div>
 
-<script src="script.js?v=10"></script>
+<script src="script.js?v=11"></script>
 <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/Moetikeenjasaan.paul/sw.js');
