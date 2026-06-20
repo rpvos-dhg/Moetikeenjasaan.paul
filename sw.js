@@ -1,4 +1,4 @@
-const CACHE = 'dighv-v1';
+const CACHE = 'dighv-v2';
 const PRECACHE = [
   '/Moetikeenjasaan.paul/',
   '/Moetikeenjasaan.paul/index.html',
