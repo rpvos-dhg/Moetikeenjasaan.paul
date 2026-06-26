@@ -14,30 +14,21 @@ const YELLOW = [255, 204, 0];  // #ffcc00
 const LAPEL = [0, 37, 81];     // #002551 (darker fold)
 
 // ─── Geometry in the favicon's 32×32 coordinate space ──────────────────────
-function cubic(p0, p1, p2, p3, steps) {
-  const pts = [];
-  for (let i = 1; i <= steps; i++) {
-    const t = i / steps, u = 1 - t;
-    pts.push([
-      u*u*u*p0[0] + 3*u*u*t*p1[0] + 3*u*t*t*p2[0] + t*t*t*p3[0],
-      u*u*u*p0[1] + 3*u*u*t*p1[1] + 3*u*t*t*p2[1] + t*t*t*p3[1],
-    ]);
-  }
-  return pts;
-}
-
-const leftPanel = [
-  [4, 27], [4, 12],
-  ...cubic([4, 12], [4, 7], [7, 5], [11, 5], 14),
-  [14.5, 5], [16, 13], [16, 27],
+// Must stay in sync with favicon.svg. The jacket is one yellow silhouette
+// (shoulders + sleeves + body + V-neck), with dark navy details (folded
+// collar, centre zipper + pull, and cuffs) layered on top.
+const jacket = [
+  [16, 9], [19.4, 6.2], [21.2, 8.8], [26.8, 11.8], [27.8, 17.2], [23.8, 18.4],
+  [21.2, 13.8], [22, 26.6], [16, 27.2], [10, 26.6], [10.8, 13.8], [8.2, 18.4],
+  [4.2, 17.2], [5.2, 11.8], [10.8, 8.8], [12.6, 6.2],
 ];
-const rightPanel = [
-  [28, 27], [28, 12],
-  ...cubic([28, 12], [28, 7], [25, 5], [21, 5], 14),
-  [17.5, 5], [16, 13], [16, 27],
-];
-const lapelLeft = [[14.5, 5], [16, 13], [16, 9]];
-const lapelRight = [[17.5, 5], [16, 13], [16, 9]];
+const collarLeft = [[12.6, 6.2], [16, 9], [14.2, 9.4]];
+const collarRight = [[19.4, 6.2], [16, 9], [17.8, 9.4]];
+const zipper = [[15.5, 9], [16.5, 9], [16.5, 24.5], [15.5, 24.5]];
+const zipperPull = [[14.9, 9], [17.1, 9], [17.1, 10.8], [14.9, 10.8]];
+const cuffLeft = [[4.2, 17.2], [8.2, 18.4], [8.7, 17.0], [4.7, 15.8]];
+const cuffRight = [[27.8, 17.2], [23.8, 18.4], [23.3, 17.0], [27.3, 15.8]];
+const navyDetails = [collarLeft, collarRight, zipper, zipperPull, cuffLeft, cuffRight];
 
 function pointInPoly(x, y, poly) {
   let inside = false;
@@ -77,8 +68,8 @@ function render(size, { square, glyphScale = 1 }) {
           let c = null;
           if (insideBg(px, py)) c = NAVY;
           const gx = (px - off) / scale, gy = (py - off) / scale;
-          if (pointInPoly(gx, gy, leftPanel) || pointInPoly(gx, gy, rightPanel)) c = YELLOW;
-          if (pointInPoly(gx, gy, lapelLeft) || pointInPoly(gx, gy, lapelRight)) c = LAPEL;
+          if (pointInPoly(gx, gy, jacket)) c = YELLOW;
+          for (const d of navyDetails) { if (pointInPoly(gx, gy, d)) { c = LAPEL; break; } }
           if (c) { R += c[0]; G += c[1]; B += c[2]; A += 255; }
         }
       }
