@@ -1070,14 +1070,46 @@ const modelParam = isNetherlands
   ? '&models=knmi_harmonie_arome_netherlands'
   : '';
 
-const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}${modelParam}&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m&minutely_15=precipitation&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,wind_speed_10m_max&past_days=1&forecast_days=3&timezone=auto`;
+// The KNMI Harmonie model forced for NL locations does not output uv_index
+// (it comes back as a null array), so we drop uv_index from the KNMI request
+// and fetch it separately from the default model below. Non-NL requests have
+// no model forced, so uv_index is included directly.
+const hourlyVars = 'temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m'
+  + (modelParam ? '' : ',uv_index');
+
+const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}${modelParam}&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m&minutely_15=precipitation&hourly=${hourlyVars}&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,wind_speed_10m_max&past_days=1&forecast_days=3&timezone=auto`;
+// Supplementary UV request on the default model, aligned to the same time grid.
+const uvUrl = modelParam
+  ? `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=uv_index&past_days=1&forecast_days=3&timezone=auto`
+  : null;
 const airQualityUrl = buildAirQualityUrl(lat, lon);
   try {
-    const [weatherRes, airQualityRes] = await Promise.all([fetch(weatherUrl), fetch(airQualityUrl)]);
+    const [weatherRes, airQualityRes, uvRes] = await Promise.all([
+      fetch(weatherUrl),
+      fetch(airQualityUrl),
+      uvUrl ? fetch(uvUrl) : Promise.resolve(null)
+    ]);
     if (requestId !== weatherRequestSeq) return;
     if (!weatherRes.ok) throw new Error('Weather network error');
     const weatherData_new = await weatherRes.json();
     if (requestId !== weatherRequestSeq) return;
+    // Merge UV from the supplementary default-model request (NL only). Aligning
+    // by timestamp keeps it correct even if the two time grids ever differ.
+    if (uvRes && uvRes.ok && weatherData_new.hourly?.time) {
+      try {
+        const uvJson = await uvRes.json();
+        if (requestId !== weatherRequestSeq) return;
+        const uvTimes = uvJson?.hourly?.time;
+        const uvVals = uvJson?.hourly?.uv_index;
+        if (uvTimes && uvVals) {
+          const uvByTime = new Map();
+          for (let i = 0; i < uvTimes.length; i++) uvByTime.set(uvTimes[i], uvVals[i]);
+          weatherData_new.hourly.uv_index = weatherData_new.hourly.time.map(
+            ts => (uvByTime.has(ts) ? uvByTime.get(ts) : null)
+          );
+        }
+      } catch (_) { /* leave uv_index absent; renderers fall back to 0 */ }
+    }
     weatherData = weatherData_new;
     lastUpdate = new Date();
     updateClock();
