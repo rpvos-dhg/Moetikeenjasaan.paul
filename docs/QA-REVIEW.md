@@ -26,6 +26,20 @@ not yesterday. The comparison card therefore labelled today's data as "Gisteren"
 tomorrow's as "Vandaag", and the day-after as "Morgen" — every column was off by one day.
 Fix: added `&past_days=1` so indices 0/1/2 are genuinely yesterday/today/tomorrow.
 
+### 🔴 UV index dead for NL (default) locations — forced KNMI model has no UV — **[fixed 2026-06-26]**
+For any location inside the Netherlands — which includes the default ANWB HQ — `fetchWeather()`
+forces `models=knmi_harmonie_arome_netherlands` on the **entire** forecast request for better
+local precipitation accuracy. That regional model does **not** output `uv_index`; Open-Meteo
+returns the field as an all-`null` array. So `hourly.uv_index[...]` was always `null`, `null ?? 0`
+→ `0`, the UV metric permanently read **0**, and the UV checklist items (zonnebril / zonnebrand /
+hoed) never appeared — even on a clear summer afternoon. UV still worked for non-NL locations
+(no model forced), which is why it looked intermittently "broken". This shadowed the earlier
+midnight-index fix below for the default location.
+Fix: drop `uv_index` from the KNMI request and fetch it from a **separate parallel request on
+the default model** (`uvUrl`), merged back onto the main hourly grid **by timestamp** so the
+indices line up. Non-NL requests are unchanged (UV stays in the main request, no extra fetch).
+If the supplementary UV fetch fails, renderers fall back to 0 as before.
+
 ### 🟠 UV index always read at midnight (≈0) — **[fixed]**
 `renderMetrics()`, `renderAdvice()` and the checklist read `hourly.uv_index[0]`, i.e. the
 first hourly sample = today 00:00, where UV is always 0. As a result the UV metric was
