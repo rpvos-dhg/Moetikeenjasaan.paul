@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#003082">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Pauze-advies">
-<link rel="stylesheet" href="style.css?v=13">
+<link rel="stylesheet" href="style.css?v=14">
 </head>
 <body>
 <div class="wrapper">
@@ -25,6 +25,7 @@
   </div>
   <div class="header-right">
     <button id="langToggle" class="lang-btn">EN</button>
+    <button id="tutorialBtn" class="tutorial-btn" title="Rondleiding" aria-label="Rondleiding starten">?</button>
     <button id="darkModeToggle" class="dark-mode-btn" title="Dark mode: Auto / Dark / Light" aria-label="Toggle dark mode">🌙</button>
     <div class="live-indicator">
       <span class="live-dot"></span>
@@ -112,7 +113,7 @@
       <div id="lunchCountdown"></div>
     </div>
 
-    <div class="weather-card">
+    <div class="weather-card" id="conditionsCard">
       <div class="card-title" role="heading" aria-level="2">
         <span data-i18n="currentConditions">Huidige condities</span>
         <span class="dot" aria-label="Live data"></span>
@@ -137,12 +138,12 @@
       </div>
     </div>
 
-    <div class="weather-card">
+    <div class="weather-card" id="forecastCard">
       <div class="card-title" role="heading" aria-level="2" data-i18n="comingHours">Komende uren</div>
       <div class="forecast" id="forecast" role="list" aria-label="Uurverwachting"></div>
     </div>
 
-    <div class="weather-card">
+    <div class="weather-card" id="bestTimeCard">
       <div class="card-title" role="heading" aria-level="2">
         <span data-i18n="bestBreakTime">Beste pauzetijd</span>
         <span style="font-size: 11px; color: var(--muted); font-weight: 500;">11:00 – 15:00</span>
@@ -216,7 +217,7 @@
 
 </div>
 
-<script src="script.js?v=13"></script>
+<script src="script.js?v=14"></script>
 <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/Moetikeenjasaan.paul/sw.js');

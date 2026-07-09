@@ -119,6 +119,38 @@ const i18n = {
     darkAutoAria: isDark => `Thema automatisch, nu ${isDark ? 'donker' : 'licht'}. Klik voor altijd ${isDark ? 'licht' : 'donker'}.`,
     darkForcedTitle: f => f === 'dark' ? 'Altijd donker — klik voor altijd licht' : 'Altijd licht — klik voor automatisch',
     darkForcedAria: f => f === 'dark' ? 'Altijd donker. Klik voor altijd licht.' : 'Altijd licht. Klik voor automatisch.',
+    tourBtnTitle: 'Rondleiding (opnieuw) bekijken',
+    tourSkip: 'Overslaan', tourPrev: 'Vorige', tourNext: 'Volgende',
+    tourDone: 'Klaar!', tourClose: 'Rondleiding sluiten',
+    tourStepOf: (a, b) => `Stap ${a} van ${b}`,
+    tourWelcomeTitle: '👋 Welkom bij Pauze-advies!',
+    tourWelcomeText: 'Deze app vertelt je of je een jas nodig hebt voor je pauzewandeling. In een halve minuut lopen we alle functies langs. Liever meteen aan de slag? Klik op "Overslaan" — deze rondleiding verschijnt dan niet meer.',
+    tourAdviceTitle: '🧥 Het advies',
+    tourAdviceText: 'De kern van de app: het jasadvies voor nu + 30 minuten, op basis van live weerdata. Eronder verschijnen tips, zoals "paraplu mee" of een pollenwaarschuwing.',
+    tourPrefTitle: '🌡️ Jouw type',
+    tourPrefText: 'Snel koud? Kies "Kouwelijk". Altijd warm? Kies "Warmbloedig". Het advies past zich aan jouw temperatuurgevoel aan en je keuze wordt onthouden.',
+    tourChecklistTitle: '✓ Wat mee naar buiten?',
+    tourChecklistText: 'Een slimme checklist die meebeweegt met het weer: pasjes, paraplu, zonnebrand, sjaal... Vink af wat je hebt gepakt.',
+    tourLocationTitle: '📍 Locatie',
+    tourLocationText: 'Standaard kijkt de app naar het weer bij het ANWB HQ in Den Haag. Klik op het potloodje om je huidige locatie te gebruiken.',
+    tourLunchTitle: '⏰ Volgende pauze',
+    tourLunchText: 'Aftellen tot de volgende pauze (lunch of middagpauze), inclusief het verwachte weer op dat moment.',
+    tourConditionsTitle: '🌤️ Huidige condities',
+    tourConditionsText: 'Live metingen: temperatuur, gevoelstemperatuur, wind, neerslag en UV-index. De data ververst elke 10 minuten automatisch.',
+    tourForecastTitle: '🕐 Komende uren',
+    tourForecastText: 'De uurverwachting voor de rest van de dag, met temperatuur, weerbeeld en regenkans per uur.',
+    tourBestTimeTitle: '🎯 Beste pauzetijd',
+    tourBestTimeText: 'De app rekent uit op welk moment tussen 11:00 en 15:00 het weer het beste is voor een rondje buiten.',
+    tourRainTitle: '🌧️ Regen per 15 minuten',
+    tourRainText: 'De regenverwachting voor de komende 2 uur in blokken van 15 minuten. Zo zie je precies of je even moet wachten op een droog moment.',
+    tourPollenTitle: '🌸 Pollenoverzicht',
+    tourPollenText: 'Voor de hooikoortsers: actuele pollenniveaus per soort, plus de verwachting voor morgen.',
+    tourComparisonTitle: '📊 Vandaag vs Morgen',
+    tourComparisonText: 'Is het morgen beter wandelweer dan vandaag? Hier zie je het in één oogopslag.',
+    tourTabsTitle: '🗂️ Meer tabbladen',
+    tourTabsText: 'In het Looplog houd je bij wie er meeliep. Bij "Hoe werkt dit?" lees je hoe het advies tot stand komt, en in het Releaselog zie je wat er nieuw is.',
+    tourHeaderTitle: '⚙️ Taal & thema',
+    tourHeaderText: 'Wissel hier tussen Nederlands en Engels en zet dark mode aan of uit. Via de ?-knop kun je deze rondleiding altijd opnieuw bekijken. Veel wandelplezier!',
     dateLocale: 'nl-NL',
   },
   en: {
@@ -215,6 +247,38 @@ const i18n = {
     darkAutoAria: isDark => `Theme automatic, now ${isDark ? 'dark' : 'light'}. Click for always ${isDark ? 'light' : 'dark'}.`,
     darkForcedTitle: f => f === 'dark' ? 'Always dark — click for always light' : 'Always light — click for automatic',
     darkForcedAria: f => f === 'dark' ? 'Always dark. Click for always light.' : 'Always light. Click for automatic.',
+    tourBtnTitle: 'View the tour (again)',
+    tourSkip: 'Skip', tourPrev: 'Back', tourNext: 'Next',
+    tourDone: 'Done!', tourClose: 'Close tour',
+    tourStepOf: (a, b) => `Step ${a} of ${b}`,
+    tourWelcomeTitle: '👋 Welcome to Pauze-advies!',
+    tourWelcomeText: 'This app tells you whether you need a jacket for your break walk. In half a minute we\'ll walk through every feature. Rather dive right in? Click "Skip" — this tour won\'t appear again.',
+    tourAdviceTitle: '🧥 The advice',
+    tourAdviceText: 'The heart of the app: the jacket advice for now + 30 minutes, based on live weather data. Below it you\'ll find tips, such as "bring an umbrella" or a pollen warning.',
+    tourPrefTitle: '🌡️ Your type',
+    tourPrefText: 'Cold easily? Pick "Sensitive to cold". Always warm? Pick "Warm-blooded". The advice adapts to how you experience temperature, and your choice is remembered.',
+    tourChecklistTitle: '✓ What to bring outside?',
+    tourChecklistText: 'A smart checklist that adapts to the weather: passes, umbrella, sunscreen, scarf... Tick off what you\'ve packed.',
+    tourLocationTitle: '📍 Location',
+    tourLocationText: 'By default the app checks the weather at ANWB HQ in The Hague. Click the pencil to use your current location.',
+    tourLunchTitle: '⏰ Next break',
+    tourLunchText: 'Counts down to the next break (lunch or afternoon break), including the expected weather at that time.',
+    tourConditionsTitle: '🌤️ Current conditions',
+    tourConditionsText: 'Live readings: temperature, feels-like, wind, precipitation and UV index. The data refreshes automatically every 10 minutes.',
+    tourForecastTitle: '🕐 Coming hours',
+    tourForecastText: 'The hourly forecast for the rest of the day, with temperature, conditions and chance of rain per hour.',
+    tourBestTimeTitle: '🎯 Best break time',
+    tourBestTimeText: 'The app works out when the weather is at its best between 11:00 and 15:00 for a walk outside.',
+    tourRainTitle: '🌧️ Rain per 15 minutes',
+    tourRainText: 'The rain forecast for the next 2 hours in 15-minute blocks, so you can see exactly whether to wait for a dry window.',
+    tourPollenTitle: '🌸 Pollen overview',
+    tourPollenText: 'For the hay fever crowd: current pollen levels per type, plus tomorrow\'s outlook.',
+    tourComparisonTitle: '📊 Today vs Tomorrow',
+    tourComparisonText: 'Is tomorrow better walking weather than today? See it at a glance here.',
+    tourTabsTitle: '🗂️ More tabs',
+    tourTabsText: 'The Walk log tracks who came along. "How does this work?" explains how the advice is calculated, and the Release log shows what\'s new.',
+    tourHeaderTitle: '⚙️ Language & theme',
+    tourHeaderText: 'Switch between Dutch and English here and toggle dark mode. The ? button lets you replay this tour anytime. Enjoy your walks!',
     dateLocale: 'en-GB',
   }
 };
@@ -252,6 +316,12 @@ function applyTranslations() {
   document.getElementById('forecast')?.setAttribute('aria-label', ariaMap.forecast);
   document.getElementById('rainChart')?.setAttribute('aria-label', ariaMap.rainChart);
   document.querySelector('.weather-card .dot')?.setAttribute('aria-label', ariaMap.liveDot);
+  const tourBtn = document.getElementById('tutorialBtn');
+  if (tourBtn) {
+    tourBtn.title = t('tourBtnTitle');
+    tourBtn.setAttribute('aria-label', t('tourBtnTitle'));
+  }
+  if (tourStep >= 0) showTourStep(tourStep);
   renderLocationUi();
   renderLogHistory();
   applyDarkMode();
@@ -1948,6 +2018,176 @@ async function fetchAppVersion() {
   }
 }
 
+// ─── Tutorial overlay (eerste bezoek) ────────────────────────────────────────
+const TUTORIAL_KEY = 'dighv_tutorial_done';
+
+const TUTORIAL_STEPS = [
+  { key: 'tourWelcome' },
+  { key: 'tourAdvice', target: '#advice' },
+  { key: 'tourPref', target: '.pref-card' },
+  { key: 'tourChecklist', target: '.checklist-card' },
+  { key: 'tourLocation', target: '.location-badge' },
+  { key: 'tourLunch', target: '.lunch-card' },
+  { key: 'tourConditions', target: '#conditionsCard' },
+  { key: 'tourForecast', target: '#forecastCard' },
+  { key: 'tourBestTime', target: '#bestTimeCard' },
+  { key: 'tourRain', target: '#rainCard' },
+  { key: 'tourPollen', target: '.pollen-card' },
+  { key: 'tourComparison', target: '.comparison-card' },
+  { key: 'tourTabs', target: '.tabs' },
+  { key: 'tourHeader', target: '.header-right' },
+];
+
+let tourStep = -1;
+let tourEls = null;
+
+function startTutorial() {
+  if (tourStep >= 0) return;
+  // De rondleiding hoort bij het Advies-tabblad
+  const adviceTab = document.querySelector('.tab[data-tab="advice"]');
+  if (adviceTab && !adviceTab.classList.contains('active')) adviceTab.click();
+  buildTourDom();
+  showTourStep(0);
+  tourEls.nextBtn.focus();
+}
+
+function buildTourDom() {
+  const overlay = document.createElement('div');
+  overlay.className = 'tour-overlay';
+  overlay.id = 'tourOverlay';
+  overlay.innerHTML = `
+    <div class="tour-spotlight" aria-hidden="true"></div>
+    <div class="tour-tooltip" role="dialog" aria-modal="true" aria-labelledby="tourTitle" aria-describedby="tourText">
+      <div class="tour-head">
+        <span class="tour-count" id="tourCount"></span>
+        <button class="tour-close" id="tourClose" type="button">×</button>
+      </div>
+      <h3 class="tour-title" id="tourTitle"></h3>
+      <p class="tour-text" id="tourText"></p>
+      <div class="tour-dots" id="tourDots" aria-hidden="true"></div>
+      <div class="tour-actions">
+        <button class="tour-skip" id="tourSkip" type="button"></button>
+        <div class="tour-nav">
+          <button class="tour-nav-btn" id="tourPrev" type="button"></button>
+          <button class="tour-nav-btn primary" id="tourNext" type="button"></button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  tourEls = {
+    overlay,
+    spotlight: overlay.querySelector('.tour-spotlight'),
+    tooltip: overlay.querySelector('.tour-tooltip'),
+    count: overlay.querySelector('#tourCount'),
+    title: overlay.querySelector('#tourTitle'),
+    text: overlay.querySelector('#tourText'),
+    dots: overlay.querySelector('#tourDots'),
+    skipBtn: overlay.querySelector('#tourSkip'),
+    prevBtn: overlay.querySelector('#tourPrev'),
+    nextBtn: overlay.querySelector('#tourNext'),
+    closeBtn: overlay.querySelector('#tourClose'),
+  };
+  tourEls.skipBtn.addEventListener('click', endTutorial);
+  tourEls.closeBtn.addEventListener('click', endTutorial);
+  tourEls.prevBtn.addEventListener('click', () => showTourStep(tourStep - 1));
+  tourEls.nextBtn.addEventListener('click', () => {
+    if (tourStep >= TUTORIAL_STEPS.length - 1) endTutorial();
+    else showTourStep(tourStep + 1);
+  });
+  window.addEventListener('resize', positionTour);
+  window.addEventListener('scroll', positionTour, { passive: true });
+  window.addEventListener('keydown', onTourKey);
+}
+
+function endTutorial() {
+  localStorage_safe_set(TUTORIAL_KEY, '1');
+  tourStep = -1;
+  window.removeEventListener('resize', positionTour);
+  window.removeEventListener('scroll', positionTour);
+  window.removeEventListener('keydown', onTourKey);
+  tourEls?.overlay.remove();
+  tourEls = null;
+  document.getElementById('tutorialBtn')?.focus();
+}
+
+function onTourKey(e) {
+  if (tourStep < 0) return;
+  if (e.key === 'Escape') { e.preventDefault(); endTutorial(); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); tourEls.nextBtn.click(); }
+  else if (e.key === 'ArrowLeft' && tourStep > 0) { e.preventDefault(); showTourStep(tourStep - 1); }
+}
+
+function showTourStep(i) {
+  if (!tourEls) return;
+  tourStep = Math.max(0, Math.min(i, TUTORIAL_STEPS.length - 1));
+  const step = TUTORIAL_STEPS[tourStep];
+  const last = tourStep === TUTORIAL_STEPS.length - 1;
+  tourEls.title.textContent = t(step.key + 'Title');
+  tourEls.text.textContent = t(step.key + 'Text');
+  tourEls.count.textContent = t('tourStepOf', tourStep + 1, TUTORIAL_STEPS.length);
+  tourEls.skipBtn.textContent = t('tourSkip');
+  tourEls.skipBtn.style.visibility = last ? 'hidden' : 'visible';
+  tourEls.closeBtn.setAttribute('aria-label', t('tourClose'));
+  tourEls.prevBtn.textContent = t('tourPrev');
+  tourEls.prevBtn.style.visibility = tourStep === 0 ? 'hidden' : 'visible';
+  tourEls.nextBtn.textContent = last ? t('tourDone') : t('tourNext');
+  tourEls.dots.innerHTML = TUTORIAL_STEPS
+    .map((_, idx) => `<span class="tour-dot${idx === tourStep ? ' active' : ''}"></span>`).join('');
+
+  const target = step.target ? document.querySelector(step.target) : null;
+  if (target) {
+    try { target.scrollIntoView({ block: 'center', behavior: 'instant' }); }
+    catch (e) { target.scrollIntoView(); }
+  } else {
+    window.scrollTo(0, 0);
+  }
+  positionTour();
+}
+
+function positionTour() {
+  if (tourStep < 0 || !tourEls) return;
+  const step = TUTORIAL_STEPS[tourStep];
+  const { overlay, spotlight, tooltip } = tourEls;
+  const target = step.target ? document.querySelector(step.target) : null;
+
+  if (!target) {
+    overlay.classList.add('tour-centered');
+    spotlight.style.display = 'none';
+    tooltip.style.top = '';
+    tooltip.style.left = '';
+    return;
+  }
+
+  overlay.classList.remove('tour-centered');
+  const r = target.getBoundingClientRect();
+  const pad = 8;
+  spotlight.style.display = 'block';
+  spotlight.style.top = (r.top - pad) + 'px';
+  spotlight.style.left = (r.left - pad) + 'px';
+  spotlight.style.width = (r.width + pad * 2) + 'px';
+  spotlight.style.height = (r.height + pad * 2) + 'px';
+
+  if (window.innerWidth < 640) {
+    // Op mobiel staat de tooltip vast onderin (via CSS)
+    tooltip.style.top = '';
+    tooltip.style.left = '';
+    return;
+  }
+
+  const gap = 14;
+  const tw = tooltip.offsetWidth;
+  const th = tooltip.offsetHeight;
+  let top = r.bottom + pad + gap;
+  if (top + th > window.innerHeight - 16) top = r.top - pad - gap - th;
+  if (top < 16) top = Math.max(16, Math.min(window.innerHeight - th - 16, r.bottom + pad + gap));
+  let left = r.left + r.width / 2 - tw / 2;
+  left = Math.max(16, Math.min(left, window.innerWidth - tw - 16));
+  tooltip.style.top = top + 'px';
+  tooltip.style.left = left + 'px';
+}
+
+document.getElementById('tutorialBtn')?.addEventListener('click', startTutorial);
+
 // Init
 applyTranslations();
 bindLocationControls();
@@ -1955,3 +2195,8 @@ fetchWeather();
 fetchAppVersion();
 fetchChangelogUpdates();
 setInterval(fetchWeather, 10 * 60 * 1000);
+
+// Rondleiding bij eerste bezoek — kort wachten tot de layout staat
+if (!localStorage_safe_get(TUTORIAL_KEY)) {
+  setTimeout(startTutorial, 800);
+}
