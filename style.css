@@ -2282,3 +2282,204 @@ body.dark .log-delete-btn:hover {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ─── Tutorial overlay (eerste bezoek) ─── */
+.tutorial-btn {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.15s;
+  line-height: 1;
+}
+
+.tutorial-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.tour-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+
+.tour-overlay.tour-centered {
+  background: rgba(6, 15, 30, 0.6);
+}
+
+.tour-spotlight {
+  position: fixed;
+  border-radius: 14px;
+  border: 2px solid var(--anwb-yellow);
+  box-shadow: 0 0 0 200vmax rgba(6, 15, 30, 0.6);
+  pointer-events: none;
+  transition: top 0.25s ease, left 0.25s ease, width 0.25s ease, height 0.25s ease;
+}
+
+.tour-tooltip {
+  position: fixed;
+  width: min(380px, calc(100vw - 32px));
+  background: #ffffff;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--anwb-yellow);
+  border-radius: 14px;
+  padding: 16px 20px 18px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+}
+
+.tour-overlay.tour-centered .tour-tooltip {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.tour-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.tour-count {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.tour-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+  border-radius: 4px;
+}
+
+.tour-close:hover { color: var(--ink); }
+
+.tour-title {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+}
+
+.tour-text {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+.tour-dots {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.tour-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--line);
+}
+
+.tour-dot.active {
+  background: var(--anwb-navy);
+  width: 18px;
+  border-radius: 4px;
+}
+
+.tour-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.tour-skip {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 2px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.tour-skip:hover { color: var(--ink); }
+
+.tour-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.tour-nav-btn {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.tour-nav-btn.primary {
+  background: var(--anwb-navy);
+  border-color: var(--anwb-navy);
+  color: white;
+}
+
+.tour-nav-btn.primary:hover { background: var(--anwb-navy-dark); }
+
+body.dark .tour-tooltip {
+  background: #16233a;
+  border-color: #2c3e5c;
+  border-top-color: var(--anwb-yellow);
+}
+
+body.dark .tour-dot { background: #334155; }
+body.dark .tour-dot.active { background: var(--anwb-yellow); }
+
+body.dark .tour-nav-btn {
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+body.dark .tour-nav-btn.primary {
+  background: var(--anwb-yellow);
+  border-color: var(--anwb-yellow);
+  color: #0f172a;
+}
+
+body.dark .tour-nav-btn.primary:hover { background: #ffd633; }
+
+@media (max-width: 640px) {
+  .tour-tooltip,
+  .tour-overlay.tour-centered .tour-tooltip {
+    top: auto !important;
+    left: 16px !important;
+    right: 16px;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    transform: none;
+    width: auto;
+  }
+}
