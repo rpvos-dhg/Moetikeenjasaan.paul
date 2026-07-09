@@ -37,6 +37,12 @@ self.addEventListener('fetch', event => {
         }
         return res;
       })
-      .catch(() => caches.match(event.request))
+      .catch(() => caches.match(event.request).then(hit => {
+        if (hit) return hit;
+        // Eigen assets worden geprecachet zonder ?v= query; match die alsnog
+        if (new URL(event.request.url).origin === location.origin) {
+          return caches.match(event.request, { ignoreSearch: true });
+        }
+      }))
   );
 });

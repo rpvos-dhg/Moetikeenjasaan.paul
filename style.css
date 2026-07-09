@@ -2284,23 +2284,14 @@ body.dark .log-delete-btn:hover {
 }
 
 /* ─── Tutorial overlay (eerste bezoek) ─── */
+/* Deelt de .lang-btn basis; alleen de ronde vorm wijkt af */
 .tutorial-btn {
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: white;
-  font-family: 'Inter', sans-serif;
   font-size: 13px;
-  font-weight: 700;
   width: 26px;
   height: 26px;
+  padding: 0;
   border-radius: 50%;
-  cursor: pointer;
-  transition: background 0.15s;
   line-height: 1;
-}
-
-.tutorial-btn:hover {
-  background: rgba(255, 255, 255, 0.22);
 }
 
 .tour-overlay {
@@ -2473,6 +2464,14 @@ body.dark .tour-nav-btn.primary {
 body.dark .tour-nav-btn.primary:hover { background: #ffd633; }
 
 @media (max-width: 640px) {
+  /* 44px tap-target, in lijn met de andere headerknoppen op mobiel */
+  .tutorial-btn {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    font-size: 15px;
+  }
+
   .tour-tooltip,
   .tour-overlay.tour-centered .tour-tooltip {
     top: auto !important;

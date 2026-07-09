@@ -2020,29 +2020,30 @@ async function fetchAppVersion() {
 
 // ─── Tutorial overlay (eerste bezoek) ────────────────────────────────────────
 const TUTORIAL_KEY = 'dighv_tutorial_done';
+const TOUR_MOBILE_QUERY = '(max-width: 640px)'; // zelfde breakpoint als de CSS
 
 const TUTORIAL_STEPS = [
   { key: 'tourWelcome' },
-  { key: 'tourAdvice', target: '#advice' },
-  { key: 'tourPref', target: '.pref-card' },
-  { key: 'tourChecklist', target: '.checklist-card' },
-  { key: 'tourLocation', target: '.location-badge' },
-  { key: 'tourLunch', target: '.lunch-card' },
-  { key: 'tourConditions', target: '#conditionsCard' },
-  { key: 'tourForecast', target: '#forecastCard' },
-  { key: 'tourBestTime', target: '#bestTimeCard' },
-  { key: 'tourRain', target: '#rainCard' },
-  { key: 'tourPollen', target: '.pollen-card' },
-  { key: 'tourComparison', target: '.comparison-card' },
-  { key: 'tourTabs', target: '.tabs' },
-  { key: 'tourHeader', target: '.header-right' },
+  { key: 'tourAdvice', target: 'advice' },
+  { key: 'tourPref', target: 'pref' },
+  { key: 'tourChecklist', target: 'checklist' },
+  { key: 'tourLocation', target: 'location' },
+  { key: 'tourLunch', target: 'lunch' },
+  { key: 'tourConditions', target: 'conditions' },
+  { key: 'tourForecast', target: 'forecast' },
+  { key: 'tourBestTime', target: 'besttime' },
+  { key: 'tourRain', target: 'rain' },
+  { key: 'tourPollen', target: 'pollen' },
+  { key: 'tourComparison', target: 'comparison' },
+  { key: 'tourTabs', target: 'tabs' },
+  { key: 'tourHeader', target: 'header' },
 ];
 
 let tourStep = -1;
 let tourEls = null;
 
 function startTutorial() {
-  if (tourStep >= 0) return;
+  if (tourEls) return;
   // De rondleiding hoort bij het Advies-tabblad
   const adviceTab = document.querySelector('.tab[data-tab="advice"]');
   if (adviceTab && !adviceTab.classList.contains('active')) adviceTab.click();
@@ -2064,7 +2065,9 @@ function buildTourDom() {
       </div>
       <h3 class="tour-title" id="tourTitle"></h3>
       <p class="tour-text" id="tourText"></p>
-      <div class="tour-dots" id="tourDots" aria-hidden="true"></div>
+      <div class="tour-dots" id="tourDots" aria-hidden="true">${
+        TUTORIAL_STEPS.map(() => '<span class="tour-dot"></span>').join('')
+      }</div>
       <div class="tour-actions">
         <button class="tour-skip" id="tourSkip" type="button"></button>
         <div class="tour-nav">
@@ -2081,11 +2084,15 @@ function buildTourDom() {
     count: overlay.querySelector('#tourCount'),
     title: overlay.querySelector('#tourTitle'),
     text: overlay.querySelector('#tourText'),
-    dots: overlay.querySelector('#tourDots'),
+    dots: [...overlay.querySelectorAll('.tour-dot')],
     skipBtn: overlay.querySelector('#tourSkip'),
     prevBtn: overlay.querySelector('#tourPrev'),
     nextBtn: overlay.querySelector('#tourNext'),
     closeBtn: overlay.querySelector('#tourClose'),
+    target: null,
+    // Herpositioneren wanneer async data (weer/pollen) de layout verandert
+    resizeObserver: typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(schedulePositionTour) : null,
   };
   tourEls.skipBtn.addEventListener('click', endTutorial);
   tourEls.closeBtn.addEventListener('click', endTutorial);
@@ -2094,27 +2101,46 @@ function buildTourDom() {
     if (tourStep >= TUTORIAL_STEPS.length - 1) endTutorial();
     else showTourStep(tourStep + 1);
   });
-  window.addEventListener('resize', positionTour);
-  window.addEventListener('scroll', positionTour, { passive: true });
+  window.addEventListener('resize', schedulePositionTour);
+  window.addEventListener('scroll', schedulePositionTour, { passive: true });
   window.addEventListener('keydown', onTourKey);
 }
 
 function endTutorial() {
   localStorage_safe_set(TUTORIAL_KEY, '1');
   tourStep = -1;
-  window.removeEventListener('resize', positionTour);
-  window.removeEventListener('scroll', positionTour);
+  window.removeEventListener('resize', schedulePositionTour);
+  window.removeEventListener('scroll', schedulePositionTour);
   window.removeEventListener('keydown', onTourKey);
+  tourEls?.resizeObserver?.disconnect();
   tourEls?.overlay.remove();
   tourEls = null;
   document.getElementById('tutorialBtn')?.focus();
 }
 
 function onTourKey(e) {
-  if (tourStep < 0) return;
+  if (!tourEls) return;
   if (e.key === 'Escape') { e.preventDefault(); endTutorial(); }
   else if (e.key === 'ArrowRight') { e.preventDefault(); tourEls.nextBtn.click(); }
   else if (e.key === 'ArrowLeft' && tourStep > 0) { e.preventDefault(); showTourStep(tourStep - 1); }
+  else if (e.key === 'Tab') {
+    // Focus-trap: aria-modal dialoog — houd Tab binnen de tooltip
+    const focusables = [...tourEls.tooltip.querySelectorAll('button')]
+      .filter(b => b.style.visibility !== 'hidden');
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (!tourEls.tooltip.contains(document.activeElement)) {
+      e.preventDefault(); first.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault(); first.focus();
+    } else if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault(); last.focus();
+    }
+  }
+}
+
+function tourTargetEl(step) {
+  return step.target ? document.querySelector(`[data-tour="${step.target}"]`) : null;
 }
 
 function showTourStep(i) {
@@ -2131,11 +2157,16 @@ function showTourStep(i) {
   tourEls.prevBtn.textContent = t('tourPrev');
   tourEls.prevBtn.style.visibility = tourStep === 0 ? 'hidden' : 'visible';
   tourEls.nextBtn.textContent = last ? t('tourDone') : t('tourNext');
-  tourEls.dots.innerHTML = TUTORIAL_STEPS
-    .map((_, idx) => `<span class="tour-dot${idx === tourStep ? ' active' : ''}"></span>`).join('');
+  tourEls.dots.forEach((d, idx) => d.classList.toggle('active', idx === tourStep));
 
-  const target = step.target ? document.querySelector(step.target) : null;
-  if (target) {
+  const target = tourTargetEl(step);
+  tourEls.target = target;
+  if (tourEls.resizeObserver) {
+    tourEls.resizeObserver.disconnect();
+    tourEls.resizeObserver.observe(document.body);
+    if (target) tourEls.resizeObserver.observe(target);
+  }
+  if (target && target.getBoundingClientRect().height > 0) {
     try { target.scrollIntoView({ block: 'center', behavior: 'instant' }); }
     catch (e) { target.scrollIntoView(); }
   } else {
@@ -2144,13 +2175,21 @@ function showTourStep(i) {
   positionTour();
 }
 
-function positionTour() {
-  if (tourStep < 0 || !tourEls) return;
-  const step = TUTORIAL_STEPS[tourStep];
-  const { overlay, spotlight, tooltip } = tourEls;
-  const target = step.target ? document.querySelector(step.target) : null;
+let tourPositionQueued = false;
+function schedulePositionTour() {
+  if (tourPositionQueued || !tourEls) return;
+  tourPositionQueued = true;
+  requestAnimationFrame(() => { tourPositionQueued = false; positionTour(); });
+}
 
-  if (!target) {
+function positionTour() {
+  if (!tourEls) return;
+  const { overlay, spotlight, tooltip, target } = tourEls;
+  const r = target ? target.getBoundingClientRect() : null;
+
+  // Geen doel, of doel is verborgen (bijv. regenkaart op een droge dag):
+  // toon de tooltip gecentreerd zonder spotlight
+  if (!r || (r.width === 0 && r.height === 0)) {
     overlay.classList.add('tour-centered');
     spotlight.style.display = 'none';
     tooltip.style.top = '';
@@ -2158,28 +2197,30 @@ function positionTour() {
     return;
   }
 
-  overlay.classList.remove('tour-centered');
-  const r = target.getBoundingClientRect();
+  // Eerst alle metingen, dan pas schrijven — voorkomt dubbele reflow
   const pad = 8;
+  const gap = 14;
+  const mobile = window.matchMedia(TOUR_MOBILE_QUERY).matches;
+  const tw = tooltip.offsetWidth;
+  const th = tooltip.offsetHeight;
+
+  overlay.classList.remove('tour-centered');
   spotlight.style.display = 'block';
   spotlight.style.top = (r.top - pad) + 'px';
   spotlight.style.left = (r.left - pad) + 'px';
   spotlight.style.width = (r.width + pad * 2) + 'px';
   spotlight.style.height = (r.height + pad * 2) + 'px';
 
-  if (window.innerWidth < 640) {
+  if (mobile) {
     // Op mobiel staat de tooltip vast onderin (via CSS)
     tooltip.style.top = '';
     tooltip.style.left = '';
     return;
   }
 
-  const gap = 14;
-  const tw = tooltip.offsetWidth;
-  const th = tooltip.offsetHeight;
-  let top = r.bottom + pad + gap;
-  if (top + th > window.innerHeight - 16) top = r.top - pad - gap - th;
-  if (top < 16) top = Math.max(16, Math.min(window.innerHeight - th - 16, r.bottom + pad + gap));
+  let top = r.bottom + pad + gap;                            // liefst onder het doel
+  if (top + th > window.innerHeight - 16) top = r.top - pad - gap - th; // anders erboven
+  top = Math.max(16, Math.min(top, window.innerHeight - th - 16));      // en altijd in beeld
   let left = r.left + r.width / 2 - tw / 2;
   left = Math.max(16, Math.min(left, window.innerWidth - tw - 16));
   tooltip.style.top = top + 'px';
@@ -2196,7 +2237,13 @@ fetchAppVersion();
 fetchChangelogUpdates();
 setInterval(fetchWeather, 10 * 60 * 1000);
 
-// Rondleiding bij eerste bezoek — kort wachten tot de layout staat
+// Rondleiding bij eerste bezoek — na load, zodat fonts/layout staan.
+// Vlag opnieuw checken: de gebruiker kan de tour in de tussentijd al
+// via de ?-knop hebben geopend en overgeslagen.
 if (!localStorage_safe_get(TUTORIAL_KEY)) {
-  setTimeout(startTutorial, 800);
+  const autoStartTutorial = () => setTimeout(() => {
+    if (!localStorage_safe_get(TUTORIAL_KEY)) startTutorial();
+  }, 500);
+  if (document.readyState === 'complete') autoStartTutorial();
+  else window.addEventListener('load', autoStartTutorial, { once: true });
 }
