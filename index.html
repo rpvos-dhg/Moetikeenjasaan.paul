@@ -23,9 +23,9 @@
     <span class="logo-badge">DIGHV</span>
     <span>Pauze-advies</span>
   </div>
-  <div class="header-right">
+  <div class="header-right" data-tour="header">
     <button id="langToggle" class="lang-btn">EN</button>
-    <button id="tutorialBtn" class="tutorial-btn" title="Rondleiding" aria-label="Rondleiding starten">?</button>
+    <button id="tutorialBtn" class="lang-btn tutorial-btn" title="Rondleiding" aria-label="Rondleiding starten">?</button>
     <button id="darkModeToggle" class="dark-mode-btn" title="Dark mode: Auto / Dark / Light" aria-label="Toggle dark mode">🌙</button>
     <div class="live-indicator">
       <span class="live-dot"></span>
@@ -35,7 +35,7 @@
   </div>
 </header>
 
-<nav class="tabs" role="tablist" aria-label="Hoofdnavigatie">
+<nav class="tabs" role="tablist" aria-label="Hoofdnavigatie" data-tour="tabs">
   <button class="tab active" data-tab="advice" data-i18n="tabAdvice" role="tab" aria-selected="true" aria-controls="view-advice-wrap">Advies</button>
   <button class="tab" data-tab="log" data-i18n="tabLog" role="tab" aria-selected="false" aria-controls="view-log">Looplog</button>
   <button class="tab" data-tab="explain" data-i18n="tabExplain" role="tab" aria-selected="false" aria-controls="view-explain">Hoe werkt dit?</button>
@@ -45,7 +45,7 @@
 <div class="view active" id="view-advice-wrap">
 <section class="hero">
   <div class="location-control">
-    <div class="location-badge">
+    <div class="location-badge" data-tour="location">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
       <span id="locationLabel">ANWB HQ · Wassenaarseweg, Den Haag</span>
       <span class="dot-sep">·</span>
@@ -75,7 +75,7 @@
 <main>
 
   <!-- Rij 1: Advies + voorkeur -->
-  <div class="advice-card" id="advice">
+  <div class="advice-card" id="advice" data-tour="advice">
     <div>
       <div class="advice-label" data-i18n="adviceLabel">Advies voor nu + 30 min</div>
       <div class="verdict" id="verdict">
@@ -89,7 +89,7 @@
 
   <div class="top-side-panel">
 
-  <div class="pref-card">
+  <div class="pref-card" data-tour="pref">
     <div class="card-title" role="heading" aria-level="2" data-i18n="yourType">Jouw type</div>
     <div class="pref-options" role="group" aria-label="Temperatuurvoorkeur">
       <button class="pref-btn" data-pref="cold" data-i18n="prefCold">Kouwelijk</button>
@@ -98,7 +98,7 @@
     </div>
   </div>
 
-  <div class="checklist-card">
+  <div class="checklist-card" data-tour="checklist">
     <div class="card-title" role="heading" aria-level="2" data-i18n="checklistTitle">✓ Wat mee naar buiten?</div>
     <div class="checklist-items" id="checklist"></div>
   </div>
@@ -108,12 +108,12 @@
   <!-- Rij 2: Weercondities + Pollen/Info -->
   <div class="conditions-panel">
 
-    <div class="lunch-card">
+    <div class="lunch-card" data-tour="lunch">
       <div class="card-title" role="heading" aria-level="2" data-i18n="nextBreak">Volgende pauze</div>
       <div id="lunchCountdown"></div>
     </div>
 
-    <div class="weather-card" id="conditionsCard">
+    <div class="weather-card" data-tour="conditions">
       <div class="card-title" role="heading" aria-level="2">
         <span data-i18n="currentConditions">Huidige condities</span>
         <span class="dot" aria-label="Live data"></span>
@@ -138,12 +138,12 @@
       </div>
     </div>
 
-    <div class="weather-card" id="forecastCard">
+    <div class="weather-card" data-tour="forecast">
       <div class="card-title" role="heading" aria-level="2" data-i18n="comingHours">Komende uren</div>
       <div class="forecast" id="forecast" role="list" aria-label="Uurverwachting"></div>
     </div>
 
-    <div class="weather-card" id="bestTimeCard">
+    <div class="weather-card" data-tour="besttime">
       <div class="card-title" role="heading" aria-level="2">
         <span data-i18n="bestBreakTime">Beste pauzetijd</span>
         <span style="font-size: 11px; color: var(--muted); font-weight: 500;">11:00 – 15:00</span>
@@ -151,7 +151,7 @@
       <div id="bestTime"></div>
     </div>
 
-    <div class="rain-card visible" id="rainCard">
+    <div class="rain-card visible" id="rainCard" data-tour="rain">
       <div class="card-title" role="heading" aria-level="2">
         <span data-i18n="rainPer15">Regen per 15 minuten</span>
         <span data-i18n="next2hours" style="font-size: 11px; color: var(--muted); font-weight: 500;">komende 2 uur</span>
@@ -164,12 +164,12 @@
 
   <div class="info-panel">
 
-    <div class="pollen-card">
+    <div class="pollen-card" data-tour="pollen">
       <div class="card-title" role="heading" aria-level="2" data-i18n="pollenOverview">🌸 Pollenoverzicht</div>
       <div class="pollen-grid" id="pollenGrid"></div>
     </div>
 
-    <div class="comparison-card">
+    <div class="comparison-card" data-tour="comparison">
       <div class="card-title" role="heading" aria-level="2" data-i18n="todayVsTomorrow">Vandaag vs Morgen</div>
       <div class="comparison-grid" id="comparisonGrid"></div>
     </div>
