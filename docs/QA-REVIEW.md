@@ -1,5 +1,7 @@
 # QA / UX / UI / Accessibility Review — Pauze-advies
 
+> Vervolg: zie [QA-REVIEW-2026-10.md](QA-REVIEW-2026-10.md) voor de tweede QA-ronde (oktober 2026).
+
 Review date: 2026-06-20
 Scope: full-stack QA, UX/UI, accessibility (WCAG 2.1 AA), responsive / multi-device,
 performance, PWA and i18n review of the vanilla HTML/CSS/JS app.
