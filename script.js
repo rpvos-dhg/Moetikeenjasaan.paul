@@ -551,7 +551,7 @@ function renderChangelogHtml() {
           { type: 'improve', text: 'Dark mode-knop toont nu het huidig thema-icoon (🌙/☀️) met een klein "A" superscript bij automatische modus — duidelijker onderscheid tussen auto en geforceerd' },
           { type: 'improve', text: 'Dark mode-tooltip beschrijft nu wat klikken zal doen, niet alleen de huidige staat' },
           { type: 'new',     text: 'Versienummer toegevoegd in de footer (automatisch oplopend op basis van commits)' },
-          { type: 'security','text': 'Gevoelige bestanden verwijderd uit repository: lokaal VS Code-configuratiebestand (met Windows-gebruikersnaam) en looplog-data' },
+          { type: 'security','text': 'Lokale configuratie en looplog-data uit de repository gehaald' },
         ],
         en: [
           { type: 'fix',     text: 'Pollen badge always showed "very high" in April/May due to hardcoded monthly table — now based on live measurements' },
@@ -562,7 +562,7 @@ function renderChangelogHtml() {
           { type: 'improve', text: 'Dark mode button now shows the current theme icon (🌙/☀️) with a small "A" superscript in automatic mode — clearer distinction between auto and forced' },
           { type: 'improve', text: 'Dark mode tooltip now describes what clicking will do, not just the current state' },
           { type: 'new',     text: 'Version number added to footer (auto-increments with each commit)' },
-          { type: 'security','text': 'Sensitive files removed from repository: local VS Code config (containing Windows username) and walk log data' },
+          { type: 'security','text': 'Local configuration and walk log data removed from the repository' },
         ]
       }
     },
