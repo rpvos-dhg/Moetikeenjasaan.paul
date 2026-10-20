@@ -14,7 +14,11 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  /* Gefocuste elementen niet onder de sticky tabbalk laten verdwijnen */
+  scroll-padding-top: 64px;
+}
 
 body {
   font-family: 'Inter', sans-serif;
@@ -24,6 +28,8 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   overflow-x: hidden;
+  /* clip i.p.v. hidden: hidden maakt een scrollcontainer en breekt position: sticky */
+  overflow-x: clip;
 }
 
 .wrapper,
@@ -180,9 +186,16 @@ main {
   main { grid-template-columns: minmax(0, 1fr); }
 }
 
+/* Desktop: twee kolommen die los van elkaar doorlopen. De advieskaart hoeft
+   dan niet mee te rekken met de rechterkolom (geen leeg navy vlak), en er
+   ontstaat ook geen gat onder de kaart. */
 @media (min-width: 961px) {
-  .advice-card { align-self: stretch; }
+  .advice-card { grid-column: 1; grid-row: 1; }
+  .top-side-panel { grid-column: 2; grid-row: 1 / span 2; }
+  .conditions-panel { grid-column: 1; grid-row: 2 / span 2; }
+  .info-panel { grid-column: 2; grid-row: 3; }
 }
+
 
 /* Accessibility: keyboard focus rings.
    Two-tone (yellow outline + navy halo) so at least one ring always contrasts,
@@ -195,8 +208,23 @@ main {
 }
 
 .tab:focus-visible {
+  outline-color: var(--anwb-navy);
   outline-offset: -3px;
   box-shadow: none;
+}
+
+body.dark .tab:focus-visible { outline-color: var(--anwb-yellow); }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .checklist-item:focus-within {
@@ -215,7 +243,6 @@ main {
   min-height: 280px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   box-shadow: 0 2px 6px rgba(0, 37, 81, 0.15), 0 14px 30px rgba(0, 37, 81, 0.18);
 }
 
@@ -258,11 +285,40 @@ main {
   opacity: 0.8;
 }
 
+.verdict-feels {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--anwb-yellow);
+  margin: -4px 0 14px;
+}
+
+.verdict-feels:empty { display: none; }
+
 .verdict-detail {
   font-size: 17px;
   opacity: 0.9;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
   max-width: 420px;
+}
+
+.data-note {
+  font-size: 13px;
+  line-height: 1.4;
+  background: rgba(255, 255, 255, 0.12);
+  border-left: 3px solid var(--anwb-yellow);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin: -8px 0 20px;
+}
+
+.advice-card .loading {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.advice-card .spinner {
+  border-color: rgba(255, 255, 255, 0.3);
+  border-top-color: var(--anwb-yellow);
 }
 
 .tips {
@@ -723,6 +779,11 @@ main {
   color: var(--warn);
 }
 
+.comparison-verdict.similar,
+.comparison-verdict.past {
+  color: var(--muted);
+}
+
 body.dark .comparison-day {
   background: #1e293b;
   border-color: #334155;
@@ -837,6 +898,17 @@ footer strong { color: var(--anwb-yellow); }
   border-radius: 50%;
   box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7);
   animation: livePulse 1.8s infinite;
+}
+
+.live-indicator.stale {
+  color: #cbd5e1;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.live-indicator.stale .live-dot {
+  background: #94a3b8;
+  box-shadow: none;
+  animation: none;
 }
 
 @keyframes livePulse {
@@ -1021,7 +1093,7 @@ footer strong { color: var(--anwb-yellow); }
   padding: 60px 32px 80px;
 }
 
-.changelog-content h2 {
+.changelog-content h1 {
   font-family: 'Bricolage Grotesque', sans-serif;
   font-size: 42px;
   font-weight: 800;
@@ -1085,6 +1157,12 @@ footer strong { color: var(--anwb-yellow); }
   line-height: 1.5;
 }
 
+/* Lange woorden ("toegankelijkheidsverbeteringen") niet afkappen op 320px */
+.cl-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .cl-badge {
   flex-shrink: 0;
   font-size: 10px;
@@ -1102,7 +1180,7 @@ footer strong { color: var(--anwb-yellow); }
 .cl-security { background: #fef3c7; color: #92400e; }
 
 body.dark .changelog-content { color: #e2e8f0; }
-body.dark .changelog-content h2 { color: #f1f5f9; }
+body.dark .changelog-content h1 { color: #f1f5f9; }
 body.dark .cl-release { background: #1e293b; border-color: #334155; color: #cbd5e1; }
 body.dark .cl-new      { background: #14532d; color: #86efac; }
 body.dark .cl-fix      { background: #7f1d1d; color: #fca5a5; }
@@ -1116,7 +1194,7 @@ body.dark .cl-security { background: #78350f; color: #fcd34d; }
   padding: 60px 32px 80px;
 }
 
-.explain-content h2 {
+.explain-content h1 {
   font-family: 'Bricolage Grotesque', sans-serif;
   font-size: 42px;
   font-weight: 800;
@@ -1141,7 +1219,7 @@ body.dark .cl-security { background: #78350f; color: #fcd34d; }
   margin-bottom: 20px;
 }
 
-.explain-section h3 {
+.explain-section h2 {
   font-family: 'Bricolage Grotesque', sans-serif;
   font-size: 22px;
   font-weight: 700;
@@ -1177,7 +1255,7 @@ body.dark {
   --ink: #f1f5f9;
   --paper: #0f172a;
   --muted: #cbd5e1;
-  --line: #1e293b;
+  --line: #334155;
   --good: #4ade80;
   --warn: #fbbf24;
   --bad: #ff6b6b;
@@ -1259,6 +1337,11 @@ body.dark .location-panel {
   color: #f1f5f9;
 }
 
+/* De statuskleur links van een pollenregel niet door de dark-rand laten overschrijven */
+body.dark .pollen-item.high { border-left-color: #d97706; }
+body.dark .pollen-item.medium { border-left-color: #f59e0b; }
+body.dark .pollen-item.low { border-left-color: #4ade80; }
+
 body.dark .checklist-item:hover {
   background: #162033;
   border-color: #ffcc00;
@@ -1284,7 +1367,7 @@ body.dark .location-panel-head span:last-child {
 
 body.dark .location-badge svg,
 body.dark h1,
-body.dark .explain-content h2,
+body.dark .explain-content h1,
 body.dark .metric-value,
 body.dark .slot-temp,
 body.dark .comparison-temp,
@@ -1384,7 +1467,7 @@ body.dark .walker-btn {
 body.dark .walker-btn.active {
   background: #0c4a6e;
   border-color: #0ea5e9;
-  color: #0ea5e9;
+  color: #e0f2fe;
 }
 
 body.dark .explain-content {
@@ -1397,7 +1480,7 @@ body.dark .explain-section {
   color: #cbd5e1;
 }
 
-body.dark .explain-section h3 {
+body.dark .explain-section h2 {
   color: #0ea5e9;
 }
 
@@ -1448,9 +1531,11 @@ body.dark .tip {
   color: #cbd5e1;
 }
 
+/* Zelfde geel als de actieve voorkeursknop, zodat de hoofdtip ook in dark herkenbaar blijft */
 body.dark .tip.yellow {
-  background: #7c2d12;
-  color: #fbbf24;
+  background: var(--anwb-yellow);
+  border-color: var(--anwb-yellow);
+  color: var(--anwb-navy-dark);
 }
 
 .dark-mode-btn {
@@ -1555,6 +1640,44 @@ code {
   font-size: 14px;
 }
 
+/* Foutmelding in de advieskaart: niet de grote verdict-typografie erven */
+.verdict .error {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: normal;
+}
+
+.retry-btn {
+  background: var(--anwb-yellow);
+  color: var(--anwb-navy);
+  border: none;
+  border-radius: 100px;
+  padding: 10px 18px;
+  min-height: 40px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+body.dark .error {
+  background: rgba(255, 107, 107, 0.12);
+  color: #fecaca;
+}
+
+.pollen-unavailable {
+  font-size: 14px;
+  color: var(--muted);
+  padding: 8px 0;
+}
+
 /* Rain chart */
 .rain-card {
   background: linear-gradient(135deg, #e8f1fb 0%, #f4f9ff 100%);
@@ -1570,6 +1693,9 @@ code {
 }
 
 .rain-card .card-title { color: var(--anwb-navy); }
+
+/* Helemaal droog: alleen de samenvatting, geen lege grafiek */
+.rain-card.dry .rain-chart { display: none; }
 
 .rain-chart {
   display: flex;
@@ -1623,6 +1749,10 @@ code {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+
+body.dark .bar-value { color: #e2e8f0; }
+body.dark .bar.dry { background: rgba(255, 255, 255, 0.15); }
+body.dark .rain-chart { border-bottom-color: rgba(255, 255, 255, 0.15); }
 
 .rain-summary {
   display: flex;
@@ -1765,10 +1895,15 @@ code {
   font-family: 'Bricolage Grotesque', sans-serif;
   font-size: 28px;
   font-weight: 800;
-  color: var(--anwb-navy);
+  color: var(--muted);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
-  opacity: 0.5;
+}
+
+.log-note {
+  font-size: 13px;
+  color: var(--muted);
+  margin: -8px 0 16px;
 }
 
 .walker-grid {
@@ -1905,6 +2040,7 @@ code {
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
+    overflow-x: clip;
   }
 
   .wrapper {
@@ -1912,6 +2048,7 @@ code {
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
+    overflow-x: clip;
   }
 
   header {
@@ -1971,7 +2108,7 @@ code {
 
   .tabs {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 0;
     padding: 0 16px;
     width: 100%;
@@ -1981,7 +2118,8 @@ code {
 
   .tabs .tab {
     min-width: 0;
-    padding: 14px 6px;
+    padding: 14px 4px;
+    font-size: 13px;
     line-height: 1.15;
     overflow-wrap: anywhere;
   }
@@ -2274,8 +2412,15 @@ body.dark .log-delete-btn:hover {
 }
 
 /* Respect users who prefer reduced motion */
+@media (max-width: 360px) {
+  /* Op de smalste schermen past de naam niet naast de knoppen; de DIGHV-badge blijft */
+  .logo > span:last-child { display: none; }
+  /* "Releaselog" moet zonder woordbreuk in een kwart van 320px passen */
+  .tabs .tab { font-size: 12px; padding: 12px 2px; overflow-wrap: normal; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
+  html, .forecast { scroll-behavior: auto; }
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
