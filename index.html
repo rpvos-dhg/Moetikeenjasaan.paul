@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.open-meteo.com https://air-quality-api.open-meteo.com https://api.github.com https://nominatim.openstreetmap.org; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Jas of geen jas? | DIGHV Pauze-advies</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,7 +14,7 @@
 <meta name="theme-color" content="#003082">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Pauze-advies">
-<link rel="stylesheet" href="style.css?v=14">
+<link rel="stylesheet" href="style.css?v=15">
 </head>
 <body>
 <div class="wrapper">
@@ -35,14 +36,14 @@
   </div>
 </header>
 
-<nav class="tabs" role="tablist" aria-label="Hoofdnavigatie" data-tour="tabs">
-  <button class="tab active" data-tab="advice" data-i18n="tabAdvice" role="tab" aria-selected="true" aria-controls="view-advice-wrap">Advies</button>
-  <button class="tab" data-tab="log" data-i18n="tabLog" role="tab" aria-selected="false" aria-controls="view-log">Looplog</button>
-  <button class="tab" data-tab="explain" data-i18n="tabExplain" role="tab" aria-selected="false" aria-controls="view-explain">Hoe werkt dit?</button>
-  <button class="tab" data-tab="changelog" data-i18n="tabChangelog" role="tab" aria-selected="false" aria-controls="view-changelog">Releaselog</button>
-</nav>
+<div class="tabs" role="tablist" aria-label="Onderdelen" data-tour="tabs">
+  <button class="tab active" id="tab-advice" data-tab="advice" data-i18n="tabAdvice" role="tab" aria-selected="true" aria-controls="view-advice-wrap">Advies</button>
+  <button class="tab" id="tab-log" data-tab="log" data-i18n="tabLog" role="tab" aria-selected="false" aria-controls="view-log" tabindex="-1">Looplog</button>
+  <button class="tab" id="tab-explain" data-tab="explain" data-i18n="tabExplain" role="tab" aria-selected="false" aria-controls="view-explain" tabindex="-1">Hoe werkt dit?</button>
+  <button class="tab" id="tab-changelog" data-tab="changelog" data-i18n="tabChangelog" role="tab" aria-selected="false" aria-controls="view-changelog" tabindex="-1">Releaselog</button>
+</div>
 
-<div class="view active" id="view-advice-wrap">
+<div class="view active" id="view-advice-wrap" role="tabpanel" aria-labelledby="tab-advice">
 <section class="hero">
   <div class="location-control">
     <div class="location-badge" data-tour="location">
@@ -81,8 +82,11 @@
       <div class="verdict" id="verdict">
         <div class="loading"><span class="spinner"></span>Weer ophalen...</div>
       </div>
+      <p class="verdict-feels" id="feels"></p>
       <p class="verdict-detail" id="detail"></p>
+      <p class="data-note" id="dataNote" hidden></p>
       <div class="wacht-strip" id="wachtFf"></div>
+      <div class="sr-only" id="adviceLive" role="status" aria-live="polite"></div>
     </div>
     <div class="tips" id="tips"></div>
   </div>
@@ -116,7 +120,7 @@
     <div class="weather-card" data-tour="conditions">
       <div class="card-title" role="heading" aria-level="2">
         <span data-i18n="currentConditions">Huidige condities</span>
-        <span class="dot" aria-label="Live data"></span>
+        <span class="dot" aria-hidden="true"></span>
       </div>
       <div class="metrics" id="metrics">
         <div class="metric">
@@ -140,7 +144,7 @@
 
     <div class="weather-card" data-tour="forecast">
       <div class="card-title" role="heading" aria-level="2" data-i18n="comingHours">Komende uren</div>
-      <div class="forecast" id="forecast" role="list" aria-label="Uurverwachting"></div>
+      <div class="forecast" id="forecast" role="list" aria-label="Uurverwachting" tabindex="0"></div>
     </div>
 
     <div class="weather-card" data-tour="besttime">
@@ -156,7 +160,7 @@
         <span data-i18n="rainPer15">Regen per 15 minuten</span>
         <span data-i18n="next2hours" style="font-size: 11px; color: var(--muted); font-weight: 500;">komende 2 uur</span>
       </div>
-      <div class="rain-chart" id="rainChart" role="img" aria-label="Regenradar grafiek"></div>
+      <div class="rain-chart" id="rainChart" role="img" aria-label="Regenverwachting"></div>
       <div class="rain-summary" id="rainSummary"></div>
     </div>
 
@@ -179,29 +183,30 @@
 </main>
 </div>
 
-<div class="view" id="view-explain">
-  <div class="explain-content">
+<div class="view" id="view-explain" role="tabpanel" aria-labelledby="tab-explain">
+  <div class="explain-content" role="main">
 
   </div>
 </div>
 
-<div class="view" id="view-changelog">
-  <div class="changelog-content">
+<div class="view" id="view-changelog" role="tabpanel" aria-labelledby="tab-changelog">
+  <div class="changelog-content" role="main">
 
   </div>
 </div>
 
-<div class="view" id="view-log">
-  <div class="log-content">
+<div class="view" id="view-log" role="tabpanel" aria-labelledby="tab-log">
+  <div class="log-content" role="main">
 
     <div class="log-register-card">
       <div class="log-register-header">
-        <h2 class="log-title" data-i18n="logTitle">Wie gaat er mee?</h2>
+        <h1 class="log-title" data-i18n="logTitle">Wie gaat er mee?</h1>
         <span class="log-time" id="logTime">--:--</span>
       </div>
+      <p class="log-note" data-i18n="logLocalNote">Wordt alleen op dit toestel bewaard. Collega's zien dit niet.</p>
       <div class="walker-grid" id="walkerGrid"></div>
       <div class="log-actions">
-        <button class="log-clear-btn" id="logClearBtn" data-i18n="logNobody">Niemand</button>
+        <button class="log-clear-btn" id="logClearBtn" data-i18n="logNobody">Wis selectie</button>
         <button class="log-save-btn" id="logSaveBtn" data-i18n="logSave">Opslaan</button>
       </div>
     </div>
@@ -212,16 +217,11 @@
 </div>
 
 <footer data-i18n-html="footerHtml">
-  Gebouwd door en voor <strong>DIGHV</strong> · Weerdata via Open-Meteo · Niet officieel ANWB · <span id="appVersion"></span>
+  Gebouwd door en voor <strong>DIGHV</strong> · Weerdata via Open-Meteo · Geen officieel ANWB-product<span id="appVersion"></span>
 </footer>
 
 </div>
 
-<script src="script.js?v=14"></script>
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/Moetikeenjasaan.paul/sw.js');
-  }
-</script>
+<script src="script.js?v=15"></script>
 </body>
 </html>
