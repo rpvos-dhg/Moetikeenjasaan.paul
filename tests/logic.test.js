@@ -118,7 +118,7 @@ test('storm, onweer en windstoten bepalen paraplu en advies', () => {
   assert.equal(L.adviceKeys(storm).verdict, 'verdictStorm');
   const w = forecast({ now });
   w.current.weather_code = 95;
-  assert.equal(L.adviceKeys(L.computeConditions(w, now, 0)).detail[0], 'detailThunder');
+  assert.equal(L.adviceKeys(L.computeConditions(w, now, 0)).detail, 'detailThunder');
 });
 
 test('sneeuw geeft een sneeuwadvies, geen regenadvies', () => {
@@ -138,11 +138,20 @@ test('jastype volgt de drempels, voorkeur verschuift ze', () => {
   assert.equal(cold.effectiveFeel, 11);
 });
 
-test('alleen het jastype is een gele (primaire) tip', () => {
+test('één jasterm: bij regen of storm geen apart jaslabel, hooguit drie tips', () => {
   const now = at('2026-10-21T10:40:00+02:00');
-  const w = forecast({ rainFrom: now - H, feels: 8, now });
-  const tips = L.adviceKeys(L.computeConditions(w, now, 0)).tips;
-  assert.equal(tips.filter(tip => tip.primary).length, 1);
+  const wet = L.adviceKeys(L.computeConditions(forecast({ rainFrom: now - H, feels: 8, now }), now, 0));
+  assert.equal(wet.verdict, 'verdictJacketRain');
+  assert.equal(wet.jacket, null);
+  const dry = L.adviceKeys(L.computeConditions(forecast({ feels: 8, now }), now, 0));
+  assert.equal(dry.jacket, 'jacketAutumn');
+  const busy = forecast({ feels: 1, temp: 2, wind: 45, gust: 70, now });
+  busy.current.weather_code = 45;
+  assert.ok(L.adviceKeys(L.computeConditions(busy, now, 0), 'very high').tips.length <= 3);
+  // Zeer veel pollen valt niet weg achter comforttips.
+  const windy = forecast({ feels: 7, temp: 7, wind: 30, prob: 40, now });
+  assert.ok(L.adviceKeys(L.computeConditions(windy, now, 0), 'very high').tips.some(x => x.key === 'tipPollenVeryHigh'));
+  assert.equal(L.adviceKeys(L.computeConditions(forecast({ feels: 25, now }), now, 0)).jacket, null);
 });
 
 test('jas-o-meter meldt hoe ver de volgende jas is', () => {
@@ -172,13 +181,31 @@ test('beste pauzemoment ontwijkt regen en blijft dicht bij de eigen lunch', () =
   for (let i = 1; i < options.length; i++) assert.ok(options[i].startMs - options[i - 1].startMs >= 30 * 60000);
 });
 
-test('rainChange ziet regen beginnen', () => {
+test('nowcast: regen begint, stopt of blijft', () => {
   const start = at('2026-10-21T00:00:00+02:00');
   const now = start + 10 * H;
-  const w = forecast({ rainFrom: now + H, now });
-  const change = L.rainChange(w, now);
-  assert.equal(change.type, 'starts');
-  assert.equal(change.atMs, now + H);
+  const starts = L.nowcast(forecast({ rainFrom: now + H, now }), now);
+  assert.equal(starts.raining, false);
+  assert.equal(starts.changeAtMs, now + H);
+  const stops = L.nowcast(forecast({ rainFrom: now - H, rainTo: now + 30 * 60000, now }), now);
+  assert.equal(stops.raining, true);
+  assert.equal(stops.changeAtMs, now + 30 * 60000);
+  const stays = L.nowcast(forecast({ rainFrom: now - H, now }), now);
+  assert.equal(stays.continues, true);
+  // Bui net voorbij: "nu" nog nat, het huidige kwartier al droog.
+  const mid = now + 5 * 60000;
+  const ended = forecast({ rainFrom: mid + 2 * H, now: mid });
+  ended.current.precipitation = 0.3;
+  const nc = L.nowcast(ended, mid);
+  assert.equal(nc.raining, true);
+  assert.equal(nc.continues, false);
+  assert.ok(nc.changeAtMs <= mid);
+});
+
+test('dagscore: dicht bij 18 °C wint, warmer is niet altijd beter', () => {
+  assert.ok(L.dayScore({ tempMax: 18 }) > L.dayScore({ tempMax: 25 }));
+  assert.ok(L.dayScore({ tempMax: 29 }) > L.dayScore({ tempMax: 31 }));
+  assert.ok(L.dayScore({ tempMax: 17, rain: 3 }) < L.dayScore({ tempMax: 17, rain: 0 }));
 });
 
 test('looplog: statistieken en badges', () => {
