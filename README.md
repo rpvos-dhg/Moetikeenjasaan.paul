@@ -4,54 +4,65 @@
 
 ## Wat doet het?
 
-Een interne webtool voor het DIGHV-team bij ANWB. De app geeft realtime jasadvies op basis van live weerdata en helpt bij het plannen van een buitenpauze.
+Een interne webtool voor het DIGHV-team bij ANWB. De app geeft jasadvies op basis van live weerdata en helpt bij het plannen van een buitenpauze.
 
-- **Jasadvies** — gebaseerd op gevoelstemperatuur, met regen, sneeuw en storm voor het venster nu + 30 min, en persoonlijke voorkeur (kouwelijk / normaal / warmbloedig)
-- **Weercondities** — temperatuur, gevoelstemperatuur, wind, neerslag
-- **Uurverwachting** — scrollbare strip voor de komende uren
-- **Beste pauzetijd** — kiest het lekkerste moment tussen 11:00 en 15:00
-- **Regengrafiek** — neerslag per 15 minuten voor de komende 2 uur
-- **Pollenoverzicht** — live concentraties per allergeen (els, berk, grassen, bijvoet, ambrosia, olijf)
-- **Gisteren · vandaag · morgen** — snelle vergelijking met de dag ervoor en erna
-- **Volgende pauze** — countdown naar lunch of middagpauze
-- **Checklist** — wat mee naar buiten? Automatisch gegenereerd op basis van weer; afvinkjes gelden voor één dag
-- **Looplog** — registreer wie er mee gaat op de wandeling
+- **Jasadvies** voor het venster nu + 30 min: gevoelstemperatuur, regen, sneeuw, onweer, storm en windstoten, met een jas-o-meter die laat zien hoe dicht je bij de volgende jas zit
+- **Jouw type en kalibratie**: kouwelijk, normaal of warmbloedig, en na de lunch "te koud / klopte / te warm" zodat het advies zich aan jou aanpast
+- **Pauze en beste moment**: countdown naar je eigen lunchtijd (weekend telt door naar maandag) en het droogste half uur tussen 11:00 en 15:00, met "regen vanaf …"
+- **Collega's vragen**: deelt twee of drie droge tijdstippen via het deelmenu of het klembord
+- **Regen per 15 minuten**, alleen zichtbaar als er regen in zit
+- **Checklist** die meebeweegt met het weer; afvinkjes gelden voor één dag
+- **Uurverwachting, weer nu, pollen** (ingeklapt als alles laag is) en **gisteren · vandaag · morgen**
+- **Looplog** met weersnapshot, statistieken, badges en ongedaan maken; het team is per toestel aan te passen
+- Knipogen bij extreem weer en seizoensmomenten (Koningsdag, eerste terrasdag, eerste vorst)
+- NL/EN, licht/donker/automatisch, installeerbaar als app (PWA), werkt offline met de laatst bekende data
 
-Checklist, looplog en voorkeuren staan alleen in de browser van het eigen toestel (`localStorage`). Er is geen backend en niets wordt gedeeld.
+Checklist, looplog, team en voorkeuren staan alleen in de browser van het eigen toestel (`localStorage`). Er is geen backend en niets wordt gedeeld.
 
 ## Tech
 
-Puur HTML, CSS en vanilla JavaScript — geen build-stap, geen dependencies.
+HTML, CSS en vanilla JavaScript, zonder build-stap en zonder runtime-dependencies.
+
+| Bestand | Wat |
+|---|---|
+| `index.html` | Structuur, Content-Security-Policy |
+| `logic.js` | Pure rekenlogica (advies, pauzemoment, statistieken); getest |
+| `script.js` | Weergave, opslag, data ophalen |
+| `style.css` | Tokens (kleur, typografie, vorm), licht en donker thema |
+| `theme-init.js` | Zet het thema vóór de eerste paint |
+| `sw.js` | Service worker (offline) |
+| `fonts/` | Inter en Bricolage Grotesque, zelf gehost (OFL) |
 
 | Databron | Wat |
 |---|---|
-| [Open-Meteo Forecast API](https://open-meteo.com/) | Temperatuur, wind, neerslag, UV, weercode |
+| [Open-Meteo Forecast API](https://open-meteo.com/) | Temperatuur, wind, windstoten, dauwpunt, neerslag, UV, weercode |
 | [Open-Meteo Air Quality API](https://open-meteo.com/en/docs/air-quality-api) | Live pollenconcentraties |
+| [OpenStreetMap Nominatim](https://nominatim.org/) | Plaatsnaam bij "Huidige locatie" |
 
-Data wordt elke 10 minuten ververst. Standaardlocatie: **ANWB HQ, Wassenaarseweg, Den Haag** (52.0964° N, 4.3268° O). Via de locatieknop kan de app je huidige locatie gebruiken (afgerond op ~100 m, plaatsnaam via OpenStreetMap Nominatim). Die keuze blijft bewaard tot je terugschakelt naar ANWB HQ.
+Data wordt elke 10 minuten ververst (niet in een verborgen tabblad). Standaardlocatie: **ANWB HQ, Wassenaarseweg, Den Haag** (52.0964° N, 4.3268° O). Via het potlood kan de app je huidige locatie gebruiken, afgerond op ~100 m. Die keuze blijft bewaard tot je terugschakelt naar ANWB HQ.
 
 ## Lokaal draaien
 
 ```bash
 git clone https://github.com/rpvos-dhg/Moetikeenjasaan.paul.git
 cd Moetikeenjasaan.paul
-# Open index.html in een browser, of start een lokale server:
 npx serve .
 ```
 
 Geen installatie of build nodig.
 
-## Team aanpassen
+## Tests en lint
 
-Namen in de looplog staan bovenin `script.js`:
-
-```js
-const WALKERS = [
-  'Adam', 'Bob', 'David', ...
-];
+```bash
+npm test        # unit tests voor logic.js (node --test, tijdzone Europe/Amsterdam)
+npm run lint    # ESLint
 ```
 
-Voeg namen toe of verwijder ze daar.
+Beide draaien ook in GitHub Actions bij elke pull request.
+
+## Team aanpassen
+
+De standaardlijst staat bovenin `script.js` (`WALKERS`). Iedereen kan de lijst op het eigen toestel aanpassen via **Looplog → Team bewerken**; met "Standaardlijst terugzetten" komt de lijst uit de code terug.
 
 ## Disclaimer
 

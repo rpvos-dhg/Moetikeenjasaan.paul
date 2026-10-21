@@ -3,18 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.open-meteo.com https://air-quality-api.open-meteo.com https://api.github.com https://nominatim.openstreetmap.org; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self' https://api.open-meteo.com https://air-quality-api.open-meteo.com https://api.github.com https://nominatim.openstreetmap.org; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Jas of geen jas? | DIGHV Pauze-advies</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<meta name="description" content="Jas aan of niet? De officieuze DIGHV pauze-scanner.">
+<link rel="preload" href="fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="icon" type="image/svg+xml" href="favicon.svg?v=3">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=3">
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#003082">
+<meta name="theme-color" content="#003a71" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Pauze-advies">
-<link rel="stylesheet" href="style.css?v=15">
+<script src="theme-init.js?v=16"></script>
+<link rel="stylesheet" href="style.css?v=16">
 </head>
 <body>
 <div class="wrapper">
@@ -22,38 +24,37 @@
 <header>
   <div class="logo">
     <span class="logo-badge">DIGHV</span>
-    <span>Pauze-advies</span>
+    <span class="logo-name">Pauze-advies</span>
   </div>
   <div class="header-right" data-tour="header">
-    <button id="langToggle" class="lang-btn">EN</button>
-    <button id="tutorialBtn" class="lang-btn tutorial-btn" title="Rondleiding" aria-label="Rondleiding starten">?</button>
-    <button id="darkModeToggle" class="dark-mode-btn" title="Dark mode: Auto / Dark / Light" aria-label="Toggle dark mode">🌙</button>
+    <button id="langToggle" class="icon-btn lang-btn" type="button" lang="en">EN</button>
+    <button id="tutorialBtn" class="icon-btn" type="button" aria-label="Rondleiding starten">?</button>
+    <button id="darkModeToggle" class="icon-btn dark-mode-btn" type="button" aria-label="Thema"></button>
     <div class="live-indicator">
-      <span class="live-dot"></span>
+      <span class="live-dot" aria-hidden="true"></span>
       <span>LIVE</span>
     </div>
     <div class="header-meta" id="clock">--:--</div>
   </div>
 </header>
 
-<div class="tabs" role="tablist" aria-label="Onderdelen" data-tour="tabs">
-  <button class="tab active" id="tab-advice" data-tab="advice" data-i18n="tabAdvice" role="tab" aria-selected="true" aria-controls="view-advice-wrap">Advies</button>
-  <button class="tab" id="tab-log" data-tab="log" data-i18n="tabLog" role="tab" aria-selected="false" aria-controls="view-log" tabindex="-1">Looplog</button>
-  <button class="tab" id="tab-explain" data-tab="explain" data-i18n="tabExplain" role="tab" aria-selected="false" aria-controls="view-explain" tabindex="-1">Hoe werkt dit?</button>
-  <button class="tab" id="tab-changelog" data-tab="changelog" data-i18n="tabChangelog" role="tab" aria-selected="false" aria-controls="view-changelog" tabindex="-1">Releaselog</button>
-</div>
+<nav class="tabs-nav" aria-label="Onderdelen" data-tour="tabs">
+  <div class="tabs" role="tablist">
+    <button class="tab active" id="tab-advice" data-tab="advice" data-i18n="tabAdvice" role="tab" aria-selected="true" aria-controls="view-advice-wrap" type="button">Advies</button>
+    <button class="tab" id="tab-log" data-tab="log" data-i18n="tabLog" role="tab" aria-selected="false" aria-controls="view-log" tabindex="-1" type="button">Looplog</button>
+    <button class="tab" id="tab-explain" data-tab="explain" data-i18n="tabExplain" role="tab" aria-selected="false" aria-controls="view-explain" tabindex="-1" type="button">Hoe werkt dit?</button>
+    <button class="tab" id="tab-changelog" data-tab="changelog" data-i18n="tabChangelog" role="tab" aria-selected="false" aria-controls="view-changelog" tabindex="-1" type="button">Releaselog</button>
+  </div>
+</nav>
 
+<main id="content">
 <div class="view active" id="view-advice-wrap" role="tabpanel" aria-labelledby="tab-advice">
-<section class="hero">
+<section class="hero" id="hero" aria-labelledby="pageTitle">
   <div class="location-control">
     <div class="location-badge" data-tour="location">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
       <span id="locationLabel">ANWB HQ · Wassenaarseweg, Den Haag</span>
-      <span class="dot-sep">·</span>
-      <span class="location-coords" id="locationCoords">52.0964, 4.3268</span>
-      <span class="dot-sep">·</span>
-      <span class="source-badge">Live data via Open-Meteo</span>
-      <button id="locationEditBtn" class="location-edit-btn" type="button" title="Locatie wijzigen" aria-label="Locatie wijzigen" aria-expanded="false" aria-controls="locationPanel">
+      <button id="locationEditBtn" class="location-edit-btn" type="button" aria-label="Locatie wijzigen" aria-expanded="false" aria-controls="locationPanel">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
       </button>
     </div>
@@ -66,162 +67,193 @@
         <button id="useCurrentLocationBtn" class="location-action-btn" type="button" data-i18n="useCurrentLocationBtn">Huidige locatie</button>
         <button id="resetLocationBtn" class="location-action-btn secondary" type="button" data-i18n="resetLocationBtn">ANWB HQ</button>
       </div>
+      <p class="location-source" data-i18n="locationSource">Weer via Open-Meteo · plaatsnaam via OpenStreetMap</p>
       <div class="location-status" id="locationStatus" role="status" aria-live="polite"></div>
     </div>
   </div>
-  <h1 data-i18n-html="h1Html">Jas aan of <span class="accent">niet?</span></h1>
+  <p class="season-banner" id="seasonBanner" hidden></p>
+  <h1 id="pageTitle" data-i18n-html="h1Html">Jas aan of <span class="accent">niet?</span></h1>
   <p class="lead" data-i18n="lead">De officieuze DIGHV pauze-scanner. Even checken voor je naar buiten loopt.</p>
 </section>
 
-<main>
+<div class="advice-grid">
 
-  <!-- Rij 1: Advies + voorkeur -->
-  <div class="advice-card" id="advice" data-tour="advice">
-    <div>
-      <div class="advice-label" data-i18n="adviceLabel">Advies voor nu + 30 min</div>
-      <div class="verdict" id="verdict">
-        <div class="loading"><span class="spinner"></span>Weer ophalen...</div>
+  <div class="col col-left">
+  <section class="advice-card" id="advice" data-tour="advice" aria-labelledby="adviceLabel">
+    <h2 class="advice-label" id="adviceLabel" data-i18n="adviceLabel">Advies voor nu + 30 min</h2>
+    <div class="verdict" id="verdict">
+      <div class="loading"><span class="spinner" aria-hidden="true"></span><span data-i18n="weatherLoading">Weer ophalen...</span></div>
+    </div>
+    <p class="verdict-feels" id="feels"></p>
+    <div class="jacket-meter" id="jacketMeter" hidden>
+      <div class="jacket-meter-track" aria-hidden="true">
+        <span class="jacket-meter-seg" data-level="Freezing"></span>
+        <span class="jacket-meter-seg" data-level="Winter"></span>
+        <span class="jacket-meter-seg" data-level="Autumn"></span>
+        <span class="jacket-meter-seg" data-level="Light"></span>
+        <span class="jacket-meter-seg" data-level="None"></span>
+        <span class="jacket-meter-needle" id="jacketNeedle"></span>
       </div>
-      <p class="verdict-feels" id="feels"></p>
-      <p class="verdict-detail" id="detail"></p>
-      <p class="data-note" id="dataNote" hidden></p>
-      <div class="wacht-strip" id="wachtFf"></div>
-      <div class="sr-only" id="adviceLive" role="status" aria-live="polite"></div>
+      <p class="jacket-meter-note" id="jacketNote"></p>
     </div>
-    <div class="tips" id="tips"></div>
-  </div>
-
-  <div class="top-side-panel">
-
-  <div class="pref-card" data-tour="pref">
-    <div class="card-title" role="heading" aria-level="2" data-i18n="yourType">Jouw type</div>
-    <div class="pref-options" role="group" aria-label="Temperatuurvoorkeur">
-      <button class="pref-btn" data-pref="cold" data-i18n="prefCold">Kouwelijk</button>
-      <button class="pref-btn active" data-pref="normal" data-i18n="prefNormal">Normaal</button>
-      <button class="pref-btn" data-pref="warm" data-i18n="prefWarm">Warmbloedig</button>
+    <p class="verdict-detail" id="detail"></p>
+    <p class="extreme-note" id="extremeNote" hidden></p>
+    <p class="data-note" id="dataNote" hidden></p>
+    <div class="wacht-strip" id="wachtFf" hidden></div>
+    <ul class="tips" id="tips" aria-label="Tips"></ul>
+    <div class="feedback-row" id="feedbackRow" hidden>
+      <p class="feedback-question" id="feedbackQuestion"></p>
+      <div class="feedback-actions">
+        <button type="button" class="feedback-btn" data-feedback="cold" data-i18n="feedbackCold">Te koud</button>
+        <button type="button" class="feedback-btn" data-feedback="ok" data-i18n="feedbackOk">Klopte</button>
+        <button type="button" class="feedback-btn" data-feedback="warm" data-i18n="feedbackWarm">Te warm</button>
+      </div>
     </div>
-  </div>
+    <div class="sr-only" id="adviceLive" role="status" aria-live="polite"></div>
+  </section>
 
-  <div class="checklist-card" data-tour="checklist">
-    <div class="card-title" role="heading" aria-level="2" data-i18n="checklistTitle">✓ Wat mee naar buiten?</div>
-    <div class="checklist-items" id="checklist"></div>
-  </div>
-
-  </div>
-
-  <!-- Rij 2: Weercondities + Pollen/Info -->
   <div class="conditions-panel">
 
-    <div class="lunch-card" data-tour="lunch">
-      <div class="card-title" role="heading" aria-level="2" data-i18n="nextBreak">Volgende pauze</div>
-      <div id="lunchCountdown"></div>
-    </div>
+    <section class="break-card" data-tour="lunch" aria-labelledby="breakTitle">
+      <h2 class="card-title" id="breakTitle" data-i18n="nextBreak">Volgende pauze</h2>
+      <div id="lunchCountdown" class="countdown"></div>
+      <div class="best-moment" id="bestTime" data-tour="besttime"></div>
+      <button type="button" class="share-btn" id="shareBtn" hidden>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+        <span data-i18n="shareBtn">Collega's vragen</span>
+      </button>
+      <p class="share-status" id="shareStatus" role="status" aria-live="polite"></p>
+    </section>
 
-    <div class="weather-card" data-tour="conditions">
-      <div class="card-title" role="heading" aria-level="2">
-        <span data-i18n="currentConditions">Huidige condities</span>
-        <span class="dot" aria-hidden="true"></span>
-      </div>
-      <div class="metrics" id="metrics">
-        <div class="metric">
-          <span class="metric-label">Temperatuur</span>
-          <span class="metric-value">--<span class="metric-unit">°C</span></span>
-        </div>
-        <div class="metric">
-          <span class="metric-label">Gevoelstemperatuur</span>
-          <span class="metric-value">--<span class="metric-unit">°C</span></span>
-        </div>
-        <div class="metric">
-          <span class="metric-label">Wind</span>
-          <span class="metric-value">--<span class="metric-unit">km/u</span></span>
-        </div>
-        <div class="metric">
-          <span class="metric-label">Neerslag</span>
-          <span class="metric-value">--<span class="metric-unit">mm</span></span>
-        </div>
-      </div>
-    </div>
-
-    <div class="weather-card" data-tour="forecast">
-      <div class="card-title" role="heading" aria-level="2" data-i18n="comingHours">Komende uren</div>
-      <div class="forecast" id="forecast" role="list" aria-label="Uurverwachting" tabindex="0"></div>
-    </div>
-
-    <div class="weather-card" data-tour="besttime">
-      <div class="card-title" role="heading" aria-level="2">
-        <span data-i18n="bestBreakTime">Beste pauzetijd</span>
-        <span style="font-size: 11px; color: var(--muted); font-weight: 500;">11:00 – 15:00</span>
-      </div>
-      <div id="bestTime"></div>
-    </div>
-
-    <div class="rain-card visible" id="rainCard" data-tour="rain">
-      <div class="card-title" role="heading" aria-level="2">
-        <span data-i18n="rainPer15">Regen per 15 minuten</span>
-        <span data-i18n="next2hours" style="font-size: 11px; color: var(--muted); font-weight: 500;">komende 2 uur</span>
+    <section class="rain-card" id="rainCard" data-tour="rain" aria-labelledby="rainTitle">
+      <div class="card-title-row">
+        <h2 class="card-title" id="rainTitle" data-i18n="rainPer15">Regen per 15 minuten</h2>
+        <span class="card-meta" data-i18n="next2hours">komende 2 uur</span>
       </div>
       <div class="rain-chart" id="rainChart" role="img" aria-label="Regenverwachting"></div>
       <div class="rain-summary" id="rainSummary"></div>
-    </div>
+    </section>
+
+    <section class="weather-card" data-tour="forecast" aria-labelledby="forecastTitle">
+      <h2 class="card-title" id="forecastTitle" data-i18n="comingHours">Komende uren</h2>
+      <div class="forecast" id="forecast" role="list" aria-labelledby="forecastTitle" tabindex="0"></div>
+    </section>
+
+    <section class="weather-card" data-tour="conditions" aria-labelledby="conditionsTitle">
+      <h2 class="card-title" id="conditionsTitle" data-i18n="currentConditions">Weer nu</h2>
+      <div class="metrics" id="metrics"></div>
+    </section>
+
+  </div>
+  </div>
+
+  <div class="col col-right">
+  <div class="top-side-panel">
+
+    <section class="pref-card" data-tour="pref" aria-labelledby="prefTitle">
+      <div class="card-head">
+        <h2 class="card-title" id="prefTitle" data-i18n="yourType">Jouw type</h2>
+        <p class="card-hint" data-i18n="prefHint">Hoe snel heb jij het koud? We onthouden het op dit toestel.</p>
+      </div>
+      <div class="pref-options segmented" role="group" aria-labelledby="prefTitle">
+        <button class="pref-btn" data-pref="cold" data-i18n="prefCold" type="button">Kouwelijk</button>
+        <button class="pref-btn active" data-pref="normal" data-i18n="prefNormal" type="button">Normaal</button>
+        <button class="pref-btn" data-pref="warm" data-i18n="prefWarm" type="button">Warmbloedig</button>
+      </div>
+      <div class="pref-row">
+        <label for="lunchTime" data-i18n="lunchTimeLabel">Mijn lunch</label>
+        <select id="lunchTime" class="select"></select>
+      </div>
+      <p class="calibration-note" id="calibrationNote" hidden></p>
+    </section>
+
+    <section class="checklist-card" data-tour="checklist" aria-labelledby="checklistTitle">
+      <h2 class="card-title" id="checklistTitle" data-i18n="checklistTitle">Wat mee naar buiten?</h2>
+      <div class="checklist-items" id="checklist"></div>
+    </section>
 
   </div>
 
   <div class="info-panel">
 
-    <div class="pollen-card" data-tour="pollen">
-      <div class="card-title" role="heading" aria-level="2" data-i18n="pollenOverview">🌸 Pollenoverzicht</div>
+    <section class="pollen-card" data-tour="pollen" aria-labelledby="pollenTitle">
+      <h2 class="card-title" id="pollenTitle" data-i18n="pollenOverview">Pollen</h2>
       <div class="pollen-grid" id="pollenGrid"></div>
-    </div>
+    </section>
 
-    <div class="comparison-card" data-tour="comparison">
-      <div class="card-title" role="heading" aria-level="2" data-i18n="todayVsTomorrow">Vandaag vs Morgen</div>
+    <section class="comparison-card" data-tour="comparison" aria-labelledby="comparisonTitle">
+      <h2 class="card-title" id="comparisonTitle" data-i18n="todayVsTomorrow">Gisteren · vandaag · morgen</h2>
+      <p class="comparison-summary" id="comparisonSummary"></p>
       <div class="comparison-grid" id="comparisonGrid"></div>
-    </div>
+    </section>
 
   </div>
+  </div>
 
-</main>
+</div>
 </div>
 
 <div class="view" id="view-explain" role="tabpanel" aria-labelledby="tab-explain">
-  <div class="explain-content" role="main">
-
-  </div>
+  <div class="explain-content"></div>
 </div>
 
 <div class="view" id="view-changelog" role="tabpanel" aria-labelledby="tab-changelog">
-  <div class="changelog-content" role="main">
-
-  </div>
+  <div class="changelog-content"></div>
 </div>
 
 <div class="view" id="view-log" role="tabpanel" aria-labelledby="tab-log">
-  <div class="log-content" role="main">
+  <div class="log-content">
 
-    <div class="log-register-card">
+    <section class="log-register-card" aria-labelledby="logTitle">
       <div class="log-register-header">
-        <h1 class="log-title" data-i18n="logTitle">Wie gaat er mee?</h1>
+        <h1 class="log-title" id="logTitle" data-i18n="logTitle">Wie liep er mee?</h1>
         <span class="log-time" id="logTime">--:--</span>
       </div>
       <p class="log-note" data-i18n="logLocalNote">Wordt alleen op dit toestel bewaard. Collega's zien dit niet.</p>
-      <div class="walker-grid" id="walkerGrid"></div>
+      <div class="walker-grid" id="walkerGrid" role="group" aria-labelledby="logTitle"></div>
       <div class="log-actions">
-        <button class="log-clear-btn" id="logClearBtn" data-i18n="logNobody">Wis selectie</button>
-        <button class="log-save-btn" id="logSaveBtn" data-i18n="logSave">Opslaan</button>
+        <button class="text-btn" id="teamEditBtn" type="button" aria-expanded="false" aria-controls="teamEditor" data-i18n="teamEdit">Team bewerken</button>
+        <span class="log-actions-spacer"></span>
+        <button class="log-clear-btn" id="logClearBtn" type="button" data-i18n="logNobody">Wis selectie</button>
+        <button class="log-save-btn" id="logSaveBtn" type="button" data-i18n="logSave">Opslaan</button>
       </div>
-    </div>
+      <div class="team-editor" id="teamEditor" hidden>
+        <form class="team-add" id="teamAddForm">
+          <label for="teamAddInput" class="sr-only" data-i18n="teamAddLabel">Naam toevoegen</label>
+          <input id="teamAddInput" class="input" type="text" maxlength="30" autocomplete="off">
+          <button type="submit" class="log-save-btn" data-i18n="teamAdd">Toevoegen</button>
+        </form>
+        <ul class="team-list" id="teamList"></ul>
+        <button type="button" class="text-btn" id="teamResetBtn" data-i18n="teamReset">Standaardlijst terugzetten</button>
+      </div>
+    </section>
+
+    <section class="log-stats" id="logStats" aria-labelledby="logStatsTitle" hidden>
+      <h2 class="card-title" id="logStatsTitle" data-i18n="logStatsTitle">Statistieken</h2>
+      <div class="stats-grid" id="statsGrid"></div>
+      <ul class="badges" id="badgeList" aria-label="Badges"></ul>
+    </section>
 
     <div id="logHistory"></div>
 
   </div>
 </div>
 
-<footer data-i18n-html="footerHtml">
-  Gebouwd door en voor <strong>DIGHV</strong> · Weerdata via Open-Meteo · Geen officieel ANWB-product<span id="appVersion"></span>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden>
+  <span id="toastText"></span>
+  <button type="button" class="toast-btn" id="toastAction"></button>
+</div>
+
+<footer>
+  <p data-i18n-html="footerHtml">Gebouwd door en voor <strong>DIGHV</strong> · Weerdata via Open-Meteo · Geen officieel ANWB-product</p>
+  <p class="footer-version" id="appVersion"></p>
 </footer>
 
 </div>
 
-<script src="script.js?v=15"></script>
+<script src="logic.js?v=16"></script>
+<script src="script.js?v=16"></script>
 </body>
 </html>
