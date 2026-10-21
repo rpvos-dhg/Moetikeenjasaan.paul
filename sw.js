@@ -41,6 +41,11 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
+// De plek van het laatst gestarte API-verzoek. Een antwoord dat nog onderweg was
+// voor een vorige plek (locatie net gewisseld) komt niet meer in de cache.
+let lastApiSpot = '';
+const spotOf = url => `${url.searchParams.get('latitude')},${url.searchParams.get('longitude')}`;
+
 // Bewaar een API-antwoord en gooi de oudste weg boven de limiet.
 async function putApi(request, response) {
   const cache = await caches.open(API_CACHE);
@@ -54,20 +59,22 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
   if (NO_CACHE_HOSTS.includes(url.hostname)) return;
+  const own = url.origin === location.origin;
+  if (!own) lastApiSpot = spotOf(url);
   event.respondWith(
     fetch(event.request)
       .then(res => {
         if (res.ok) {
           const clone = res.clone();
-          if (url.origin === location.origin) caches.open(CACHE).then(cache => cache.put(event.request, clone));
-          else putApi(event.request, clone).catch(() => {});
+          if (own) caches.open(CACHE).then(cache => cache.put(event.request, clone));
+          else if (spotOf(url) === lastApiSpot) putApi(event.request, clone).catch(() => {});
         }
         return res;
       })
       .catch(() => caches.match(event.request).then(hit => {
         if (hit) return hit;
         // Eigen assets worden geprecachet zonder ?v= query; match die alsnog
-        if (url.origin === location.origin) {
+        if (own) {
           return caches.match(event.request, { ignoreSearch: true });
         }
       }))

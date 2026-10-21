@@ -120,10 +120,6 @@ function highPollenKeys(values) {
 
 const PREF_OFFSETS = { cold: 3, normal: 0, warm: -5 };
 
-// Eén set condities voor advies, wacht-strip en checklist, zodat die elkaar
-// niet tegenspreken. Open-Meteo telt neerslag en regenkans per slot over de
-// *voorafgaande* periode, dus voor "nu + 30 min" kijken we naar de slots die
-// ná nu eindigen. offset = voorkeur + persoonlijke kalibratie (in °C kou).
 // Drempels op één plek: advies, checklist, grafiek en beste moment gebruiken
 // dezelfde getallen (de uitleg-tab noemt ze ook).
 const THRESHOLDS = {
@@ -155,27 +151,36 @@ function isSnowCode(code) {
   return (code >= 71 && code <= 77) || code === 85 || code === 86;
 }
 
-// Vooruitblik op een later moment (de eigen lunch). Neerslag en kans komen uit
-// het uurslot dat ná dat moment eindigt: Open-Meteo telt die over het voorgaande uur.
+// Vooruitblik op een later moment (de eigen lunch). Neerslag, kans en windstoten
+// komen uit het uurslot dat ná dat moment eindigt: Open-Meteo telt die over het
+// voorgaande uur. Temperaturen lineair tussen de twee omliggende uren.
 function outlookAt(w, startMs, offset = 0) {
   const h = w?.hourly;
   const i = h?.time?.findIndex(ts => ts > startMs) ?? -1;
   if (i < 1) return null;
-  const temp = interpolateHourly(h, h.temperature_2m, startMs);
+  const frac = (startMs - h.time[i - 1]) / (h.time[i] - h.time[i - 1]);
+  const lerp = values => (values?.[i - 1] == null || values?.[i] == null ? null : values[i - 1] + (values[i] - values[i - 1]) * frac);
+  const temp = lerp(h.temperature_2m);
   if (temp == null) return null;
-  const feels = Math.round(interpolateHourly(h, h.apparent_temperature, startMs) ?? temp);
+  const feels = Math.round(lerp(h.apparent_temperature) ?? temp);
   const prob = h.precipitation_probability?.[i] ?? 0;
   const code = h.weather_code?.[i] ?? 0;
   const snow = isSnowCode(code);
   const wet = (h.precipitation?.[i] ?? 0) > THRESHOLDS.wetMm || prob >= THRESHOLDS.wetProb;
+  const stormy = code >= 95 || (lerp(h.wind_speed_10m) ?? 0) >= THRESHOLDS.windStorm ||
+    (h.wind_gusts_10m?.[i] ?? 0) >= THRESHOLDS.gustStorm;
   const level = jacketLevel(feels - offset);
   let verdict = `verdict${level}`;
-  if (code >= 95) verdict = 'verdictStorm';
+  if (stormy) verdict = 'verdictStorm';
   else if (wet && snow) verdict = 'verdictSnow';
   else if (wet) verdict = feels - offset >= 15 ? 'verdictRain' : 'verdictJacketRain';
-  return { temp, feels, prob, code, snow, wet, verdict };
+  return { temp, feels, prob, code, snow, wet, stormy, verdict };
 }
 
+// Eén set condities voor advies, wacht-strip en checklist, zodat die elkaar
+// niet tegenspreken. Open-Meteo telt neerslag en regenkans per slot over de
+// *voorafgaande* periode, dus voor "nu + 30 min" kijken we naar de slots die
+// ná nu eindigen. offset = voorkeur + persoonlijke kalibratie (in °C kou).
 function computeConditions(w, nowMs, offset = 0) {
   const c = w.current;
   const hourly = w.hourly;
@@ -391,14 +396,15 @@ function nowcast(w, nowMs) {
   const wet = i => (m.precipitation[i] ?? 0) >= WET_SLOT_MM;
   const raining = wet(start) || (w.current?.precipitation ?? 0) >= WET_SLOT_MM;
   const code = w.current?.weather_code ?? 0;
-  const snow = (code >= 71 && code <= 77) || code === 85 || code === 86;
+  const snow = isSnowCode(code);
   const end = Math.min(start + 12, m.time.length);
   // Begin bij het huidige kwartier: meldt "nu" regen maar is dit kwartier al
   // droog, dan stopt het nu.
   for (let i = start; i < end; i++) {
-    // Eén afwijkend kwartier is nog geen omslag: pas melden als het volgende
-    // kwartier dezelfde kant op valt (anders "stopt" motregen steeds even).
-    if (wet(i) !== raining && (i + 1 >= m.time.length || wet(i + 1) !== raining)) {
+    // Eén droog kwartier in motregen is nog geen "stopt": dan moet ook het
+    // volgende kwartier droog zijn. Een korte bui die begint, meldt hij wel.
+    const settled = !raining || i + 1 >= m.time.length || !wet(i + 1);
+    if (wet(i) !== raining && settled) {
       // Slot i telt het kwartier ervóór: daar begint (of stopt) het.
       return { raining, snow, changeAtMs: m.time[i] - 15 * 60000, continues: false };
     }
@@ -428,11 +434,13 @@ function windowDayStats(w, dateKey, fromHour = 11, toHour = 15) {
   const h = w?.hourly;
   if (!Array.isArray(h?.time)) return null;
   const temps = [], winds = [], rain = [], codes = [];
-  const pad = n => String(n).padStart(2, '0');
+  // Lokale tijd van de locatie (net als de dagsleutels in normalizeForecast),
+  // niet die van het toestel.
+  const off = (w.utc_offset_seconds || 0) * 1000;
   h.time.forEach((ts, i) => {
-    const d = new Date(ts);
-    if (`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` !== dateKey) return;
-    const hour = d.getHours();
+    const local = new Date(ts + off);
+    if (local.toISOString().slice(0, 10) !== dateKey) return;
+    const hour = local.getUTCHours();
     if (hour >= fromHour && hour <= toHour) { temps.push(h.temperature_2m?.[i]); winds.push(h.wind_speed_10m?.[i]); }
     if (hour > fromHour && hour <= toHour) { rain.push(h.precipitation?.[i]); codes.push(h.weather_code?.[i]); }
   });
