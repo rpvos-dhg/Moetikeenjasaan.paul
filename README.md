@@ -7,10 +7,10 @@
 Een interne webtool voor het DIGHV-team bij ANWB. De app geeft jasadvies op basis van live weerdata en helpt bij het plannen van een buitenpauze.
 
 - **Jasadvies** voor het venster nu + 30 min: gevoelstemperatuur, regen, sneeuw, onweer, storm en windstoten, met een jas-o-meter die laat zien hoe dicht je bij de volgende jas zit
-- **Jouw type en kalibratie**: kouwelijk, normaal of warmbloedig, en na de lunch "te koud / klopte / te warm" zodat het advies zich aan jou aanpast
-- **Pauze en beste moment**: countdown naar je eigen lunchtijd (weekend telt door naar maandag) en het droogste half uur tussen 11:00 en 15:00, met "regen vanaf …"
+- **Jouw type en kalibratie**: kouwelijk, normaal of warmbloedig, en na de lunch "Hoe was het buiten?" zodat het advies zich aan jou aanpast
+- **Pauze en beste moment**: countdown naar je eigen lunchtijd (weekend telt door naar maandag) en het droogste half uur tussen 11:00 en 15:00
 - **Collega's vragen**: deelt twee of drie droge tijdstippen via het deelmenu of het klembord
-- **Regen per 15 minuten**, alleen zichtbaar als er regen in zit
+- **Regen per 15 minuten**, alleen zichtbaar als er regen in zit, plus een regel wanneer de regen begint of stopt
 - **Checklist** die meebeweegt met het weer; afvinkjes gelden voor één dag
 - **Uurverwachting, weer nu, pollen** (ingeklapt als alles laag is) en **gisteren · vandaag · morgen**
 - **Looplog** met weersnapshot, statistieken, badges en ongedaan maken; het team is per toestel aan te passen
