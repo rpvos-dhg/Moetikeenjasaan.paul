@@ -200,6 +200,11 @@ test('nowcast: regen begint, stopt of blijft', () => {
   assert.equal(nc.raining, true);
   assert.equal(nc.continues, false);
   assert.ok(nc.changeAtMs <= mid);
+  // Motregen met af en toe één droog kwartier: blijft regenen.
+  const drizzle = forecast({ rainFrom: now - H, now });
+  drizzle.minutely_15.precipitation = drizzle.minutely_15.precipitation.map((v, i) => (i % 2 ? 0 : 0.2));
+  drizzle.current.precipitation = 0.2;
+  assert.equal(L.nowcast(drizzle, now).continues, true);
 });
 
 test('dagscore: dicht bij 18 °C wint, warmer is niet altijd beter', () => {
@@ -236,4 +241,37 @@ test('seizoensmomenten', () => {
 test('pickDaily is stabiel per dag', () => {
   assert.equal(L.pickDaily(3, '2026-10-21x'), L.pickDaily(3, '2026-10-21x'));
   assert.ok(L.pickDaily(3, 'abc') < 3);
+});
+
+test('vooruitblik op de lunch: slot ná de start, temperatuur geïnterpoleerd', () => {
+  const now = at('2026-10-21T10:40:00+02:00');
+  const lunch = at('2026-10-21T12:30:00+02:00');
+  // Regen alleen in het uur 12:00-13:00 (slot met tijdstempel 13:00).
+  const w = forecast({ rainFrom: at('2026-10-21T12:00:00+02:00'), rainTo: at('2026-10-21T13:00:00+02:00'), feels: 12, now });
+  const o = L.outlookAt(w, lunch, 0);
+  assert.equal(o.prob, 90);
+  assert.equal(o.wet, true);
+  assert.equal(o.verdict, 'verdictJacketRain');
+  // Om 11:30 is het nog droog: het slot van 12:00 telt 11:00-12:00.
+  assert.equal(L.outlookAt(w, at('2026-10-21T11:30:00+02:00'), 0).wet, false);
+  assert.equal(L.outlookAt({ hourly: { time: [] } }, lunch, 0), null);
+});
+
+test('pauzevenster per dag: regen buiten 11-15 uur telt niet', () => {
+  const now = at('2026-10-21T10:40:00+02:00');
+  // Regen alleen 's nachts (02:00-05:00).
+  const w = forecast({ rainFrom: at('2026-10-21T02:00:00+02:00'), rainTo: at('2026-10-21T05:00:00+02:00'), now });
+  const s = L.windowDayStats(w, '2026-10-21');
+  assert.equal(s.rain, 0);
+  assert.equal(L.windowDayStats(w, '2030-01-01'), null);
+});
+
+test('checklist: geen paraplu bij sneeuw of harde wind, sjaal en handschoenen op drempel', () => {
+  const base = { uv: 0, muggy: false, feels: 10, wet: true, snow: false, umbrellaUseless: false, rainProb: 90, minTemp: 10 };
+  assert.equal(L.checklistConditions(base).paraplu, true);
+  assert.equal(L.checklistConditions({ ...base, snow: true }).paraplu, false);
+  assert.equal(L.checklistConditions({ ...base, umbrellaUseless: true }).paraplu, false);
+  const cold = L.checklistConditions({ ...base, minTemp: 3 });
+  assert.equal(cold.sjaal && cold.handschoenen, true);
+  assert.equal(L.checklistConditions({ ...base, minTemp: 8 }).handschoenen, false);
 });

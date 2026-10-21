@@ -5,11 +5,11 @@
   "description": "Jas aan of niet? De officieuze DIGHV pauze-scanner.",
   "lang": "nl",
   "dir": "ltr",
-  "start_url": "/Moetikeenjasaan.paul/",
-  "scope": "/Moetikeenjasaan.paul/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#fdfcf7",
+  "background_color": "#f3f5f8",
   "theme_color": "#003a71",
   "categories": ["weather", "utilities", "productivity"],
   "icons": [
@@ -19,8 +19,8 @@
     { "src": "icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "Looplog", "short_name": "Looplog", "description": "Bijhouden wie er meeliep", "url": "/Moetikeenjasaan.paul/#log", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
-    { "name": "Hoe werkt dit?", "short_name": "Uitleg", "url": "/Moetikeenjasaan.paul/#uitleg", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] }
+    { "name": "Looplog", "short_name": "Looplog", "description": "Bijhouden wie er meeliep", "url": "./#log", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "Hoe werkt dit?", "short_name": "Uitleg", "url": "./#uitleg", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] }
   ],
   "screenshots": [
     { "src": "screenshots/desktop.png", "sizes": "1280x800", "type": "image/png", "form_factor": "wide", "label": "Jasadvies op desktop" },

@@ -229,3 +229,35 @@ Detector na de fixes: 3 van 15 patronen over. Twee daarvan gaan over Inter als l
 ### Git-historie
 
 `.vscode/launch.json` en `log.json` zijn met `git filter-repo` uit de historie gehaald, en een commitbericht met een gebruikersnaam is aangepast. Daarna zijn de branches geforceerd gepusht. Iedereen met een lokale kopie moet opnieuw clonen. Oude pull requests op GitHub (`refs/pull/*`) verwijzen nog naar de oude commits; die zijn alleen via GitHub Support volledig te verwijderen.
+
+## 12. Controleronde: is alles echt verwerkt?
+
+Na de merge van de impeccable-ronde hebben vier controleurs elke bevinding opnieuw tegen de code gelegd. Ze keken naar dit rapport, het rapport van juni en de impeccable-ronde, en ook naar de ruwe rapporten van de eerste reviewers, omdat daar details in stonden die in de samenvatting waren weggevallen.
+
+| Bron | Gecontroleerd | In orde | Half verwerkt |
+|---|---|---|---|
+| Functionaliteit en techniek (F, T, sectie 9) | 38 | 26 | 12 |
+| Design en toegankelijkheid (D, A) | 36 | 24 | 12 |
+| UX, aanbevelingen en ideeën (U, sectie 7, I) | 40 | 27 | 13 |
+| Juni-rapport | 25 | 24 | 1 |
+| Impeccable-ronde | 70 | 54 | 16 |
+
+Een deel van de halve punten kwam bij meerdere controleurs terug. Alle halve punten zijn daarna opgelost. De belangrijkste:
+
+- **Advies**: de gevoelstemperatuur is nu de laagste over het hele venster. Bij aanhoudende motregen meldt de app niet meer dat de regen stopt na één droog kwartier. Bij storm zonder droog moment staat er "Vandaag geen goed wandelmoment".
+- **Pauze**: de pauzekaart geeft een jasadvies voor je eigen lunchtijd. Regenkans en de app-badge gebruiken het juiste uurslot: Open-Meteo telt een uur over het voorgaande uur. In het weekend is er geen beste moment voor vandaag.
+- **Vergelijking**: gisteren, vandaag en morgen kijken naar 11:00 tot 15:00. Regen 's nachts maakt een dag niet meer nat.
+- **Checklist**: geen jassen meer (die noemt het advies al) en geen paraplu bij sneeuw. De regels staan in `logic.js`, net als alle drempels (`THRESHOLDS`), en zijn getest.
+- **Robuustheid**: een kapotte of onvolledige opgeslagen of opgehaalde weerset laat de app niet meer hangen. Data van meer dan 6 uur oud geeft geen jasadvies meer.
+- **Privacy en PWA**: weerdata in de service worker staat in een eigen, kleine cache (maximaal 6 antwoorden) die bij een locatiewissel wordt gewist. Manifest-URL's zijn relatief. OpenStreetMap staat met licentievermelding in beeld.
+- **Releaselog**: leesbare NL- en EN-teksten voor alle releases. Commits verschijnen alleen nog als ze nieuwer zijn dan de laatste geschreven release, zonder merge-commits.
+- **Design**: Inter toont nu echt 700 en 800 (het lettertype stond op 400 tot 600). De keuzelijst heeft weer een pijltje. In donker thema is de waarschuwing oranje in plaats van bijna hetzelfde geel. Een rand vervaagt als de uurstrook nog verder scrolt. Afrondingen en kleuren lopen via tokens.
+- **Toegankelijkheid**: meldingen (opgeslagen, toast, bedankje) worden voorgelezen. Na een actie staat de focus op een logische plek in plaats van op de pagina. Op een liggende telefoon blijft de h1 voor schermlezers bestaan en staat de rondleiding rechts. Tikdoelen zijn op touchscreens overal 44 px.
+- **Layout**: regen staat direct onder het advies, daarna de pauze en "Jouw type". De uitlegregel bij "Jouw type" is ook op mobiel zichtbaar. Verspringen bij de eerste keer laden: telefoon van 0,29 naar 0,09, desktop 0,03.
+- **Thema**: "Automatisch" blijft donker na zonsondergang (bestaande keuze), maar flitst niet meer van licht naar donker: de app onthoudt de tijden van zon op en zon onder.
+
+Bewust niet veranderd:
+- "Nieuw" blijft een tab naast de footerlink. Een releaselog buiten het tabpatroon zou de ARIA-tabs breken.
+- Het jaslabel staat als gele chip boven de tips en telt niet mee voor het maximum van drie.
+- Route- en pasteksten blijven staan; dat koos het team.
+
