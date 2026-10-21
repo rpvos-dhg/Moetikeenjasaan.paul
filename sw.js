@@ -1,4 +1,4 @@
-const CACHE = 'dighv-v9';
+const CACHE = 'dighv-v10';
 // Relatieve paden: werkt op GitHub Pages, een eigen domein en lokaal.
 const PRECACHE = [
   './',

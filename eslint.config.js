@@ -11,7 +11,7 @@ const logic = Object.fromEntries([
   'mergeHourlyByTime', 'dataTimestamp', 'hourlyNowIndex', 'hourlyIndexAtHour', 'POLLEN_KEYS',
   'POLLEN_THRESHOLDS', 'parsePollen', 'highPollenKeys', 'PREF_OFFSETS', 'computeConditions',
   'jacketLevel', 'adviceKeys', 'extremePool', 'jacketScale', 'calibrate', 'minutesOfDay',
-  'scoreBreakBlocks', 'bestBreakMoment', 'topBreakOptions', 'rainChange', 'logStats',
+  'scoreBreakBlocks', 'bestBreakMoment', 'topBreakOptions', 'WET_SLOT_MM', 'nowcast', 'dayScore', 'logStats',
   'achievements', 'seasonalMoment',
 ].map(name => [name, 'readonly']));
 

@@ -15,8 +15,8 @@
 <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Pauze-advies">
-<script src="theme-init.js?v=16"></script>
-<link rel="stylesheet" href="style.css?v=16">
+<script src="theme-init.js?v=17"></script>
+<link rel="stylesheet" href="style.css?v=17">
 </head>
 <body>
 <div class="wrapper">
@@ -42,8 +42,8 @@
   <div class="tabs" role="tablist">
     <button class="tab active" id="tab-advice" data-tab="advice" data-i18n="tabAdvice" role="tab" aria-selected="true" aria-controls="view-advice-wrap" type="button">Advies</button>
     <button class="tab" id="tab-log" data-tab="log" data-i18n="tabLog" role="tab" aria-selected="false" aria-controls="view-log" tabindex="-1" type="button">Looplog</button>
-    <button class="tab" id="tab-explain" data-tab="explain" data-i18n="tabExplain" role="tab" aria-selected="false" aria-controls="view-explain" tabindex="-1" type="button">Hoe werkt dit?</button>
-    <button class="tab" id="tab-changelog" data-tab="changelog" data-i18n="tabChangelog" role="tab" aria-selected="false" aria-controls="view-changelog" tabindex="-1" type="button">Releaselog</button>
+    <button class="tab" id="tab-explain" data-tab="explain" data-i18n="tabExplain" role="tab" aria-selected="false" aria-controls="view-explain" tabindex="-1" type="button">Uitleg</button>
+    <button class="tab" id="tab-changelog" data-tab="changelog" data-i18n="tabChangelog" role="tab" aria-selected="false" aria-controls="view-changelog" tabindex="-1" type="button">Nieuw</button>
   </div>
 </nav>
 
@@ -79,8 +79,8 @@
 <div class="advice-grid">
 
   <div class="col col-left">
-  <section class="advice-card" id="advice" data-tour="advice" aria-labelledby="adviceLabel">
-    <h2 class="advice-label" id="adviceLabel" data-i18n="adviceLabel">Advies voor nu + 30 min</h2>
+    <section class="advice-card" id="advice" data-tour="advice" aria-labelledby="adviceLabel">
+    <h2 class="advice-label" id="adviceLabel"><span data-i18n="adviceLabel">Advies voor nu + 30 min</span><span class="advice-updated" id="adviceUpdated"></span></h2>
     <div class="verdict" id="verdict">
       <div class="loading"><span class="spinner" aria-hidden="true"></span><span data-i18n="weatherLoading">Weer ophalen...</span></div>
     </div>
@@ -94,6 +94,7 @@
         <span class="jacket-meter-seg" data-level="None"></span>
         <span class="jacket-meter-needle" id="jacketNeedle"></span>
       </div>
+      <div class="jacket-meter-ends" aria-hidden="true"><span data-i18n="meterCold">koud</span><span data-i18n="meterWarm">warm</span></div>
       <p class="jacket-meter-note" id="jacketNote"></p>
     </div>
     <p class="verdict-detail" id="detail"></p>
@@ -107,12 +108,32 @@
         <button type="button" class="feedback-btn" data-feedback="cold" data-i18n="feedbackCold">Te koud</button>
         <button type="button" class="feedback-btn" data-feedback="ok" data-i18n="feedbackOk">Klopte</button>
         <button type="button" class="feedback-btn" data-feedback="warm" data-i18n="feedbackWarm">Te warm</button>
+        <button type="button" class="feedback-btn subtle" data-feedback="skip" data-i18n="feedbackSkip">Niet buiten geweest</button>
       </div>
     </div>
     <div class="sr-only" id="adviceLive" role="status" aria-live="polite"></div>
   </section>
 
-  <div class="conditions-panel">
+    <details class="pref-card" id="prefCard" data-tour="pref">
+      <summary class="pref-summary">
+        <h2 class="card-title" id="prefTitle" data-i18n="yourType">Jouw type</h2>
+        <span class="pref-current" id="prefCurrent"></span>
+        <span class="pref-edit" data-i18n="prefEdit">Wijzig</span>
+      </summary>
+      <div class="pref-body">
+        <p class="card-hint" data-i18n="prefHint">Hoe snel heb jij het koud? We onthouden het op dit toestel.</p>
+        <div class="pref-options segmented" role="group" aria-labelledby="prefTitle">
+        <button class="pref-btn" data-pref="cold" data-i18n="prefCold" type="button">Kouwelijk</button>
+        <button class="pref-btn active" data-pref="normal" data-i18n="prefNormal" type="button">Normaal</button>
+        <button class="pref-btn" data-pref="warm" data-i18n="prefWarm" type="button">Warm&shy;bloedig</button>
+      </div>
+      <div class="pref-row">
+        <label for="lunchTime" data-i18n="lunchTimeLabel">Mijn lunch</label>
+        <select id="lunchTime" class="select"></select>
+      </div>
+      <p class="calibration-note" id="calibrationNote" hidden></p>
+      </div>
+    </details>
 
     <section class="break-card" data-tour="lunch" aria-labelledby="breakTitle">
       <h2 class="card-title" id="breakTitle" data-i18n="nextBreak">Volgende pauze</h2>
@@ -134,6 +155,13 @@
       <div class="rain-summary" id="rainSummary"></div>
     </section>
 
+    <section class="checklist-card" data-tour="checklist" aria-labelledby="checklistTitle">
+      <h2 class="card-title" id="checklistTitle" data-i18n="checklistTitle">Wat mee naar buiten?</h2>
+      <div class="checklist-items" id="checklist"></div>
+    </section>
+  </div>
+
+  <div class="col col-right">
     <section class="weather-card" data-tour="forecast" aria-labelledby="forecastTitle">
       <h2 class="card-title" id="forecastTitle" data-i18n="comingHours">Komende uren</h2>
       <div class="forecast" id="forecast" role="list" aria-labelledby="forecastTitle" tabindex="0"></div>
@@ -143,38 +171,6 @@
       <h2 class="card-title" id="conditionsTitle" data-i18n="currentConditions">Weer nu</h2>
       <div class="metrics" id="metrics"></div>
     </section>
-
-  </div>
-  </div>
-
-  <div class="col col-right">
-  <div class="top-side-panel">
-
-    <section class="pref-card" data-tour="pref" aria-labelledby="prefTitle">
-      <div class="card-head">
-        <h2 class="card-title" id="prefTitle" data-i18n="yourType">Jouw type</h2>
-        <p class="card-hint" data-i18n="prefHint">Hoe snel heb jij het koud? We onthouden het op dit toestel.</p>
-      </div>
-      <div class="pref-options segmented" role="group" aria-labelledby="prefTitle">
-        <button class="pref-btn" data-pref="cold" data-i18n="prefCold" type="button">Kouwelijk</button>
-        <button class="pref-btn active" data-pref="normal" data-i18n="prefNormal" type="button">Normaal</button>
-        <button class="pref-btn" data-pref="warm" data-i18n="prefWarm" type="button">Warmbloedig</button>
-      </div>
-      <div class="pref-row">
-        <label for="lunchTime" data-i18n="lunchTimeLabel">Mijn lunch</label>
-        <select id="lunchTime" class="select"></select>
-      </div>
-      <p class="calibration-note" id="calibrationNote" hidden></p>
-    </section>
-
-    <section class="checklist-card" data-tour="checklist" aria-labelledby="checklistTitle">
-      <h2 class="card-title" id="checklistTitle" data-i18n="checklistTitle">Wat mee naar buiten?</h2>
-      <div class="checklist-items" id="checklist"></div>
-    </section>
-
-  </div>
-
-  <div class="info-panel">
 
     <section class="pollen-card" data-tour="pollen" aria-labelledby="pollenTitle">
       <h2 class="card-title" id="pollenTitle" data-i18n="pollenOverview">Pollen</h2>
@@ -186,8 +182,6 @@
       <p class="comparison-summary" id="comparisonSummary"></p>
       <div class="comparison-grid" id="comparisonGrid"></div>
     </section>
-
-  </div>
   </div>
 
 </div>
@@ -247,13 +241,13 @@
 </div>
 
 <footer>
-  <p data-i18n-html="footerHtml">Gebouwd door en voor <strong>DIGHV</strong> · Weerdata via Open-Meteo · Geen officieel ANWB-product</p>
-  <p class="footer-version" id="appVersion"></p>
+  <p data-i18n-html="footerHtml">Gebouwd door en voor <strong>DIGHV</strong> · Weerdata via Open&#8209;Meteo · Geen officieel ANWB-product</p>
+  <p class="footer-version"><a href="#releaselog" class="footer-link"><span id="appVersion"></span><span data-i18n="footerWhatsNew">Wat is er nieuw</span></a></p>
 </footer>
 
 </div>
 
-<script src="logic.js?v=16"></script>
-<script src="script.js?v=16"></script>
+<script src="logic.js?v=17"></script>
+<script src="script.js?v=17"></script>
 </body>
 </html>

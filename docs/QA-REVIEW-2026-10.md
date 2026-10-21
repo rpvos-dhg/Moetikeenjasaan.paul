@@ -153,6 +153,8 @@ De site en de repo zijn openbaar. Per punt is het risico klein, maar samen is he
 
 ## 7. Open aanbevelingen op volgorde
 
+Stand 21 oktober: alle zeven punten zijn uitgevoerd in de vervolgronde (zie sectie 10). De lijst blijft staan als verslag.
+
 1. Mobiele volgorde herzien (U3, D2, D13): advies en regen bovenaan, "Jouw type" compact onder het advies, pollen inklappen als alles laag is, hero kleiner.
 2. Beste pauzetijd per kwartier rond de echte pauzetijd, met "regen begint om 12:30" (I5, U7).
 3. Rondleiding inkorten tot ~4 stappen (U12).
@@ -183,5 +185,47 @@ Verder:
 
 - Komt `precipitation_probability` voor de standaardlocatie (KNMI-model) gevuld binnen, of gebruikt de app de terugval? Te zien in DevTools bij het tweede `api.open-meteo.com`-verzoek.
 - Verschijnen regengrafiek, "Voelt als" en de wachtstrook zoals verwacht bij een echte bui.
-- De service worker op GitHub Pages: na deploy één keer herladen, daarna moet `dighv-v8` de enige cache van de app zijn.
+- De service worker op GitHub Pages: na deploy één keer herladen, daarna moet `dighv-v10` de enige cache van de app zijn.
 - De Content-Security-Policy op de live site: geen meldingen in de console.
+
+## 10. Vervolgronde: alles doorgevoerd
+
+Na deze ronde zijn alle bevindingen uit sectie 1 tot en met 5 en alle ideeën uit sectie 8 verwerkt. Het team besliste over de punten uit sectie 6:
+
+| Punt | Besluit |
+|---|---|
+| Namen in de code | Blijven staan als standaardlijst; per toestel aan te passen via Looplog → Team bewerken |
+| Toegangsinformatie in de checklist | Blijft staan |
+| Git-historie | Wordt opgeschoond (laatste stap, zie hieronder) |
+| Teamstemming (I18) | Zonder opslag: alleen een deelknop met twee of drie droge tijdstippen |
+
+Belangrijkste wijzigingen:
+
+- Rekenlogica apart in `logic.js` met unit tests (`node --test`), ESLint en een GitHub Action.
+- Fonts zelf gehost, thema vóór de eerste paint, data in unixtime, laatst bekende data direct zichtbaar bij openen.
+- Kalibratie, pauzevenster, beste moment per kwartier, jas-o-meter, windstoten en dauwpunt, looplog met weersnapshot, statistieken en badges, ongedaan maken, seizoensmomenten.
+- Rondleiding van 4 stappen, ARIA-tabs, één `main`-landmark, live region voor het advies.
+
+Gemeten in de testopstelling: axe-core 0 meldingen (licht, donker, mobiel, warm, fout; alle tabs), CLS van 0,21 naar 0,03, geen horizontale scroll van 320 tot 1280 px, geen CSP-meldingen.
+
+## 11. Impeccable-ronde
+
+Vier reviewers draaiden daarna de impeccable-skill: audit, critique, polish (met typeset en layout) en harden (met clarify). Uitgangsscore: audit 14/20 ("pass, krap"), critique 26/40. De automatische detector vond 15 patronen.
+
+| Thema | Wat er veranderd is |
+|---|---|
+| Structuur | De DOM staat in de mobiele leesvolgorde, zonder CSS `order`. Beeld- en focusvolgorde zijn nu gelijk. "Jouw type" is een compacte uitklapregel onder het advies. |
+| Visueel | Rasterachtergrond, decoratieve cirkel en gekleurde zijstrepen weg. Koel grijs papier. Kaarttitels in zinsvorm, cijfers in Inter met vaste breedte. LIVE-stip pulseert niet meer. |
+| Typografie en maten | Alle tekstmaten in rem. Uitleg in 16 px met een maximale regellengte. Tikdoelen minimaal 44 px op touchscreens. |
+| Advies | Eén jasterm per advies, max. drie tips als lijst, één regendrempel. Regen begint/stopt alleen nog in de wachtstrook, met sneeuwwoorden bij sneeuw. Bij storm geen deelknop, jas-o-meter of feedback. |
+| Teksten | "Hoe was het buiten?" met "Ik had het koud / Precies goed / Ik had het warm / Niet buiten geweest". Bijwerktijd in het advieslabel. Kortere tabnamen (Uitleg, Nieuw). Inhoudsopgave in de uitleg. |
+| Robuustheid | Opslag vol: oude cache wissen en opnieuw proberen, anders een melding. Lege kaarten verborgen tijdens laden en bij een fout. Meldingen wisselen mee van taal. Kalibratie heeft een grens en een knop Terugzetten. Looplog toont 50 wandelingen met "oudere tonen". |
+| Delen | Als delen en klembord niet werken, verschijnt de tekst in een selecteerbaar veld. |
+
+Niet overgenomen: het voorstel om route- en pasteksten algemener te maken (keuze van het team, zie sectie 10).
+
+Detector na de fixes: 3 van 15 patronen over. Twee daarvan gaan over Inter als lettertype; dat is een bewuste keuze. De derde ("dark glow") is een focusring en geen gloed. Een nieuwe audit- en critique-score is niet gemeten.
+
+### Git-historie
+
+`.vscode/launch.json` en `log.json` zijn met `git filter-repo` uit de historie gehaald, en een commitbericht met een gebruikersnaam is aangepast. Daarna zijn de branches geforceerd gepusht. Iedereen met een lokale kopie moet opnieuw clonen. Oude pull requests op GitHub (`refs/pull/*`) verwijzen nog naar de oude commits; die zijn alleen via GitHub Support volledig te verwijderen.

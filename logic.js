@@ -200,44 +200,50 @@ function jacketLevel(effectiveFeel) {
   return 'Freezing';
 }
 
+const MAX_TIPS = 3;
+
 // Vertaalt condities naar i18n-sleutels, zodat de beslisregels los te testen zijn.
 // pollenLevel: 'very high' | 'high' | null.
+// Eén jasterm per situatie: noemt het oordeel al een jas (regen, sneeuw) of is
+// het storm, dan komt er geen apart jaslabel bij.
 function adviceKeys(cond, pollenLevel = null) {
   const level = jacketLevel(cond.effectiveFeel);
+  const cold = level === 'Winter' || level === 'Freezing';
   let verdict = `verdict${level}`;
-  let jacket = `jacket${level}`;
-  const detail = [`detail${level}`];
+  let jacket = level === 'None' ? null : `jacket${level}`;
+  let detail = `detail${level}`;
 
   if (cond.stormy) {
     verdict = 'verdictStorm';
-    detail.splice(0, 1, cond.thunder ? 'detailThunder' : 'detailStorm');
+    detail = cond.thunder ? 'detailThunder' : 'detailStorm';
+    jacket = null;
+  } else if (cond.wet && cond.snow) {
+    verdict = 'verdictSnow'; detail = 'detailSnow'; jacket = null;
+  } else if (cond.wet && cond.effectiveFeel >= 15) {
+    verdict = 'verdictRain'; detail = 'detailRain'; jacket = null;
   } else if (cond.wet) {
-    if (cond.snow) {
-      verdict = 'verdictSnow'; detail.push('detailSnowAppend');
-    } else if (cond.effectiveFeel >= 15) {
-      verdict = 'verdictRain'; jacket = 'jacketRain'; detail.splice(0, 1, 'detailRain');
-    } else {
-      verdict = 'verdictJacketRain'; detail.push('detailRainAppend');
-    }
+    verdict = 'verdictJacketRain'; detail = cold ? 'detailJacketRainCold' : 'detailJacketRain'; jacket = null;
   }
 
-  // Alleen het jastype is geel; de rest zijn neutrale tips.
-  const tips = [{ key: jacket, primary: true }];
-  if (cond.wet) tips.push({ key: cond.umbrellaUseless ? 'tipRainGear' : 'tipUmbrella' });
+  // Tips op volgorde van belang; hooguit drie, zodat ze gelezen worden.
+  const tips = [];
+  if (cond.wet && !cond.snow) tips.push({ key: cond.umbrellaUseless ? 'tipRainGear' : 'tipUmbrella' });
+  else if (cond.wet && cond.snow) tips.push({ key: 'tipSlippery' });
   else if (cond.rainProb >= 30) tips.push({ key: 'tipRainChance', args: [cond.rainProb] });
-  if (cond.gust >= 50 && cond.gust > cond.wind + 15) tips.push({ key: 'tipGusts', args: [Math.round(cond.gust)] });
-  else if (cond.wind >= 40) tips.push({ key: 'tipStormWind' });
+  if (cond.gust >= 50 && cond.gust > cond.wind + 15) tips.push({ key: 'tipGusts', args: [Math.round(cond.gust)], warn: true });
+  else if (cond.wind >= 40) tips.push({ key: 'tipStormWind', warn: true });
   else if (cond.wind >= 25) tips.push({ key: 'tipStrongWind' });
-  if (cond.minTemp <= 3) { tips.push({ key: 'tipScarf' }); tips.push({ key: 'tipGloves' }); }
+  if (cond.fog) tips.push({ key: 'tipFog', warn: true });
+  // Zeer veel pollen is een gezondheidstip: die gaat voor comforttips.
+  if (pollenLevel === 'very high') tips.push({ key: 'tipPollenVeryHigh' });
+  if (cond.minTemp <= 3) tips.push({ key: 'tipScarfGloves' });
   else if (cond.minTemp <= 8) tips.push({ key: 'tipScarfNice' });
   if (cond.uv >= 7) tips.push({ key: 'tipUvHigh' });
   else if (cond.uv >= 3) tips.push({ key: 'tipUvMid' });
   if (cond.muggy) tips.push({ key: 'tipMuggy' });
-  if (cond.fog) tips.push({ key: 'tipFog' });
-  if (pollenLevel === 'very high') tips.push({ key: 'tipPollenVeryHigh' });
-  else if (pollenLevel === 'high') tips.push({ key: 'tipPollenHigh' });
+  if (pollenLevel === 'high') tips.push({ key: 'tipPollenHigh' });
 
-  return { verdict, jacket, detail, tips, level };
+  return { verdict, jacket, detail, tips: tips.slice(0, MAX_TIPS), level };
 }
 
 // Knipoog bij bijzonder weer: welke tekstpool past vandaag (of geen).
@@ -326,21 +332,37 @@ function topBreakOptions(w, nowMs, opts, n = 3) {
   return picked.sort((a, b) => a.startMs - b.startMs);
 }
 
-// Wanneer begint of stopt de regen in de komende 3 uur?
-function rainChange(w, nowMs) {
+// Eén drempel voor "het regent in dit kwartier", zodat wachtstrook en grafiek
+// elkaar niet tegenspreken.
+const WET_SLOT_MM = 0.1;
+
+// Regent het nu, en wanneer begint of stopt het in de komende 3 uur?
+// Geeft { raining, snow, changeAtMs (of null), continues } of null zonder data.
+function nowcast(w, nowMs) {
   const m = w.minutely_15;
   if (!m?.time) return null;
   const start = m.time.findIndex(ts => ts >= nowMs);
   if (start === -1) return null;
-  const wet = i => (m.precipitation[i] ?? 0) >= 0.1;
-  const wetNow = wet(start);
-  for (let i = start + 1; i < Math.min(start + 12, m.time.length); i++) {
-    if (wet(i) !== wetNow) {
+  const wet = i => (m.precipitation[i] ?? 0) >= WET_SLOT_MM;
+  const raining = wet(start) || (w.current?.precipitation ?? 0) >= WET_SLOT_MM;
+  const code = w.current?.weather_code ?? 0;
+  const snow = (code >= 71 && code <= 77) || code === 85 || code === 86;
+  const end = Math.min(start + 12, m.time.length);
+  // Begin bij het huidige kwartier: meldt "nu" regen maar is dit kwartier al
+  // droog, dan stopt het nu.
+  for (let i = start; i < end; i++) {
+    if (wet(i) !== raining) {
       // Slot i telt het kwartier ervóór: daar begint (of stopt) het.
-      return { type: wetNow ? 'stops' : 'starts', atMs: m.time[i] - 15 * 60000 };
+      return { raining, snow, changeAtMs: m.time[i] - 15 * 60000, continues: false };
     }
   }
-  return null;
+  return { raining, snow, changeAtMs: null, continues: raining };
+}
+
+// Wandelweer per dag: dicht bij 18 °C is het fijnst, regen en wind kosten punten.
+function dayScore(day) {
+  const t = day.tempMax ?? 15;
+  return -Math.abs(t - 18) - ((day.rain ?? 0) > 0.5 ? 5 : 0) - ((day.wind ?? 0) > 25 ? 3 : 0);
 }
 
 // ─── Looplog ─────────────────────────────────────────────────────────────────
@@ -423,7 +445,7 @@ if (typeof module !== 'undefined' && module.exports) {
     normalizeForecast, mergeHourlyByTime, dataTimestamp, hourlyNowIndex, hourlyIndexAtHour,
     POLLEN_KEYS, POLLEN_THRESHOLDS, parsePollen, highPollenKeys,
     PREF_OFFSETS, computeConditions, jacketLevel, adviceKeys, extremePool, jacketScale, calibrate,
-    minutesOfDay, scoreBreakBlocks, bestBreakMoment, topBreakOptions, rainChange,
+    minutesOfDay, scoreBreakBlocks, bestBreakMoment, topBreakOptions, WET_SLOT_MM, nowcast, dayScore,
     logStats, achievements, seasonalMoment,
   };
 }
