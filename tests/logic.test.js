@@ -148,6 +148,9 @@ test('één jasterm: bij regen of storm geen apart jaslabel, hooguit drie tips',
   const busy = forecast({ feels: 1, temp: 2, wind: 45, gust: 70, now });
   busy.current.weather_code = 45;
   assert.ok(L.adviceKeys(L.computeConditions(busy, now, 0), 'very high').tips.length <= 3);
+  // Zeer veel pollen valt niet weg achter comforttips.
+  const windy = forecast({ feels: 7, temp: 7, wind: 30, prob: 40, now });
+  assert.ok(L.adviceKeys(L.computeConditions(windy, now, 0), 'very high').tips.some(x => x.key === 'tipPollenVeryHigh'));
   assert.equal(L.adviceKeys(L.computeConditions(forecast({ feels: 25, now }), now, 0)).jacket, null);
 });
 
@@ -189,6 +192,14 @@ test('nowcast: regen begint, stopt of blijft', () => {
   assert.equal(stops.changeAtMs, now + 30 * 60000);
   const stays = L.nowcast(forecast({ rainFrom: now - H, now }), now);
   assert.equal(stays.continues, true);
+  // Bui net voorbij: "nu" nog nat, het huidige kwartier al droog.
+  const mid = now + 5 * 60000;
+  const ended = forecast({ rainFrom: mid + 2 * H, now: mid });
+  ended.current.precipitation = 0.3;
+  const nc = L.nowcast(ended, mid);
+  assert.equal(nc.raining, true);
+  assert.equal(nc.continues, false);
+  assert.ok(nc.changeAtMs <= mid);
 });
 
 test('dagscore: dicht bij 18 °C wint, warmer is niet altijd beter', () => {
