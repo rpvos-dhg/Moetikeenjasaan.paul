@@ -234,13 +234,14 @@ function adviceKeys(cond, pollenLevel = null) {
   else if (cond.wind >= 40) tips.push({ key: 'tipStormWind', warn: true });
   else if (cond.wind >= 25) tips.push({ key: 'tipStrongWind' });
   if (cond.fog) tips.push({ key: 'tipFog', warn: true });
+  // Zeer veel pollen is een gezondheidstip: die gaat voor comforttips.
+  if (pollenLevel === 'very high') tips.push({ key: 'tipPollenVeryHigh' });
   if (cond.minTemp <= 3) tips.push({ key: 'tipScarfGloves' });
   else if (cond.minTemp <= 8) tips.push({ key: 'tipScarfNice' });
   if (cond.uv >= 7) tips.push({ key: 'tipUvHigh' });
   else if (cond.uv >= 3) tips.push({ key: 'tipUvMid' });
   if (cond.muggy) tips.push({ key: 'tipMuggy' });
-  if (pollenLevel === 'very high') tips.push({ key: 'tipPollenVeryHigh' });
-  else if (pollenLevel === 'high') tips.push({ key: 'tipPollenHigh' });
+  if (pollenLevel === 'high') tips.push({ key: 'tipPollenHigh' });
 
   return { verdict, jacket, detail, tips: tips.slice(0, MAX_TIPS), level };
 }
@@ -347,7 +348,9 @@ function nowcast(w, nowMs) {
   const code = w.current?.weather_code ?? 0;
   const snow = (code >= 71 && code <= 77) || code === 85 || code === 86;
   const end = Math.min(start + 12, m.time.length);
-  for (let i = start + 1; i < end; i++) {
+  // Begin bij het huidige kwartier: meldt "nu" regen maar is dit kwartier al
+  // droog, dan stopt het nu.
+  for (let i = start; i < end; i++) {
     if (wet(i) !== raining) {
       // Slot i telt het kwartier ervóór: daar begint (of stopt) het.
       return { raining, snow, changeAtMs: m.time[i] - 15 * 60000, continues: false };

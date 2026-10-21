@@ -51,7 +51,7 @@ const i18n = {
     comingHours: 'Komende uren', forecastLabel: 'Uurverwachting',
     rainPer15: 'Regen per 15 minuten', next2hours: 'komende 2 uur',
     pollenOverview: 'Pollen', todayVsTomorrow: 'Gisteren · vandaag · morgen',
-    footerHtml: 'Gebouwd door en voor <strong>DIGHV</strong> · Weerdata via Open-Meteo · Geen officieel ANWB-product',
+    footerHtml: 'Gebouwd door en voor <strong>DIGHV</strong> · Weerdata via Open&#8209;Meteo · Geen officieel ANWB-product',
     pageTitle: 'Jas of geen jas? | DIGHV Pauze-advies',
     editLocation: 'Locatie wijzigen',
     versionLabel: n => `Versie 1.${n} · `, footerWhatsNew: 'Wat is er nieuw',
@@ -61,7 +61,7 @@ const i18n = {
     locationSource: 'Weer via Open-Meteo · plaatsnaam via OpenStreetMap',
     locationDefaultLabel: 'Mijn locatie',
     locationCityLabel: city => `Mijn locatie · ${city}`,
-    locationSince: date => `Bewaard sinds ${date}.`,
+    locationSince: ms => `Bewaard sinds ${new Date(ms).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' })}.`,
     locationFetching: 'Locatie ophalen...', cityFetching: 'Plaatsnaam ophalen...',
     locationActive: 'Je eigen locatie wordt gebruikt.',
     locationActiveCity: city => `Je eigen locatie wordt gebruikt (${city}).`,
@@ -84,7 +84,7 @@ const i18n = {
     detailWinter: 'Koud. Trek iets warms aan voordat je naar buiten stapt.',
     verdictFreezing: 'Dikke jas + laagjes', jacketFreezing: 'Winterjas + laagjes',
     detailFreezing: 'Echt koud. Een goede winterjas is geen overbodige luxe.',
-    verdictRain: 'Regenjas', jacketRain: 'Regenjas',
+    verdictRain: 'Regenjas',
     detailRain: 'Het is warm genoeg, maar er komt regen. Pak iets waterdichts.',
     verdictJacketRain: 'Waterdichte jas',
     detailJacketRain: 'Fris en nat. Een waterdichte jas houdt je droog.',
@@ -167,7 +167,7 @@ const i18n = {
     logShowOlder: n => `Oudere wandelingen tonen (${n})`,
     saveFailed: 'Opslaan op dit toestel lukte niet. Het blijft staan tot je de pagina sluit.',
     logNobodyWalked: '<em>Niemand meegelopen</em>',
-    logWeather: (feels, rain) => `${feels} °C${rain >= 0.1 ? `, ${rain.toLocaleString('nl-NL')} mm regen` : ', droog'}`,
+    logWeather: (feels, rain) => [feels === null ? null : `${feels} °C`, rain ? `${rain} mm regen` : 'droog'].filter(Boolean).join(', '),
     toastDeleted: 'Wandeling verwijderd.', toastUndo: 'Ongedaan maken',
     teamEdit: 'Team bewerken', teamAddLabel: 'Naam toevoegen', teamAdd: 'Toevoegen',
     teamReset: 'Standaardlijst terugzetten', teamRemove: name => `${name} verwijderen`,
@@ -254,7 +254,7 @@ const i18n = {
     comingHours: 'Next few hours', forecastLabel: 'Hourly forecast',
     rainPer15: 'Rain per 15 minutes', next2hours: 'next 2 hours',
     pollenOverview: 'Pollen', todayVsTomorrow: 'Yesterday · today · tomorrow',
-    footerHtml: 'Built by and for <strong>DIGHV</strong> · Weather data via Open-Meteo · Not an official ANWB product',
+    footerHtml: 'Built by and for <strong>DIGHV</strong> · Weather data via Open&#8209;Meteo · Not an official ANWB product',
     pageTitle: 'Jacket or no jacket? | DIGHV Break advice',
     editLocation: 'Change location',
     versionLabel: n => `Version 1.${n} · `, footerWhatsNew: "What's new",
@@ -264,7 +264,7 @@ const i18n = {
     locationSource: 'Weather via Open-Meteo · place name via OpenStreetMap',
     locationDefaultLabel: 'My location',
     locationCityLabel: city => `My location · ${city}`,
-    locationSince: date => `Saved since ${date}.`,
+    locationSince: ms => `Saved since ${new Date(ms).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}.`,
     locationFetching: 'Getting location...', cityFetching: 'Looking up place name...',
     locationActive: 'Using your location.',
     locationActiveCity: city => `Using your location (${city}).`,
@@ -287,7 +287,7 @@ const i18n = {
     detailWinter: 'Cold. Put on something warm before you step outside.',
     verdictFreezing: 'Warm coat + layers', jacketFreezing: 'Winter coat + layers',
     detailFreezing: 'Properly cold. A good winter coat is no luxury.',
-    verdictRain: 'Rain jacket', jacketRain: 'Rain jacket',
+    verdictRain: 'Rain jacket',
     detailRain: 'Warm enough, but rain is coming. Grab something waterproof.',
     verdictJacketRain: 'Waterproof jacket',
     detailJacketRain: 'Chilly and wet. A waterproof jacket keeps you dry.',
@@ -370,7 +370,7 @@ const i18n = {
     logShowOlder: n => `Show older walks (${n})`,
     saveFailed: "Couldn't save on this device. It stays until you close the page.",
     logNobodyWalked: '<em>Nobody came along</em>',
-    logWeather: (feels, rain) => `${feels} °C${rain >= 0.1 ? `, ${rain} mm rain` : ', dry'}`,
+    logWeather: (feels, rain) => [feels === null ? null : `${feels} °C`, rain ? `${rain} mm rain` : 'dry'].filter(Boolean).join(', '),
     toastDeleted: 'Walk deleted.', toastUndo: 'Undo',
     teamEdit: 'Edit team', teamAddLabel: 'Add name', teamAdd: 'Add',
     teamReset: 'Restore default list', teamRemove: name => `Remove ${name}`,
@@ -806,7 +806,7 @@ function renderChangelogHtml() {
   return html;
 }
 
-// Inhoudsopgave bovenaan de uitleg. Geen #-links: de hash kiest het tabblad.
+// Inhoudsopgave bovenaan de uitleg. De links (#uitleg-N) kiezen ook het tabblad.
 function buildExplainToc(root) {
   const sections = [...root.querySelectorAll('.explain-section h2')];
   const nav = document.createElement('nav');
@@ -816,7 +816,7 @@ function buildExplainToc(root) {
     h.id = `uitleg-${i + 1}`;
     h.tabIndex = -1;
     const link = document.createElement('a');
-    link.href = `#${h.id}`;
+    link.href = `#${h.id}`; // werkt ook in een nieuw tabblad, zie selectTabFromHash
     link.textContent = h.textContent.replace(/^\d+\.\s*/, '');
     link.addEventListener('click', e => {
       e.preventDefault();
@@ -1225,9 +1225,9 @@ function renderLocationUi(status) {
   if (status !== undefined) setLocationStatus(...(status || [null]));
   else if (locationStatusState) setLocationStatus(locationStatusState.key, ...locationStatusState.args);
   else if (currentLocation.mode === 'current' && currentLocation.savedAt) {
-    // De eigen locatie blijft bewaard; laat zien sinds wanneer.
-    const since = new Date(currentLocation.savedAt).toLocaleDateString(t('dateLocale'), { day: 'numeric', month: 'short' });
-    setLocationStatus('locationSince', since);
+    // De eigen locatie blijft bewaard; laat zien sinds wanneer. De datum wordt
+    // pas in de vertaling opgemaakt, zodat hij meewisselt van taal.
+    setLocationStatus('locationSince', currentLocation.savedAt);
   }
 }
 
@@ -1367,10 +1367,17 @@ function selectTab(tab, focus, scroll = true) {
   }
 }
 
-function selectTabFromHash() {
-  const name = Object.keys(TAB_HASHES).find(k => TAB_HASHES[k] && TAB_HASHES[k] === location.hash);
+// Ook #uitleg-3 en dergelijke (inhoudsopgave, gekopieerde link) openen de uitleg,
+// op die paragraaf. Na een klik op een link (hashchange) naar boven, bij het laden niet.
+function selectTabFromHash(event) {
+  const section = /^#uitleg-\d+$/.test(location.hash) ? document.getElementById(location.hash.slice(1)) : null;
+  const name = section ? 'explain' : Object.keys(TAB_HASHES).find(k => TAB_HASHES[k] && TAB_HASHES[k] === location.hash);
   const tab = tabs.find(tb => tb.dataset.tab === (name || 'advice'));
-  if (tab && !tab.classList.contains('active')) selectTab(tab, false, false);
+  if (tab && !tab.classList.contains('active')) selectTab(tab, false, !!event && !section);
+  if (section) {
+    section.closest('.explain-section').scrollIntoView();
+    section.focus({ preventScroll: true });
+  }
 }
 
 tabs.forEach((tab, i) => {
@@ -1580,8 +1587,11 @@ function showWeatherError() {
 
 // ─── Hulpfuncties voor de weergave ───────────────────────────────────────────
 // Eén decimaal met de juiste komma voor de taal ("0,4 mm" in het Nederlands).
+const fmt1Cache = {};
 function fmt1(n) {
-  return new Intl.NumberFormat(t('dateLocale'), { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(n);
+  const locale = t('dateLocale');
+  fmt1Cache[locale] ||= new Intl.NumberFormat(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  return fmt1Cache[locale].format(n);
 }
 
 function setNoData(on) {
@@ -1770,10 +1780,10 @@ function renderBestMoment() {
   const temp = Math.round(best.temp);
   const hIdx = hourlyNowIndex(weatherData.hourly.time, best.startMs);
   const code = weatherData.hourly.weather_code?.[hIdx] ?? 0;
-  const dry = best.rainMm < 0.1 && best.prob < 30;
+  const dry = best.rainMm < WET_SLOT_MM && best.prob < 30;
   const detail = `${temp} °C · ${dry ? t('bestMomentDry') : t('precipPreview', best.prob, weatherKind(code) === 'snow')}`;
   // Ook het beste blok is nat: zeg dat eerlijk, en noem het niet "beste".
-  const wetBest = best.rainMm >= 0.1 || best.prob >= 70;
+  const wetBest = best.rainMm >= WET_SLOT_MM || best.prob >= 70;
   const noDryHtml = wetBest ? `<p class="rain-change">${t('bestNoDry')}</p>` : '';
 
   el.innerHTML = `
@@ -1796,7 +1806,7 @@ async function shareBreak() {
   const nowMs = Date.now();
   const options = topBreakOptions(weatherData, nowMs, breakOptions(), 3);
   if (!options.length) return;
-  const parts = options.map(o => t('shareOption', hhmm(o.startMs), Math.round(o.temp), o.rainMm < 0.1 && o.prob < 30));
+  const parts = options.map(o => t('shareOption', hhmm(o.startMs), Math.round(o.temp), o.rainMm < WET_SLOT_MM && o.prob < 30));
   // "11:30, 12:00 of 12:30" in de taal van de app
   const list = typeof Intl.ListFormat === 'function'
     ? new Intl.ListFormat(t('dateLocale'), { type: 'disjunction' }).format(parts)
@@ -1885,14 +1895,14 @@ function renderRainChart() {
   const probStart = Math.max(0, nowIndex());
   const maxProb = Math.max(0, ...[0, 1, 2].map(o => hourlyProb[probStart + o] ?? 0));
   // Droog: de kaart verdwijnt en het advies zegt "droog de komende 2 uur".
-  card.hidden = !slots.length || (totalRain < 0.1 && maxProb < 30);
+  card.hidden = !slots.length || (totalRain < WET_SLOT_MM && maxProb < 30);
   if (card.hidden) return;
 
   const maxPrecip = Math.max(1, ...slots.map(s => s.precip));
   const html = slots.map(s => {
     const heightPct = s.precip > 0 ? Math.max(4, (s.precip / maxPrecip) * 100) : 2;
-    const isDry = s.precip < 0.05;
-    const valueStr = s.precip >= 0.1 ? fmt1(s.precip) : '';
+    const isDry = s.precip < WET_SLOT_MM;
+    const valueStr = isDry ? '' : fmt1(s.precip);
     return `<div class="bar-group">
       <div class="bar ${isDry ? 'dry' : ''}" style="height: ${heightPct}%">${valueStr ? `<span class="bar-value">${valueStr}</span>` : ''}</div>
       <span class="bar-label">${hhmm(s.time)}</span>
@@ -1902,7 +1912,7 @@ function renderRainChart() {
   const chart = document.getElementById('rainChart');
   chart.innerHTML = html;
   // De balken zelf zijn voor schermlezers onzichtbaar; geef de data in het label.
-  const wetSlots = slots.filter(s => s.precip >= 0.1);
+  const wetSlots = slots.filter(s => s.precip >= WET_SLOT_MM);
   chart.setAttribute('aria-label', wetSlots.length
     ? t('rainChartAria', wetSlots.map(sl => `${hhmm(sl.time)} ${fmt1(sl.precip)} mm`).join(', '), fmt1(totalRain))
     : t('rainChartAriaDry'));
@@ -2437,7 +2447,13 @@ function renderLogHistory() {
       const time = hhmm(new Date(entry.timestamp).getTime());
       const names = entry.people.map(escapeHtml).join(', ');
       const peopleStr = entry.people.length === 0 ? t('logNobodyWalked') : names;
-      const weather = entry.weather ? `<span class="log-entry-weather">${escapeHtml(t('logWeather', Number(entry.weather.feels), Number(entry.weather.rain) || 0))}</span>` : '';
+      let weather = '';
+      if (entry.weather) {
+        const feels = Number(entry.weather.feels);
+        const rain = Number(entry.weather.rain) || 0;
+        const text = t('logWeather', Number.isFinite(feels) ? Math.round(feels) : null, rain >= WET_SLOT_MM ? fmt1(rain) : null);
+        weather = `<span class="log-entry-weather">${escapeHtml(text)}</span>`;
+      }
       const deleteLabel = escapeHtml(t('logDeleteAria', time, entry.people.join(', ')));
       html += `<li class="log-entry">
         <div class="log-entry-main">
