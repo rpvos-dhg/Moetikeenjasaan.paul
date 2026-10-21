@@ -8,11 +8,11 @@ Een interne webtool voor het DIGHV-team bij ANWB. De app geeft jasadvies op basi
 
 - **Jasadvies** voor het venster nu + 30 min: gevoelstemperatuur, regen, sneeuw, onweer, storm en windstoten, met een jas-o-meter die laat zien hoe dicht je bij de volgende jas zit
 - **Jouw type en kalibratie**: kouwelijk, normaal of warmbloedig, en na de lunch "Hoe was het buiten?" zodat het advies zich aan jou aanpast
-- **Pauze en beste moment**: countdown naar je eigen lunchtijd (weekend telt door naar maandag) en het droogste half uur tussen 11:00 en 15:00
-- **Collega's vragen**: deelt twee of drie droge tijdstippen via het deelmenu of het klembord
+- **Pauze en beste moment**: countdown naar je eigen lunchtijd met het jasadvies voor dat moment (weekend telt door naar maandag), en het droogste half uur tussen 11:00 en 15:00
+- **Collega's vragen**: deelt de twee of drie beste tijdstippen via het deelmenu of het klembord
 - **Regen per 15 minuten**, alleen zichtbaar als er regen in zit, plus een regel wanneer de regen begint of stopt
 - **Checklist** die meebeweegt met het weer; afvinkjes gelden voor één dag
-- **Uurverwachting, weer nu, pollen** (ingeklapt als alles laag is) en **gisteren · vandaag · morgen**
+- **Uurverwachting, weer nu, pollen** (ingeklapt als alles laag is) en **gisteren · vandaag · morgen** voor het pauzevenster van 11:00 tot 15:00
 - **Looplog** met weersnapshot, statistieken, badges en ongedaan maken; het team is per toestel aan te passen
 - Knipogen bij extreem weer en seizoensmomenten (Koningsdag, eerste terrasdag, eerste vorst)
 - NL/EN, licht/donker/automatisch, installeerbaar als app (PWA), werkt offline met de laatst bekende data
@@ -37,7 +37,8 @@ HTML, CSS en vanilla JavaScript, zonder build-stap en zonder runtime-dependencie
 |---|---|
 | [Open-Meteo Forecast API](https://open-meteo.com/) | Temperatuur, wind, windstoten, dauwpunt, neerslag, UV, weercode |
 | [Open-Meteo Air Quality API](https://open-meteo.com/en/docs/air-quality-api) | Live pollenconcentraties |
-| [OpenStreetMap Nominatim](https://nominatim.org/) | Plaatsnaam bij "Huidige locatie" |
+| [OpenStreetMap Nominatim](https://nominatim.org/) | Plaatsnaam bij "Gebruik mijn locatie" (© OpenStreetMap-bijdragers) |
+| [GitHub API](https://docs.github.com/rest) | Versienummer en releaselog (een paar uur lokaal bewaard) |
 
 Data wordt elke 10 minuten ververst (niet in een verborgen tabblad). Standaardlocatie: **ANWB HQ, Wassenaarseweg, Den Haag** (52.0964° N, 4.3268° O). Via het potlood kan de app je huidige locatie gebruiken, afgerond op ~100 m. Die keuze blijft bewaard tot je terugschakelt naar ANWB HQ.
 

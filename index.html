@@ -7,7 +7,6 @@
 <title>Jas of geen jas? | DIGHV Pauze-advies</title>
 <meta name="description" content="Jas aan of niet? De officieuze DIGHV pauze-scanner.">
 <link rel="preload" href="fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="icon" type="image/svg+xml" href="favicon.svg?v=3">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=3">
 <link rel="manifest" href="manifest.json">
@@ -15,8 +14,8 @@
 <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Pauze-advies">
-<script src="theme-init.js?v=17"></script>
-<link rel="stylesheet" href="style.css?v=17">
+<script src="theme-init.js?v=18"></script>
+<link rel="stylesheet" href="style.css?v=18">
 </head>
 <body>
 <div class="wrapper">
@@ -52,10 +51,10 @@
 <section class="hero" id="hero" aria-labelledby="pageTitle">
   <div class="location-control">
     <div class="location-badge" data-tour="location">
-      <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
       <span id="locationLabel">ANWB HQ · Wassenaarseweg, Den Haag</span>
       <button id="locationEditBtn" class="location-edit-btn" type="button" aria-label="Locatie wijzigen" aria-expanded="false" aria-controls="locationPanel">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
       </button>
     </div>
     <div class="location-panel" id="locationPanel" hidden>
@@ -64,10 +63,10 @@
         <span id="locationPanelCoords">52.0964, 4.3268</span>
       </div>
       <div class="location-actions">
-        <button id="useCurrentLocationBtn" class="location-action-btn" type="button" data-i18n="useCurrentLocationBtn">Huidige locatie</button>
+        <button id="useCurrentLocationBtn" class="location-action-btn" type="button" data-i18n="useCurrentLocationBtn">Gebruik mijn locatie</button>
         <button id="resetLocationBtn" class="location-action-btn secondary" type="button" data-i18n="resetLocationBtn">ANWB HQ</button>
       </div>
-      <p class="location-source" data-i18n="locationSource">Weer via Open-Meteo · plaatsnaam via OpenStreetMap</p>
+      <p class="location-source" data-i18n-html="locationSource">Weer via Open-Meteo · plaatsnaam © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap-bijdragers</a></p>
       <div class="location-status" id="locationStatus" role="status" aria-live="polite"></div>
     </div>
   </div>
@@ -80,7 +79,7 @@
 
   <div class="col col-left">
     <section class="advice-card" id="advice" data-tour="advice" aria-labelledby="adviceLabel">
-    <h2 class="advice-label" id="adviceLabel"><span data-i18n="adviceLabel">Advies voor nu + 30 min</span><span class="advice-updated" id="adviceUpdated"></span></h2>
+    <h2 class="advice-label" id="adviceLabel" tabindex="-1"><span data-i18n="adviceLabel">Advies voor nu + 30 min</span><span class="advice-updated" id="adviceUpdated"></span></h2>
     <div class="verdict" id="verdict">
       <div class="loading"><span class="spinner" aria-hidden="true"></span><span data-i18n="weatherLoading">Weer ophalen...</span></div>
     </div>
@@ -103,7 +102,7 @@
     <div class="wacht-strip" id="wachtFf" hidden></div>
     <ul class="tips" id="tips" aria-label="Tips"></ul>
     <div class="feedback-row" id="feedbackRow" hidden>
-      <p class="feedback-question" id="feedbackQuestion"></p>
+      <p class="feedback-question" id="feedbackQuestion" tabindex="-1"></p>
       <div class="feedback-actions">
         <button type="button" class="feedback-btn" data-feedback="cold" data-i18n="feedbackCold">Te koud</button>
         <button type="button" class="feedback-btn" data-feedback="ok" data-i18n="feedbackOk">Klopte</button>
@@ -113,6 +112,26 @@
     </div>
     <div class="sr-only" id="adviceLive" role="status" aria-live="polite"></div>
   </section>
+
+    <section class="rain-card" id="rainCard" data-tour="rain" aria-labelledby="rainTitle" hidden>
+      <div class="card-title-row">
+        <h2 class="card-title" id="rainTitle" data-i18n="rainPer15">Regen per 15 minuten</h2>
+        <span class="card-meta" data-i18n="next2hours">komende 2 uur</span>
+      </div>
+      <div class="rain-chart" id="rainChart" role="img" aria-label="Regenverwachting"></div>
+      <div class="rain-summary" id="rainSummary"></div>
+    </section>
+
+    <section class="break-card" data-tour="lunch" aria-labelledby="breakTitle">
+      <h2 class="card-title" id="breakTitle" data-i18n="nextBreak">Volgende pauze</h2>
+      <div id="lunchCountdown" class="countdown"></div>
+      <div class="best-moment" id="bestTime" data-tour="besttime"></div>
+      <button type="button" class="share-btn" id="shareBtn" hidden>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+        <span data-i18n="shareBtn">Collega's vragen</span>
+      </button>
+      <p class="share-status" id="shareStatus" role="status" aria-live="polite"></p>
+    </section>
 
     <details class="pref-card" id="prefCard" data-tour="pref">
       <summary class="pref-summary">
@@ -134,26 +153,6 @@
       <p class="calibration-note" id="calibrationNote" hidden></p>
       </div>
     </details>
-
-    <section class="break-card" data-tour="lunch" aria-labelledby="breakTitle">
-      <h2 class="card-title" id="breakTitle" data-i18n="nextBreak">Volgende pauze</h2>
-      <div id="lunchCountdown" class="countdown"></div>
-      <div class="best-moment" id="bestTime" data-tour="besttime"></div>
-      <button type="button" class="share-btn" id="shareBtn" hidden>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
-        <span data-i18n="shareBtn">Collega's vragen</span>
-      </button>
-      <p class="share-status" id="shareStatus" role="status" aria-live="polite"></p>
-    </section>
-
-    <section class="rain-card" id="rainCard" data-tour="rain" aria-labelledby="rainTitle">
-      <div class="card-title-row">
-        <h2 class="card-title" id="rainTitle" data-i18n="rainPer15">Regen per 15 minuten</h2>
-        <span class="card-meta" data-i18n="next2hours">komende 2 uur</span>
-      </div>
-      <div class="rain-chart" id="rainChart" role="img" aria-label="Regenverwachting"></div>
-      <div class="rain-summary" id="rainSummary"></div>
-    </section>
 
     <section class="checklist-card" data-tour="checklist" aria-labelledby="checklistTitle">
       <h2 class="card-title" id="checklistTitle" data-i18n="checklistTitle">Wat mee naar buiten?</h2>
@@ -179,6 +178,7 @@
 
     <section class="comparison-card" data-tour="comparison" aria-labelledby="comparisonTitle">
       <h2 class="card-title" id="comparisonTitle" data-i18n="todayVsTomorrow">Gisteren · vandaag · morgen</h2>
+      <p class="card-hint" data-i18n="compareWindow">Tussen 11:00 en 15:00, het pauzevenster.</p>
       <p class="comparison-summary" id="comparisonSummary"></p>
       <div class="comparison-grid" id="comparisonGrid"></div>
     </section>
@@ -235,7 +235,9 @@
 
 </main>
 
-<div class="toast" id="toast" role="status" aria-live="polite" hidden>
+<!-- Korte meldingen voor schermlezers; de toast zelf is alleen visueel -->
+<div class="sr-only" id="srStatus" role="status" aria-live="polite"></div>
+<div class="toast" id="toast" hidden>
   <span id="toastText"></span>
   <button type="button" class="toast-btn" id="toastAction"></button>
 </div>
@@ -247,7 +249,7 @@
 
 </div>
 
-<script src="logic.js?v=17"></script>
-<script src="script.js?v=17"></script>
+<script src="logic.js?v=18"></script>
+<script src="script.js?v=18"></script>
 </body>
 </html>
