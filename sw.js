@@ -1,11 +1,15 @@
-const CACHE = 'dighv-v8';
+const CACHE = 'dighv-v9';
 // Relatieve paden: werkt op GitHub Pages, een eigen domein en lokaal.
 const PRECACHE = [
   './',
   './index.html',
   './style.css',
+  './logic.js',
   './script.js',
+  './theme-init.js',
   './manifest.json',
+  './fonts/inter-latin.woff2',
+  './fonts/bricolage-grotesque-latin.woff2',
   './favicon.svg',
   './apple-touch-icon.png',
   './icon-192.png',

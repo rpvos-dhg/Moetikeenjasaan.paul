@@ -1,0 +1,9 @@
+{
+  "name": "moetikeenjasaan",
+  "private": true,
+  "description": "DIGHV Pauze-advies. Statische site zonder build-stap; dit bestand is alleen voor tests en lint.",
+  "scripts": {
+    "test": "TZ=Europe/Amsterdam node --test tests/*.test.js",
+    "lint": "npx --yes eslint@10 ."
+  }
+}
