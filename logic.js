@@ -12,7 +12,7 @@ function escapeHtml(str) {
 // Badge afleiden uit het eerste woord van de commit ("Fix …" is geen "Nieuw").
 function commitType(msg) {
   if (/^(fix|herstel)/i.test(msg)) return 'fix';
-  if (/^(refine|improve|update|polish|redesign|qa|follow-?ups?|verbeter)/i.test(msg)) return 'improve';
+  if (/^(refine|revise|improve|update|polish|redesign|qa|follow-?ups?|verbeter|fase|review|releaselog|rapport)/i.test(msg)) return 'improve';
   return 'new';
 }
 
@@ -93,16 +93,6 @@ function hourlyNowIndex(times, nowMs) {
   return idx;
 }
 
-// Eerste uurindex vanaf nu waarvan het lokale uur gelijk is aan targetHour.
-function hourlyIndexAtHour(times, targetHour, nowMs) {
-  if (!times) return -1;
-  const start = Math.max(0, hourlyNowIndex(times, nowMs));
-  for (let i = start; i < times.length; i++) {
-    if (new Date(times[i]).getHours() === targetHour) return i;
-  }
-  return -1;
-}
-
 const POLLEN_KEYS = ['alder', 'birch', 'grass', 'mugwort', 'ragweed', 'olive'];
 const POLLEN_THRESHOLDS = { alder: 20, birch: 20, grass: 50, mugwort: 10, ragweed: 10, olive: 20 };
 
@@ -134,6 +124,58 @@ const PREF_OFFSETS = { cold: 3, normal: 0, warm: -5 };
 // niet tegenspreken. Open-Meteo telt neerslag en regenkans per slot over de
 // *voorafgaande* periode, dus voor "nu + 30 min" kijken we naar de slots die
 // ná nu eindigen. offset = voorkeur + persoonlijke kalibratie (in °C kou).
+// Drempels op één plek: advies, checklist, grafiek en beste moment gebruiken
+// dezelfde getallen (de uitleg-tab noemt ze ook).
+const THRESHOLDS = {
+  rainTipProb: 30,   // % kans: regentip, paraplu, "droog" daaronder
+  bagProb: 50,       // % kans: waterdichte tas
+  wetProb: 70,       // % kans: telt als nat
+  wetMm: 0.5,        // mm per uur in het venster: telt als nat
+  windStrong: 25,    // km/u: tip "stevige wind"
+  windHard: 40,      // km/u: paraplu kansloos
+  gustHard: 50,      // km/u windstoten: paraplu kansloos, tip
+  windStorm: 60,     // km/u: storm
+  gustStorm: 75,     // km/u windstoten: storm
+  scarf: 8,          // °C laagste temperatuur: sjaal
+  gloves: 3,         // °C: handschoenen
+  uvMid: 3,
+  uvHigh: 7,
+  warm: 25,          // °C gevoel: water mee
+};
+
+// Waarde van een uurreeks op tijdstip ms, lineair tussen de twee omliggende uren.
+function interpolateHourly(hourly, values, ms) {
+  const i = hourly?.time?.findIndex(ts => ts > ms) ?? -1;
+  if (i < 1 || values?.[i - 1] == null || values?.[i] == null) return null;
+  const frac = (ms - hourly.time[i - 1]) / (hourly.time[i] - hourly.time[i - 1]);
+  return values[i - 1] + (values[i] - values[i - 1]) * frac;
+}
+
+function isSnowCode(code) {
+  return (code >= 71 && code <= 77) || code === 85 || code === 86;
+}
+
+// Vooruitblik op een later moment (de eigen lunch). Neerslag en kans komen uit
+// het uurslot dat ná dat moment eindigt: Open-Meteo telt die over het voorgaande uur.
+function outlookAt(w, startMs, offset = 0) {
+  const h = w?.hourly;
+  const i = h?.time?.findIndex(ts => ts > startMs) ?? -1;
+  if (i < 1) return null;
+  const temp = interpolateHourly(h, h.temperature_2m, startMs);
+  if (temp == null) return null;
+  const feels = Math.round(interpolateHourly(h, h.apparent_temperature, startMs) ?? temp);
+  const prob = h.precipitation_probability?.[i] ?? 0;
+  const code = h.weather_code?.[i] ?? 0;
+  const snow = isSnowCode(code);
+  const wet = (h.precipitation?.[i] ?? 0) > THRESHOLDS.wetMm || prob >= THRESHOLDS.wetProb;
+  const level = jacketLevel(feels - offset);
+  let verdict = `verdict${level}`;
+  if (code >= 95) verdict = 'verdictStorm';
+  else if (wet && snow) verdict = 'verdictSnow';
+  else if (wet) verdict = feels - offset >= 15 ? 'verdictRain' : 'verdictJacketRain';
+  return { temp, feels, prob, code, snow, wet, verdict };
+}
+
 function computeConditions(w, nowMs, offset = 0) {
   const c = w.current;
   const hourly = w.hourly;
@@ -159,15 +201,17 @@ function computeConditions(w, nowMs, offset = 0) {
 
   const codes = [c.weather_code, ...hourIdx.map(i => hourly.weather_code?.[i])];
   const thunder = codes.some(code => code >= 95);
-  const snow = codes.some(code => (code >= 71 && code <= 77) || code === 85 || code === 86);
+  const snow = codes.some(isSnowCode);
   const fog = c.weather_code === 45 || c.weather_code === 48;
 
-  // Afgerond, zodat het getal in beeld en het advies hetzelfde zeggen.
-  const feels = Math.round(c.apparent_temperature);
+  // Laagste gevoelstemperatuur in het venster: nu, of over 30 minuten (lineair
+  // tussen de twee uurwaarden). Afgerond, zodat beeld en advies hetzelfde zeggen.
+  const feelsLater = interpolateHourly(hourly, hourly.apparent_temperature, windowEnd);
+  const feels = Math.round(Math.min(c.apparent_temperature, feelsLater ?? c.apparent_temperature));
   const wind = c.wind_speed_10m;
   const gust = Math.max(c.wind_gusts_10m ?? 0, ...hourIdx.map(i => hourly.wind_gusts_10m?.[i] ?? 0));
   const minTemp = Math.min(c.temperature_2m, hourly.temperature_2m[idxNow + 1] ?? c.temperature_2m);
-  const wet = rainAmount > 0.5 || rainProb >= 70;
+  const wet = rainAmount > THRESHOLDS.wetMm || rainProb >= THRESHOLDS.wetProb;
 
   return {
     feels,
@@ -185,9 +229,9 @@ function computeConditions(w, nowMs, offset = 0) {
     thunder,
     snow,
     fog,
-    stormy: thunder || wind >= 60 || gust >= 75,
+    stormy: thunder || wind >= THRESHOLDS.windStorm || gust >= THRESHOLDS.gustStorm,
     // Bij harde wind of stevige windstoten is een paraplu zinloos.
-    umbrellaUseless: wind >= 40 || gust >= 50,
+    umbrellaUseless: wind >= THRESHOLDS.windHard || gust >= THRESHOLDS.gustHard,
   };
 }
 
@@ -226,20 +270,21 @@ function adviceKeys(cond, pollenLevel = null) {
   }
 
   // Tips op volgorde van belang; hooguit drie, zodat ze gelezen worden.
+  const T = THRESHOLDS;
   const tips = [];
   if (cond.wet && !cond.snow) tips.push({ key: cond.umbrellaUseless ? 'tipRainGear' : 'tipUmbrella' });
   else if (cond.wet && cond.snow) tips.push({ key: 'tipSlippery' });
-  else if (cond.rainProb >= 30) tips.push({ key: 'tipRainChance', args: [cond.rainProb] });
-  if (cond.gust >= 50 && cond.gust > cond.wind + 15) tips.push({ key: 'tipGusts', args: [Math.round(cond.gust)], warn: true });
-  else if (cond.wind >= 40) tips.push({ key: 'tipStormWind', warn: true });
-  else if (cond.wind >= 25) tips.push({ key: 'tipStrongWind' });
+  else if (cond.rainProb >= T.rainTipProb) tips.push({ key: 'tipRainChance', args: [cond.rainProb] });
+  if (cond.gust >= T.gustHard && cond.gust > cond.wind + 15) tips.push({ key: 'tipGusts', args: [Math.round(cond.gust)], warn: true });
+  else if (cond.wind >= T.windHard) tips.push({ key: 'tipStormWind', warn: true });
+  else if (cond.wind >= T.windStrong) tips.push({ key: 'tipStrongWind' });
   if (cond.fog) tips.push({ key: 'tipFog', warn: true });
   // Zeer veel pollen is een gezondheidstip: die gaat voor comforttips.
   if (pollenLevel === 'very high') tips.push({ key: 'tipPollenVeryHigh' });
-  if (cond.minTemp <= 3) tips.push({ key: 'tipScarfGloves' });
-  else if (cond.minTemp <= 8) tips.push({ key: 'tipScarfNice' });
-  if (cond.uv >= 7) tips.push({ key: 'tipUvHigh' });
-  else if (cond.uv >= 3) tips.push({ key: 'tipUvMid' });
+  if (cond.minTemp <= T.gloves) tips.push({ key: 'tipScarfGloves' });
+  else if (cond.minTemp <= T.scarf) tips.push({ key: 'tipScarfNice' });
+  if (cond.uv >= T.uvHigh) tips.push({ key: 'tipUvHigh' });
+  else if (cond.uv >= T.uvMid) tips.push({ key: 'tipUvMid' });
   if (cond.muggy) tips.push({ key: 'tipMuggy' });
   if (pollenLevel === 'high') tips.push({ key: 'tipPollenHigh' });
 
@@ -249,7 +294,7 @@ function adviceKeys(cond, pollenLevel = null) {
 // Knipoog bij bijzonder weer: welke tekstpool past vandaag (of geen).
 function extremePool(cond) {
   if (cond.thunder) return 'extremeThunder';
-  if (cond.gust >= 75 || cond.wind >= 60) return 'extremeStorm';
+  if (cond.gust >= THRESHOLDS.gustStorm || cond.wind >= THRESHOLDS.windStorm) return 'extremeStorm';
   if (cond.feels >= 30) return 'extremeHeat';
   if (cond.feels <= -5) return 'extremeFrost';
   if (cond.snow && cond.wet) return 'extremeSnow';
@@ -351,12 +396,55 @@ function nowcast(w, nowMs) {
   // Begin bij het huidige kwartier: meldt "nu" regen maar is dit kwartier al
   // droog, dan stopt het nu.
   for (let i = start; i < end; i++) {
-    if (wet(i) !== raining) {
+    // Eén afwijkend kwartier is nog geen omslag: pas melden als het volgende
+    // kwartier dezelfde kant op valt (anders "stopt" motregen steeds even).
+    if (wet(i) !== raining && (i + 1 >= m.time.length || wet(i + 1) !== raining)) {
       // Slot i telt het kwartier ervóór: daar begint (of stopt) het.
       return { raining, snow, changeAtMs: m.time[i] - 15 * 60000, continues: false };
     }
   }
   return { raining, snow, changeAtMs: null, continues: raining };
+}
+
+// Welke weerafhankelijke checklist-items gelden. Geen jassen: die noemt het advies.
+// Geen paraplu bij sneeuw of harde wind.
+function checklistConditions(cond) {
+  const T = THRESHOLDS;
+  return {
+    zonnebril: cond.uv >= T.uvMid,
+    zonnebrandcreme: cond.uv >= T.uvMid,
+    hoed: cond.uv >= T.uvHigh,
+    water: cond.muggy || cond.feels >= T.warm,
+    paraplu: !cond.umbrellaUseless && !cond.snow && (cond.wet || cond.rainProb >= T.rainTipProb),
+    waterdichte_tas: cond.wet || cond.rainProb >= T.bagProb,
+    sjaal: cond.minTemp <= T.scarf,
+    handschoenen: cond.minTemp <= T.gloves,
+  };
+}
+
+// Wandelweer in het pauzevenster (standaard 11:00 tot 15:00) van één dag, uit de
+// uurdata. Neerslag en weercode tellen over het voorgaande uur: slots 12 t/m 15.
+function windowDayStats(w, dateKey, fromHour = 11, toHour = 15) {
+  const h = w?.hourly;
+  if (!Array.isArray(h?.time)) return null;
+  const temps = [], winds = [], rain = [], codes = [];
+  const pad = n => String(n).padStart(2, '0');
+  h.time.forEach((ts, i) => {
+    const d = new Date(ts);
+    if (`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` !== dateKey) return;
+    const hour = d.getHours();
+    if (hour >= fromHour && hour <= toHour) { temps.push(h.temperature_2m?.[i]); winds.push(h.wind_speed_10m?.[i]); }
+    if (hour > fromHour && hour <= toHour) { rain.push(h.precipitation?.[i]); codes.push(h.weather_code?.[i]); }
+  });
+  const nums = arr => arr.filter(Number.isFinite);
+  if (!nums(temps).length) return null;
+  return {
+    tempMax: Math.max(...nums(temps)),
+    rain: nums(rain).reduce((sum, v) => sum + v, 0),
+    wind: Math.max(0, ...nums(winds)),
+    // Hogere WMO-codes zijn grofweg slechter weer: neem de zwaarste.
+    code: Math.max(0, ...nums(codes)),
+  };
 }
 
 // Wandelweer per dag: dicht bij 18 °C is het fijnst, regen en wind kosten punten.
@@ -442,10 +530,10 @@ function seasonalMoment(dateKey, today, memory = {}) {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     escapeHtml, commitType, durationParts, pickDaily, dateKeyInZone,
-    normalizeForecast, mergeHourlyByTime, dataTimestamp, hourlyNowIndex, hourlyIndexAtHour,
+    normalizeForecast, mergeHourlyByTime, dataTimestamp, hourlyNowIndex,
     POLLEN_KEYS, POLLEN_THRESHOLDS, parsePollen, highPollenKeys,
-    PREF_OFFSETS, computeConditions, jacketLevel, adviceKeys, extremePool, jacketScale, calibrate,
-    minutesOfDay, scoreBreakBlocks, bestBreakMoment, topBreakOptions, WET_SLOT_MM, nowcast, dayScore,
+    THRESHOLDS, checklistConditions, PREF_OFFSETS, interpolateHourly, isSnowCode, outlookAt, computeConditions, jacketLevel, adviceKeys, extremePool, jacketScale, calibrate,
+    minutesOfDay, scoreBreakBlocks, bestBreakMoment, topBreakOptions, WET_SLOT_MM, nowcast, windowDayStats, dayScore,
     logStats, achievements, seasonalMoment,
   };
 }
