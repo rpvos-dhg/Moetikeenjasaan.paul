@@ -16,30 +16,36 @@ const DEFAULT_LOCATION = Object.freeze({
   lon: 4.3268
 });
 const LOCATION_STORAGE_KEY = 'dighv_location';
-let userPref = localStorage_safe_get('dighv_pref') || 'normal';
+// Opgeslagen waarden alleen gebruiken als ze geldig zijn.
+const oneOf = (value, allowed, fallback) => (allowed.includes(value) ? value : fallback);
+let userPref = oneOf(localStorage_safe_get('dighv_pref'), ['cold', 'normal', 'warm'], 'normal');
 let selectedWalkers = new Set();
-let darkModeForced = localStorage_safe_get('dighv_dark_force') || 'auto';
-let lang = localStorage_safe_get('dighv_lang') || 'nl';
+let darkModeForced = oneOf(localStorage_safe_get('dighv_dark_force'), ['auto', 'dark', 'light'], 'auto');
+let lang = oneOf(localStorage_safe_get('dighv_lang'), ['nl', 'en'], 'nl');
 let currentLocation = getStoredLocation();
 let weatherRequestSeq = 0;
 // Eigen lunchtijd (minuten na middernacht), tussen 11:00 en 13:30.
-let lunchMinutes = Math.min(810, Math.max(660, Number(localStorage_safe_get('dighv_lunch')) || 720));
+let lunchMinutes = Math.round(Math.min(810, Math.max(660, Number(localStorage_safe_get('dighv_lunch')) || 720)) / 15) * 15;
 // Persoonlijke kalibratie uit "te koud / te warm"-feedback, in °C.
 let calibration = Math.max(-6, Math.min(6, Number(localStorage_safe_get('dighv_calibration')) || 0));
 
 // ─── i18n ────────────────────────────────────────────────────────────────────
 const i18n = {
   nl: {
-    tabAdvice: 'Advies', tabLog: 'Looplog', tabExplain: 'Hoe werkt dit?', tabChangelog: 'Releaselog',
+    tabAdvice: 'Advies', tabLog: 'Looplog', tabExplain: 'Uitleg', tabChangelog: 'Nieuw',
     tabsLabel: 'Onderdelen',
     h1Html: 'Jas aan of <span class="accent">niet?</span>',
     lead: 'De officieuze DIGHV pauze-scanner. Even checken voor je naar buiten loopt.',
-    adviceLabel: 'Advies voor nu + 30 min',
-    yourType: 'Jouw type', prefCold: 'Kouwelijk', prefNormal: 'Normaal', prefWarm: 'Warmbloedig',
+    adviceLabel: 'Advies voor de komende 30 min',
+    adviceUpdated: ts => `bijgewerkt ${ts}`,
+    yourType: 'Jouw type', prefCold: 'Kouwelijk', prefNormal: 'Normaal', prefWarm: 'Warm\u00ADbloedig',
     prefHint: 'Hoe snel heb jij het koud? We onthouden het op dit toestel.',
     prefGroupLabel: 'Temperatuurvoorkeur',
+    prefEdit: 'Wijzig', prefCurrentLine: (type, lunch) => `${type} · lunch ${lunch}`,
     lunchTimeLabel: 'Mijn lunch',
-    calibrationNote: n => `Bijgesteld op jouw feedback: ${n > 0 ? '+' : ''}${n} °C kouwelijker.`,
+    calibrationNote: n => (n > 0 ? `Op basis van je feedback rekenen we ${n} °C kouder.` : `Op basis van je feedback rekenen we ${-n} °C warmer.`),
+    calibrationReset: 'Terugzetten',
+    calibrationLimit: 'Dank je. Het advies staat al op de maximale bijstelling van 6 °C.',
     checklistTitle: 'Wat mee naar buiten?',
     nextBreak: 'Volgende pauze', currentConditions: 'Weer nu',
     comingHours: 'Komende uren', forecastLabel: 'Uurverwachting',
@@ -48,21 +54,22 @@ const i18n = {
     footerHtml: 'Gebouwd door en voor <strong>DIGHV</strong> · Weerdata via Open-Meteo · Geen officieel ANWB-product',
     pageTitle: 'Jas of geen jas? | DIGHV Pauze-advies',
     editLocation: 'Locatie wijzigen',
-    versionLabel: n => `Versie 1.${n}`,
+    versionLabel: n => `Versie 1.${n} · `, footerWhatsNew: 'Wat is er nieuw',
+    meterCold: 'koud', meterWarm: 'warm',
     locationPanelTitle: 'Locatie',
-    useCurrentLocationBtn: 'Huidige locatie', resetLocationBtn: 'ANWB HQ',
+    useCurrentLocationBtn: 'Gebruik mijn locatie', resetLocationBtn: 'Terug naar ANWB HQ',
     locationSource: 'Weer via Open-Meteo · plaatsnaam via OpenStreetMap',
     locationDefaultLabel: 'Mijn locatie',
     locationCityLabel: city => `Mijn locatie · ${city}`,
     locationSince: date => `Bewaard sinds ${date}.`,
     locationFetching: 'Locatie ophalen...', cityFetching: 'Plaatsnaam ophalen...',
-    locationActive: 'Huidige locatie actief.',
-    locationActiveCity: city => `Huidige locatie actief (${city}).`,
+    locationActive: 'Je eigen locatie wordt gebruikt.',
+    locationActiveCity: city => `Je eigen locatie wordt gebruikt (${city}).`,
     locationNoGeo: 'Huidige locatie is niet beschikbaar in deze browser.',
-    locationDenied: 'Locatietoegang geweigerd.',
-    locationFailed: 'Locatie kon niet worden opgehaald.',
+    locationDenied: 'Je browser deelt je locatie niet. Sta het toe in de browserinstellingen, of gebruik ANWB HQ.',
+    locationFailed: 'Je locatie is niet gevonden. Probeer het zo nog eens.',
     anwbHqActive: 'ANWB HQ actief.',
-    weatherLoading: 'Weer ophalen...', weatherError: 'Kon weerdata niet ophalen.', retry: 'Opnieuw proberen',
+    weatherLoading: 'Weer ophalen...', weatherError: 'Geen weerdata. Controleer je verbinding en probeer het opnieuw, of kijk even uit het raam.', retry: 'Opnieuw proberen',
     dataFresh: 'net bijgewerkt', dataAgeMin: mins => `${mins} min geleden bijgewerkt`,
     dataAgeHours: h => `${h} uur geleden bijgewerkt`,
     staleBadge: 'NIET LIVE', staleNote: ts => `Geen verse data. Dit advies is van ${ts}.`,
@@ -80,8 +87,9 @@ const i18n = {
     verdictRain: 'Regenjas', jacketRain: 'Regenjas',
     detailRain: 'Het is warm genoeg, maar er komt regen. Pak iets waterdichts.',
     verdictJacketRain: 'Waterdichte jas',
-    detailRainAppend: ' Er is flinke kans op regen, dus waterdicht aanbevolen.',
-    verdictSnow: 'Dikke jas, sneeuw', detailSnowAppend: ' Er valt sneeuw: let op gladheid.',
+    detailJacketRain: 'Fris en nat. Een waterdichte jas houdt je droog.',
+    detailJacketRainCold: 'Koud en nat. Trek een warme, waterdichte jas aan.',
+    verdictSnow: 'Dikke jas, sneeuw', detailSnow: 'Het sneeuwt. Trek een dikke jas aan en let op gladheid.',
     verdictStorm: 'Blijf liever binnen',
     detailThunder: 'Onweer in de buurt. Wacht met je wandeling tot het over is.',
     detailStorm: 'Zware wind. Een rondje buiten is nu geen pretje; wacht op een rustiger moment.',
@@ -89,13 +97,14 @@ const i18n = {
     tipRainChance: prob => `${prob}% kans op regen`,
     tipStormWind: 'Harde wind, paraplu kansloos', tipStrongWind: 'Stevige wind',
     tipGusts: g => `Windstoten tot ${g} km/u`,
-    tipScarf: 'Sjaal aanraden', tipGloves: 'Handschoenen', tipScarfNice: 'Sjaal is fijn',
+    tipScarfGloves: 'Sjaal en handschoenen', tipScarfNice: 'Sjaal is fijn', tipSlippery: 'Let op gladheid',
     tipUvHigh: 'Hoge UV: zonnebrand smeren', tipUvMid: 'Matige UV: smeer je in',
     tipMuggy: 'Benauwd: neem water mee', tipFog: 'Mist: kijk goed uit bij het oversteken',
     tipPollenVeryHigh: 'Veel pollen. Hooikoorts? Neem je medicatie mee.',
     tipPollenHigh: 'Verhoogde pollen, let op bij hooikoorts',
     jacketLevels: { Freezing: 'laagjes', Winter: 'winterjas', Autumn: 'herfstjas', Light: 'dun jasje', None: 'geen jas' },
-    jacketNear: (level, delta) => `${delta} °C kouder en het wordt ${level}.`,
+    jacketNeeds: { Freezing: 'een winterjas met laagjes', Winter: 'een winterjas', Autumn: 'een herfstjas', Light: 'een dun jasje' },
+    jacketNear: (need, delta) => `Nog ${delta} °C kouder en je hebt ${need} nodig.`,
     jacketMeterLabel: (level, feel) => `Jas-o-meter: ${level}, ${feel} °C voor jou`,
     extremeThunder: ['Onweer. De koffieautomaat telt ook als wandeling.', 'Bliksem in de buurt: vandaag is binnen het nieuwe buiten.'],
     extremeStorm: ['Code oranje-gevoel. Hou je jas (en jezelf) goed vast.', 'Storm. Lopen kan, maar je komt terug met een nieuw kapsel.'],
@@ -104,13 +113,15 @@ const i18n = {
     extremeSnow: ['Sneeuw! Kijk uit voor gladde stoepen.', 'Sneeuw. Sneeuwballen buiten werktijd, graag.'],
     extremeFog: ['Mist. Je collega\'s zie je pas als je er bijna bent.', 'Dichte mist: blijf op de stoep.'],
     weekendNote: 'Weekend! Het advies geldt, maar de pauzetijden niet.',
-    feedbackQuestion: 'Klopte het advies van vandaag?',
-    feedbackCold: 'Te koud', feedbackOk: 'Klopte', feedbackWarm: 'Te warm',
+    feedbackQuestion: 'Hoe was het buiten?',
+    feedbackCold: 'Ik had het koud', feedbackOk: 'Precies goed', feedbackWarm: 'Ik had het warm',
+    feedbackSkip: 'Niet buiten geweest', feedbackSkipped: 'Prima, morgen weer.',
     feedbackThanks: 'Dank je. We passen het advies voor jou aan.',
     feedbackThanksOk: 'Mooi zo. Dan houden we het zo.',
-    rainContinues: 'Blijft de komende 2 uur regenen',
-    rainStopsSoon: 'Stopt zo dadelijk, wacht even',
+    rainContinues: 'Blijft de komende 3 uur regenen', snowContinues: 'Blijft de komende 3 uur sneeuwen',
+    rainStopsSoon: 'Regen stopt binnen 5 minuten', snowStopsSoon: 'Sneeuw stopt binnen 5 minuten',
     rainWait: (mins, ts) => `Wacht ~${mins} min, droog rond <strong>${ts}</strong>`,
+    rainStartsAt: ts => `Droog tot <strong>${ts}</strong>, daarna regen`, snowStartsAt: ts => `Droog tot <strong>${ts}</strong>, daarna sneeuw`,
     rainDry: 'Droog de komende 2 uur', rainPeakChance: 'Grootste kans', rainTotal: 'Totaal',
     rainChartAria: (list, total) => `Regen komende 2 uur: ${list}. Totaal ${total} mm.`,
     rainChartAriaDry: 'Regen komende 2 uur: droog.',
@@ -123,23 +134,20 @@ const i18n = {
     forecastNow: 'NU',
     lunchLabel: 'Lunch', afternoonLabel: 'Middagpauze', tomorrowLunch: 'Morgen lunch',
     dayLunch: day => `${day.charAt(0).toUpperCase()}${day.slice(1)} lunch`,
-    countdownNow: 'Nu!', rainPreview: rain => `${rain}% regen`,
-    durationHM: (h, m) => `${h} u ${m} min`, durationM: m => `${m} min`,
+    countdownNow: 'Nu!', precipPreview: (p, snow) => `${p}% kans op ${snow ? 'sneeuw' : 'regen'}`,
+    durationHM: (h, m) => (m ? `${h} u ${m} min` : `${h} u`), durationM: m => `${m} min`,
     durationDH: (d, h) => `${d} ${d === 1 ? 'dag' : 'dagen'} ${h} u`,
-    bestMomentLabel: 'Beste moment',
-    bestMomentDetail: (temp, rain) => `${temp} °C · ${rain}% kans op regen`,
+    bestMomentLabel: 'Beste moment', bestLeastWetLabel: 'Minst natte moment',
     bestMomentDry: 'droog',
-    bestNoMore: 'Geen pauzemoment meer vandaag.',
+    bestNoMore: 'Het venster 11:00 tot 15:00 is voorbij.',
     bestNoDry: 'Geen droog moment tussen 11:00 en 15:00.',
-    rainStarts: ts => `Regen vanaf ${ts}`, rainStops: ts => `Droog vanaf ${ts}`,
     sunLine: (sr, ss) => `Zon op ${sr} · onder ${ss}`,
     shareBtn: 'Collega\'s vragen',
     shareTitle: 'Pauzewandeling?',
-    shareText: (verdict, options) => `Wandelen? ${options}. Advies: ${verdict}.`,
+    shareText: (options, verdict) => `Pauzewandeling? ${options}. Jasadvies nu: ${verdict}.`,
     shareOption: (ts, temp, dry) => `${ts} (${temp} °C${dry ? ', droog' : ''})`,
-    shareJoin: ' of ',
     shareCopied: 'Bericht gekopieerd. Plak het in de teamchat.',
-    shareFailed: 'Delen lukte niet.',
+    shareFallback: 'Kopieer deze tekst en plak hem in de teamchat:',
     yesterday: 'Gisteren', today: 'Vandaag', tomorrow: 'Morgen',
     better: 'Beter', worse: 'Minder', similar: 'Vergelijkbaar',
     compareSummary: (dir, dT, rainy) => {
@@ -151,18 +159,22 @@ const i18n = {
     },
     maxLabel: 'max', windLabel: w => `Wind ${w} km/u`,
     rainLabel: r => `Regen ${r} mm`,
-    logTitle: 'Wie liep er mee?', logNobody: 'Wis selectie', logSave: 'Opslaan',
+    logTitle: 'Wie liep er mee?', logNobody: 'Wis selectie', logSave: 'Wandeling opslaan',
+    logSaveCount: n => `Wandeling opslaan (${n})`,
     logLocalNote: 'Wordt alleen op dit toestel bewaard. Collega\'s zien dit niet.',
-    logDeleteAria: (time, people) => `Verwijder pauze van ${time}${people ? ` (${people})` : ''}`,
-    logSaved: 'Opgeslagen', logEmpty: 'Nog geen pauzes geregistreerd.',
+    logDeleteAria: (time, people) => `Verwijder wandeling van ${time}${people ? ` (${people})` : ''}`,
+    logSaved: 'Opgeslagen', logEmpty: 'Nog geen wandelingen opgeslagen. Tik aan wie meeliep en kies Wandeling opslaan.',
+    logShowOlder: n => `Oudere wandelingen tonen (${n})`,
+    saveFailed: 'Opslaan op dit toestel lukte niet. Het blijft staan tot je de pagina sluit.',
     logNobodyWalked: '<em>Niemand meegelopen</em>',
-    logWeather: (feels, rain) => `${feels} °C${rain >= 0.1 ? `, ${rain} mm regen` : ', droog'}`,
-    toastDeleted: 'Pauze verwijderd.', toastUndo: 'Ongedaan maken',
+    logWeather: (feels, rain) => `${feels} °C${rain >= 0.1 ? `, ${rain.toLocaleString('nl-NL')} mm regen` : ', droog'}`,
+    toastDeleted: 'Wandeling verwijderd.', toastUndo: 'Ongedaan maken',
     teamEdit: 'Team bewerken', teamAddLabel: 'Naam toevoegen', teamAdd: 'Toevoegen',
     teamReset: 'Standaardlijst terugzetten', teamRemove: name => `${name} verwijderen`,
-    teamExists: 'Die naam staat er al.',
+    teamExists: 'Die naam staat er al.', teamEmpty: 'Nog geen namen. Voeg collega\'s toe via Team bewerken.',
+    teamResetDone: 'Standaardlijst teruggezet.',
     logStatsTitle: 'Statistieken',
-    statTotal: 'wandelingen', statMonth: 'deze maand', statStreak: 'droog op rij',
+    statTotal: n => (n === 1 ? 'wandeling' : 'wandelingen'), statMonth: 'deze maand', statStreak: 'droge wandelingen op rij',
     statLoyal: (name, n) => `Trouwste loper deze maand: ${name} (${n}×)`,
     statBravest: (name, n) => `Dapperste: ${name}, ${n}× in de regen`,
     badges: {
@@ -208,31 +220,35 @@ const i18n = {
       firstTerrace: 'Eerste terrasdag van het jaar: 20 °C of meer.',
       firstFrost: 'Eerste vorst van het seizoen. Handschoenen erbij.',
     },
-    tourBtnTitle: 'Rondleiding (opnieuw) bekijken',
+    tourBtnTitle: 'Rondleiding bekijken',
     tourSkip: 'Overslaan', tourPrev: 'Vorige', tourNext: 'Volgende',
     tourDone: 'Klaar', tourClose: 'Rondleiding sluiten',
     tourStepOf: (a, b) => `Stap ${a} van ${b}`,
     tourAdviceTitle: 'Welkom: dit is het advies',
-    tourAdviceText: 'Jas of geen jas voor de komende 30 minuten, met tips en een jas-o-meter. Na je pauze kun je aangeven of het klopte; dan leert de app jouw temperatuurgevoel.',
+    tourAdviceText: 'Jas of geen jas voor de komende 30 minuten, met tips en een jas-o-meter. Na je pauze vraagt de app hoe het buiten was; zo leert hij jouw temperatuurgevoel.',
     tourPrefTitle: 'Jouw type en lunchtijd',
     tourPrefText: 'Snel koud of juist warm? Kies je type. Stel ook je lunchtijd in; daar rekent de app het beste pauzemoment op uit.',
     tourBreakTitle: 'Pauze en beste moment',
     tourBreakText: 'Aftellen naar je pauze, het droogste moment tussen 11:00 en 15:00, en een knop om collega\'s te vragen of ze meegaan.',
-    tourMoreTitle: 'Locatie, taal en meer',
-    tourMoreText: 'Bovenin wissel je taal en thema. Het potlood bij de locatie gebruikt je huidige plek. In de Looplog houd je bij wie er meeliep. Via de ?-knop zie je deze rondleiding opnieuw.',
+    tourMoreTitle: 'Taal, thema en locatie',
+    tourMoreText: 'Rechtsboven wissel je taal en thema. Via het potlood bij de locatie kies je een andere plek. Met ? zie je deze rondleiding opnieuw.',
     dateLocale: 'nl-NL',
   },
   en: {
-    tabAdvice: 'Advice', tabLog: 'Walk log', tabExplain: 'How it works', tabChangelog: 'Release log',
+    tabAdvice: 'Advice', tabLog: 'Walk log', tabExplain: 'Guide', tabChangelog: "What's new",
     tabsLabel: 'Sections',
     h1Html: 'Jacket on or <span class="accent">not?</span>',
     lead: 'The unofficial DIGHV break scanner. Check before you head outside.',
-    adviceLabel: 'Advice for now + 30 min',
+    adviceLabel: 'Advice for the next 30 min',
+    adviceUpdated: ts => `updated ${ts}`,
     yourType: 'Your type', prefCold: 'I feel the cold', prefNormal: 'Normal', prefWarm: 'I run warm',
     prefHint: 'How quickly do you get cold? We remember this on this device.',
     prefGroupLabel: 'Temperature preference',
+    prefEdit: 'Change', prefCurrentLine: (type, lunch) => `${type} · lunch ${lunch}`,
     lunchTimeLabel: 'My lunch',
-    calibrationNote: n => `Adjusted from your feedback: ${n > 0 ? '+' : ''}${n} °C colder.`,
+    calibrationNote: n => (n > 0 ? `Based on your feedback we count ${n} °C colder.` : `Based on your feedback we count ${-n} °C warmer.`),
+    calibrationReset: 'Reset',
+    calibrationLimit: 'Thanks. The advice is already at the maximum adjustment of 6 °C.',
     checklistTitle: 'What to bring outside?',
     nextBreak: 'Next break', currentConditions: 'Weather now',
     comingHours: 'Next few hours', forecastLabel: 'Hourly forecast',
@@ -241,21 +257,22 @@ const i18n = {
     footerHtml: 'Built by and for <strong>DIGHV</strong> · Weather data via Open-Meteo · Not an official ANWB product',
     pageTitle: 'Jacket or no jacket? | DIGHV Break advice',
     editLocation: 'Change location',
-    versionLabel: n => `Version 1.${n}`,
+    versionLabel: n => `Version 1.${n} · `, footerWhatsNew: "What's new",
+    meterCold: 'cold', meterWarm: 'warm',
     locationPanelTitle: 'Location',
-    useCurrentLocationBtn: 'Current location', resetLocationBtn: 'ANWB HQ',
+    useCurrentLocationBtn: 'Use my location', resetLocationBtn: 'Back to ANWB HQ',
     locationSource: 'Weather via Open-Meteo · place name via OpenStreetMap',
     locationDefaultLabel: 'My location',
     locationCityLabel: city => `My location · ${city}`,
     locationSince: date => `Saved since ${date}.`,
     locationFetching: 'Getting location...', cityFetching: 'Looking up place name...',
-    locationActive: 'Current location active.',
-    locationActiveCity: city => `Current location active (${city}).`,
+    locationActive: 'Using your location.',
+    locationActiveCity: city => `Using your location (${city}).`,
     locationNoGeo: 'Current location is not available in this browser.',
-    locationDenied: 'Location access denied.',
-    locationFailed: 'Could not get location.',
+    locationDenied: "Your browser isn't sharing your location. Allow it in your browser settings, or use ANWB HQ.",
+    locationFailed: "Couldn't find your location. Try again in a moment.",
     anwbHqActive: 'ANWB HQ active.',
-    weatherLoading: 'Getting weather...', weatherError: 'Could not fetch weather data.', retry: 'Try again',
+    weatherLoading: 'Getting weather...', weatherError: 'No weather data. Check your connection and try again, or just look outside.', retry: 'Try again',
     dataFresh: 'just updated', dataAgeMin: mins => `updated ${mins} min ago`,
     dataAgeHours: h => `updated ${h} h ago`,
     staleBadge: 'NOT LIVE', staleNote: ts => `No fresh data. This advice is from ${ts}.`,
@@ -273,8 +290,9 @@ const i18n = {
     verdictRain: 'Rain jacket', jacketRain: 'Rain jacket',
     detailRain: 'Warm enough, but rain is coming. Grab something waterproof.',
     verdictJacketRain: 'Waterproof jacket',
-    detailRainAppend: " There's a good chance of rain, so waterproof is recommended.",
-    verdictSnow: 'Warm coat, snow', detailSnowAppend: ' Snow is falling: watch out for slippery paths.',
+    detailJacketRain: 'Chilly and wet. A waterproof jacket keeps you dry.',
+    detailJacketRainCold: 'Cold and wet. Wear a warm, waterproof coat.',
+    verdictSnow: 'Warm coat, snow', detailSnow: 'It is snowing. Wear a warm coat and watch out for slippery paths.',
     verdictStorm: 'Better stay inside',
     detailThunder: 'Thunderstorm nearby. Wait with your walk until it has passed.',
     detailStorm: 'Gale-force wind. A walk is no fun right now; wait for a calmer moment.',
@@ -282,13 +300,14 @@ const i18n = {
     tipRainChance: prob => `${prob}% chance of rain`,
     tipStormWind: 'Strong wind, umbrella is pointless', tipStrongWind: 'Strong wind',
     tipGusts: g => `Gusts up to ${g} km/h`,
-    tipScarf: 'Scarf recommended', tipGloves: 'Gloves', tipScarfNice: 'Scarf is a good idea',
+    tipScarfGloves: 'Scarf and gloves', tipScarfNice: 'Scarf is a good idea', tipSlippery: 'Watch out for slippery paths',
     tipUvHigh: 'High UV: put on sunscreen', tipUvMid: 'Moderate UV: use sunscreen',
     tipMuggy: 'Muggy: bring water', tipFog: 'Fog: take care when crossing',
     tipPollenVeryHigh: 'Very high pollen. Hay fever? Bring your medication.',
     tipPollenHigh: 'Raised pollen, take care if you have hay fever',
     jacketLevels: { Freezing: 'layers', Winter: 'winter coat', Autumn: 'autumn jacket', Light: 'light jacket', None: 'no jacket' },
-    jacketNear: (level, delta) => `${delta} °C colder and it becomes ${level}.`,
+    jacketNeeds: { Freezing: 'a winter coat with layers', Winter: 'a winter coat', Autumn: 'an autumn jacket', Light: 'a light jacket' },
+    jacketNear: (need, delta) => `${delta} °C colder and you'll need ${need}.`,
     jacketMeterLabel: (level, feel) => `Jacket meter: ${level}, ${feel} °C for you`,
     extremeThunder: ['Thunderstorm. The coffee machine counts as a walk too.', 'Lightning nearby: inside is the new outside today.'],
     extremeStorm: ['Feels like a weather warning. Hold on to your jacket (and yourself).', 'Gale. You can walk, but you will come back with a new hairdo.'],
@@ -297,13 +316,15 @@ const i18n = {
     extremeSnow: ['Snow! Watch out for slippery pavements.', 'Snow. Snowballs after work hours, please.'],
     extremeFog: ['Fog. You will only see your colleagues once you are close.', 'Thick fog: stay on the pavement.'],
     weekendNote: 'Weekend! The advice applies, the break times do not.',
-    feedbackQuestion: "Was today's advice right?",
-    feedbackCold: 'Too cold', feedbackOk: 'Spot on', feedbackWarm: 'Too warm',
+    feedbackQuestion: 'How was it outside?',
+    feedbackCold: 'I was cold', feedbackOk: 'Just right', feedbackWarm: 'I was warm',
+    feedbackSkip: "Didn't go out", feedbackSkipped: 'Fine, see you tomorrow.',
     feedbackThanks: 'Thanks. We will adjust the advice for you.',
     feedbackThanksOk: 'Great. We will keep it this way.',
-    rainContinues: 'Rain continues for the next 2 hours',
-    rainStopsSoon: 'Stops in a moment, just wait',
+    rainContinues: 'Rain continues for the next 3 hours', snowContinues: 'Snow continues for the next 3 hours',
+    rainStopsSoon: 'Rain stops within 5 minutes', snowStopsSoon: 'Snow stops within 5 minutes',
     rainWait: (mins, ts) => `Wait ~${mins} min, dry around <strong>${ts}</strong>`,
+    rainStartsAt: ts => `Dry until <strong>${ts}</strong>, then rain`, snowStartsAt: ts => `Dry until <strong>${ts}</strong>, then snow`,
     rainDry: 'Dry for the next 2 hours', rainPeakChance: 'Highest chance', rainTotal: 'Total',
     rainChartAria: (list, total) => `Rain in the next 2 hours: ${list}. Total ${total} mm.`,
     rainChartAriaDry: 'Rain in the next 2 hours: dry.',
@@ -316,23 +337,20 @@ const i18n = {
     forecastNow: 'NOW',
     lunchLabel: 'Lunch', afternoonLabel: 'Afternoon break', tomorrowLunch: "Tomorrow's lunch",
     dayLunch: day => `${day} lunch`,
-    countdownNow: 'Now!', rainPreview: rain => `${rain}% rain`,
-    durationHM: (h, m) => `${h}h ${m}m`, durationM: m => `${m} min`,
+    countdownNow: 'Now!', precipPreview: (p, snow) => `${p}% chance of ${snow ? 'snow' : 'rain'}`,
+    durationHM: (h, m) => (m ? `${h}h ${m}m` : `${h}h`), durationM: m => `${m} min`,
     durationDH: (d, h) => `${d}d ${h}h`,
-    bestMomentLabel: 'Best moment',
-    bestMomentDetail: (temp, rain) => `${temp} °C · ${rain}% chance of rain`,
+    bestMomentLabel: 'Best moment', bestLeastWetLabel: 'Least wet moment',
     bestMomentDry: 'dry',
-    bestNoMore: 'No more break moments today.',
+    bestNoMore: 'The 11:00 to 15:00 window has passed.',
     bestNoDry: 'No dry moment between 11:00 and 15:00.',
-    rainStarts: ts => `Rain from ${ts}`, rainStops: ts => `Dry from ${ts}`,
     sunLine: (sr, ss) => `Sunrise ${sr} · sunset ${ss}`,
     shareBtn: 'Ask colleagues',
     shareTitle: 'Break walk?',
-    shareText: (verdict, options) => `Walk? ${options}. Advice: ${verdict}.`,
+    shareText: (options, verdict) => `Break walk? ${options}. Jacket advice now: ${verdict}.`,
     shareOption: (ts, temp, dry) => `${ts} (${temp} °C${dry ? ', dry' : ''})`,
-    shareJoin: ' or ',
     shareCopied: 'Message copied. Paste it in the team chat.',
-    shareFailed: 'Sharing did not work.',
+    shareFallback: 'Copy this text and paste it into the team chat:',
     yesterday: 'Yesterday', today: 'Today', tomorrow: 'Tomorrow',
     better: 'Better', worse: 'Not as good', similar: 'Similar',
     compareSummary: (dir, dT, rainy) => {
@@ -344,18 +362,22 @@ const i18n = {
     },
     maxLabel: 'max', windLabel: w => `Wind ${w} km/h`,
     rainLabel: r => `Rain ${r} mm`,
-    logTitle: 'Who joined the walk?', logNobody: 'Clear selection', logSave: 'Save',
+    logTitle: 'Who joined the walk?', logNobody: 'Clear selection', logSave: 'Save walk',
+    logSaveCount: n => `Save walk (${n})`,
     logLocalNote: 'Only stored on this device. Colleagues cannot see it.',
-    logDeleteAria: (time, people) => `Delete break at ${time}${people ? ` (${people})` : ''}`,
-    logSaved: 'Saved', logEmpty: 'No breaks logged yet.',
+    logDeleteAria: (time, people) => `Delete walk at ${time}${people ? ` (${people})` : ''}`,
+    logSaved: 'Saved', logEmpty: 'No walks saved yet. Tap who came along and choose Save walk.',
+    logShowOlder: n => `Show older walks (${n})`,
+    saveFailed: "Couldn't save on this device. It stays until you close the page.",
     logNobodyWalked: '<em>Nobody came along</em>',
     logWeather: (feels, rain) => `${feels} °C${rain >= 0.1 ? `, ${rain} mm rain` : ', dry'}`,
-    toastDeleted: 'Break deleted.', toastUndo: 'Undo',
+    toastDeleted: 'Walk deleted.', toastUndo: 'Undo',
     teamEdit: 'Edit team', teamAddLabel: 'Add name', teamAdd: 'Add',
     teamReset: 'Restore default list', teamRemove: name => `Remove ${name}`,
-    teamExists: 'That name is already on the list.',
+    teamExists: 'That name is already on the list.', teamEmpty: 'No names yet. Add colleagues via Edit team.',
+    teamResetDone: 'Default list restored.',
     logStatsTitle: 'Stats',
-    statTotal: 'walks', statMonth: 'this month', statStreak: 'dry in a row',
+    statTotal: n => (n === 1 ? 'walk' : 'walks'), statMonth: 'this month', statStreak: 'dry walks in a row',
     statLoyal: (name, n) => `Most loyal walker this month: ${name} (${n}×)`,
     statBravest: (name, n) => `Bravest: ${name}, ${n}× in the rain`,
     badges: {
@@ -401,18 +423,18 @@ const i18n = {
       firstTerrace: 'First terrace day of the year: 20 °C or more.',
       firstFrost: 'First frost of the season. Add gloves.',
     },
-    tourBtnTitle: 'View the tour (again)',
+    tourBtnTitle: 'Show tour',
     tourSkip: 'Skip', tourPrev: 'Back', tourNext: 'Next',
     tourDone: 'Done', tourClose: 'Close tour',
     tourStepOf: (a, b) => `Step ${a} of ${b}`,
     tourAdviceTitle: 'Welcome: this is the advice',
-    tourAdviceText: 'Jacket or no jacket for the next 30 minutes, with tips and a jacket meter. After your break you can say whether it was right; the app then learns how you feel the temperature.',
+    tourAdviceText: 'Jacket or no jacket for the next 30 minutes, with tips and a jacket meter. After your break the app asks how it was outside; that is how it learns how you feel the temperature.',
     tourPrefTitle: 'Your type and lunch time',
     tourPrefText: 'Cold quickly or always warm? Pick your type. Also set your lunch time; the app uses it to find the best moment for a walk.',
     tourBreakTitle: 'Break and best moment',
     tourBreakText: 'Counts down to your break, shows the driest moment between 11:00 and 15:00, and has a button to ask colleagues to join.',
-    tourMoreTitle: 'Location, language and more',
-    tourMoreText: 'At the top you switch language and theme. The pencil next to the location uses where you are. The Walk log tracks who came along. The ? button replays this tour.',
+    tourMoreTitle: 'Language, theme and location',
+    tourMoreText: 'Top right you switch language and theme. The pencil next to the location lets you pick another place. The ? button replays this tour.',
     dateLocale: 'en-GB',
   }
 };
@@ -435,7 +457,10 @@ function applyTranslations() {
   document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
   if (appVersionCount) setAppVersion(appVersionCount);
   const explainEl = document.querySelector('.explain-content');
-  if (explainEl) explainEl.innerHTML = renderExplainHtml();
+  if (explainEl) {
+    explainEl.innerHTML = renderExplainHtml();
+    buildExplainToc(explainEl);
+  }
   const changelogEl = document.querySelector('.changelog-content');
   if (changelogEl) changelogEl.innerHTML = renderChangelogHtml();
   const langBtn = document.getElementById('langToggle');
@@ -459,7 +484,10 @@ function applyTranslations() {
   }
   document.getElementById('teamAddInput')?.setAttribute('placeholder', t('teamAddLabel'));
   renderLunchOptions();
+  renderPrefSummary();
   renderCalibrationNote();
+  renderFeedbackRow();
+  if (toastState && !document.getElementById('toast').hidden) renderToast();
   if (tourStep >= 0) showTourStep(tourStep);
   renderLocationUi();
   renderTeamEditor();
@@ -538,28 +566,55 @@ async function fetchChangelogUpdates() {
 function renderChangelogHtml() {
   const releases = [
     {
+      isoDate: '2026-10-21',
+      date: '21 oktober 2026',
+      dateEn: 'October 21, 2026',
+      items: {
+        nl: [
+          { type: 'fix',     text: 'Advies kijkt nu echt naar de komende 30 minuten en herkent sneeuw, onweer, storm en windstoten' },
+          { type: 'fix',     text: 'Eén mislukt verzoek of een kapotte opgeslagen waarde legt de app niet meer plat' },
+          { type: 'new',     text: 'Jouw type en kalibratie: na de pauze aangeven hoe het buiten was, het advies past zich aan' },
+          { type: 'new',     text: 'Beste moment per kwartier rond je eigen lunchtijd, en een knop om collega\'s te vragen' },
+          { type: 'new',     text: 'Jas-o-meter, looplog met weer, statistieken en badges, ongedaan maken' },
+          { type: 'improve', text: 'Rustiger ontwerp: advies bovenaan, minder ruis op mobiel, eigen donker thema' },
+          { type: 'improve', text: 'Beter te bedienen met toetsenbord en schermlezer; korte rondleiding van 4 stappen' },
+          { type: 'improve', text: 'Werkt offline met de laatst bekende data en laat zien hoe oud die is' },
+        ],
+        en: [
+          { type: 'fix',     text: 'Advice now really looks at the next 30 minutes and recognises snow, thunder, storms and gusts' },
+          { type: 'fix',     text: 'One failed request or a broken stored value no longer breaks the app' },
+          { type: 'new',     text: 'Your type and calibration: tell the app how it was outside and the advice adapts' },
+          { type: 'new',     text: 'Best moment per quarter hour around your own lunch time, plus a button to ask colleagues' },
+          { type: 'new',     text: 'Jacket meter, walk log with weather, stats and badges, undo' },
+          { type: 'improve', text: 'Calmer design: advice first, less noise on mobile, a proper dark theme' },
+          { type: 'improve', text: 'Better keyboard and screen reader support; short 4-step tour' },
+          { type: 'improve', text: 'Works offline with the last known data and shows how old it is' },
+        ]
+      }
+    },
+    {
       isoDate: '2026-05-13',
       date: '13 mei 2026',
       dateEn: 'May 13, 2026',
       items: {
         nl: [
-          { type: 'fix',     text: 'Pollenbadge toonde altijd "zeer hoog" in april/mei door hardcoded maandtabel — nu gebaseerd op live meetwaarden' },
+          { type: 'fix',     text: 'Pollenbadge toonde altijd "zeer hoog" in april/mei door een vaste maandtabel. Nu gebaseerd op live meetwaarden' },
           { type: 'new',     text: 'Windrichting toegevoegd aan de windmetric (bv. ZW, NO)' },
           { type: 'new',     text: 'Pollenkaart toont nu ook de verwachte pollenwaarden voor morgen' },
           { type: 'new',     text: 'Zonsopgang en -ondergang zichtbaar in de "Beste pauzetijd"-kaart' },
           { type: 'new',     text: 'PWA-ondersteuning: app is installeerbaar als standalone app op mobiel en desktop (via browser-menu of adresbalk)' },
-          { type: 'improve', text: 'Dark mode-knop toont nu het huidig thema-icoon (🌙/☀️) met een klein "A" superscript bij automatische modus — duidelijker onderscheid tussen auto en geforceerd' },
+          { type: 'improve', text: 'Dark mode-knop toont nu het huidig thema-icoon (🌙/☀️) met een klein "A" superscript bij automatische modus. Duidelijker onderscheid tussen auto en geforceerd' },
           { type: 'improve', text: 'Dark mode-tooltip beschrijft nu wat klikken zal doen, niet alleen de huidige staat' },
           { type: 'new',     text: 'Versienummer toegevoegd in de footer (automatisch oplopend op basis van commits)' },
           { type: 'security','text': 'Lokale configuratie en looplog-data uit de repository gehaald' },
         ],
         en: [
-          { type: 'fix',     text: 'Pollen badge always showed "very high" in April/May due to hardcoded monthly table — now based on live measurements' },
+          { type: 'fix',     text: 'Pollen badge always showed "very high" in April/May due to a fixed monthly table. Now based on live measurements' },
           { type: 'new',     text: 'Wind direction added to wind metric (e.g. SW, NE)' },
           { type: 'new',     text: 'Pollen card now also shows tomorrow\'s expected pollen values' },
           { type: 'new',     text: 'Sunrise and sunset times visible in the "Best break time" card' },
           { type: 'new',     text: 'PWA support: app can be installed as standalone app on mobile and desktop (via browser menu or address bar)' },
-          { type: 'improve', text: 'Dark mode button now shows the current theme icon (🌙/☀️) with a small "A" superscript in automatic mode — clearer distinction between auto and forced' },
+          { type: 'improve', text: 'Dark mode button now shows the current theme icon (🌙/☀️) with a small "A" superscript in automatic mode. Clearer distinction between auto and forced' },
           { type: 'improve', text: 'Dark mode tooltip now describes what clicking will do, not just the current state' },
           { type: 'new',     text: 'Version number added to footer (auto-increments with each commit)' },
           { type: 'security','text': 'Local configuration and walk log data removed from the repository' },
@@ -572,22 +627,22 @@ function renderChangelogHtml() {
       dateEn: 'May 8, 2026',
       items: {
         nl: [
-          { type: 'new',     text: 'Taalswitch NL/EN toegevoegd — volledige vertaling van de gehele interface' },
+          { type: 'new',     text: 'Taalswitch NL/EN toegevoegd: volledige vertaling van de gehele interface' },
           { type: 'new',     text: 'ANWB-stijl SVG-favicon toegevoegd' },
           { type: 'new',     text: 'Stadsnaam zichtbaar in de locatiebadge bij gebruik van GPS ("Huidige locatie · Amsterdam")' },
           { type: 'improve', text: 'GPS-nauwkeurigheid verbeterd: geen gecachte positie meer, langere timeout' },
           { type: 'improve', text: 'Beste pauzetijd beperkt tot het venster 11:00–15:00' },
-          { type: 'fix',     text: '"Nu meteen" verscheen ook buiten pauzetijden — opgelost' },
+          { type: 'fix',     text: 'Opgelost: "Nu meteen" verscheen ook buiten pauzetijden' },
           { type: 'fix',     text: 'Ruimte onder advieskaart op desktop verwijderd' },
           { type: 'new',     text: 'README toegevoegd aan de repository' },
         ],
         en: [
-          { type: 'new',     text: 'NL/EN language toggle added — full translation of the entire interface' },
+          { type: 'new',     text: 'NL/EN language toggle added: full translation of the entire interface' },
           { type: 'new',     text: 'ANWB-style SVG favicon added' },
           { type: 'new',     text: 'City name visible in location badge when using GPS ("Current location · Amsterdam")' },
           { type: 'improve', text: 'GPS accuracy improved: no cached position, longer timeout' },
           { type: 'improve', text: 'Best break time now limited to the 11:00–15:00 window' },
-          { type: 'fix',     text: '"Right now" appeared outside break hours — fixed' },
+          { type: 'fix',     text: 'Fixed: "Right now" appeared outside break hours' },
           { type: 'fix',     text: 'Gap below advice card on desktop removed' },
           { type: 'new',     text: 'README added to the repository' },
         ]
@@ -710,7 +765,10 @@ function renderChangelogHtml() {
   };
 
   const today = new Date().toLocaleDateString('sv', { timeZone: 'Europe/Amsterdam' });
-  const allReleases = [...liveChangelogReleases, ...releases];
+  // Een handgeschreven release gaat voor de commits van dezelfde dag.
+  const curatedDates = new Set(releases.map(r => r.isoDate));
+  const allReleases = [...liveChangelogReleases.filter(r => !curatedDates.has(r.isoDate)), ...releases]
+    .sort((a, b) => b.isoDate.localeCompare(a.isoDate));
 
   const title = lang === 'en' ? 'Release log' : 'Releaselog';
   const intro = lang === 'en'
@@ -729,7 +787,7 @@ function renderChangelogHtml() {
 
     html += `<div class="cl-release">
       <div class="cl-header">
-        <span class="cl-date">${date}</span>
+        <h2 class="cl-date">${date}</h2>
         ${tag ? `<span class="cl-tag">${tag}</span>` : ''}
       </div>
       <ul class="cl-items">`;
@@ -748,15 +806,37 @@ function renderChangelogHtml() {
   return html;
 }
 
+// Inhoudsopgave bovenaan de uitleg. Geen #-links: de hash kiest het tabblad.
+function buildExplainToc(root) {
+  const sections = [...root.querySelectorAll('.explain-section h2')];
+  const nav = document.createElement('nav');
+  nav.className = 'toc';
+  nav.setAttribute('aria-label', lang === 'en' ? 'Contents' : 'Inhoud');
+  sections.forEach((h, i) => {
+    h.id = `uitleg-${i + 1}`;
+    h.tabIndex = -1;
+    const link = document.createElement('a');
+    link.href = `#${h.id}`;
+    link.textContent = h.textContent.replace(/^\d+\.\s*/, '');
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      h.closest('.explain-section').scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      h.focus({ preventScroll: true });
+    });
+    nav.appendChild(link);
+  });
+  root.querySelector('.intro')?.after(nav);
+}
+
 function renderExplainHtml() {
   if (lang === 'en') return `
     <h1>How it works</h1>
-    <p class="intro">No magic, just a few thresholds based on live weather data. Here is exactly what the tool does.</p>
+    <p class="intro">The advice comes from live weather data and a few fixed thresholds. Here they are.</p>
     <div class="explain-section">
       <h2>1. Data source</h2>
       <p>Every 10 minutes the tool fetches weather data from <strong>Open-Meteo</strong> and pollen data from the <strong>Open-Meteo Air Quality API</strong>. For locations in the Netherlands it uses the KNMI model. A hidden tab does not refresh; it does as soon as you come back or the connection returns.</p>
       <p>Default location: <code>52.0964° N, 4.3268° E</code>, ANWB headquarters in The Hague. Via the pencil the app can use your current location (rounded to about 100 metres; place name from OpenStreetMap). That choice is kept until you switch back to ANWB HQ.</p>
-      <div class="callout"><strong>Live check:</strong> the green LIVE dot pulses while the data is fresh. When opening, the app immediately shows the last known data (at most 6 hours old). Data older than half an hour shows as NOT LIVE, with the time of the advice.</div>
+      <div class="callout"><strong>Live check:</strong> the green LIVE dot means the data is fresh; the advice card shows when it was updated. When opening, the app immediately shows the last known data (at most 6 hours old). Data older than half an hour shows as NOT LIVE, with the time of the advice.</div>
     </div>
     <div class="explain-section">
       <h2>2. What is measured?</h2>
@@ -773,7 +853,7 @@ function renderExplainHtml() {
     <div class="explain-section">
       <h2>3. Jacket type and jacket meter</h2>
       <table class="threshold-table">
-        <tr><th>Feels-like (for you)</th><th>Advice</th></tr>
+        <tr><th>Feels-like (for you)</th><th>Jacket type</th></tr>
         <tr><td>17 °C or warmer</td><td><span class="badge-inline">No jacket</span></td></tr>
         <tr><td>12 to 17 °C</td><td><span class="badge-inline">Light jacket</span></td></tr>
         <tr><td>5 to 12 °C</td><td><span class="badge-inline">Autumn jacket</span></td></tr>
@@ -786,11 +866,11 @@ function renderExplainHtml() {
       <h2>4. Your type and calibration</h2>
       <table class="threshold-table">
         <tr><th>Type</th><th>Offset</th></tr>
-        <tr><td>I feel the cold</td><td><code>+3 °C colder</code></td></tr>
+        <tr><td>I feel the cold</td><td>3 °C colder</td></tr>
         <tr><td>Normal</td><td><code>0</code></td></tr>
-        <tr><td>I run warm</td><td><code>−5 °C colder</code></td></tr>
+        <tr><td>I run warm</td><td>5 °C warmer</td></tr>
       </table>
-      <p>After your lunch on workdays the app asks whether the advice was right. "Too cold" adds 1 °C, "too warm" removes 1 °C, up to 6 °C either way. Below the advice you see "for you X °C" whenever an offset applies.</p>
+      <p>After your lunch on workdays the app asks how it was outside. "I was cold" makes the advice count 1 °C colder, "I was warm" 1 °C warmer, up to 6 °C. Below the advice you see "for you X °C" whenever an adjustment applies; under "Your type" you can reset it.</p>
     </div>
     <div class="explain-section">
       <h2>5. Rain, snow and storms take priority</h2>
@@ -800,7 +880,8 @@ function renderExplainHtml() {
     <div class="explain-section">
       <h2>6. Break and best moment</h2>
       <p>The countdown runs to your own lunch time (set under "Your type") and the afternoon break at 15:00. During the break it says "Now!". After Friday afternoon it counts to Monday.</p>
-      <p>The best moment is a 30-minute block between 11:00 and 15:00, in steps of 15 minutes. Dry weighs most, then closeness to your lunch time, then temperature. When rain starts or stops within 3 hours, you see when. "Ask colleagues" shares two or three dry options via your phone's share menu, or copies them.</p>
+      <p>The best moment is a 30-minute block between 11:00 and 15:00, in steps of 15 minutes. Dry weighs most, then closeness to your lunch time, then temperature. If even the best block is wet, it is called "Least wet moment". "Ask colleagues" shares two or three dry options via your phone's share menu, or copies them; not in a storm or at the weekend.</p>
+      <p>When rain starts or stops within 3 hours, the strip in the advice card says when.</p>
     </div>
     <div class="explain-section">
       <h2>7. Extra tips</h2>
@@ -852,17 +933,17 @@ function renderExplainHtml() {
     </div>
     <div class="explain-section disclaimer">
       <h2>Disclaimer</h2>
-      <p>A fun tool built by the DIGHV team. Not an official ANWB product. The thresholds are based on common sense, not meteorological research. If you get wet: not our fault.</p>
+      <p>A side project by the DIGHV team. Not an official ANWB product. The thresholds are based on common sense, not meteorological research. If you get wet: not our fault.</p>
     </div>`;
 
   return `
     <h1>Hoe werkt dit?</h1>
-    <p class="intro">Geen magie, gewoon een paar drempelwaardes op basis van live weerdata. Hieronder precies wat de tool doet.</p>
+    <p class="intro">Het advies komt uit live weerdata en een paar vaste drempels. Hieronder staat welke.</p>
     <div class="explain-section">
       <h2>1. Databron</h2>
       <p>Elke 10 minuten haalt de tool weerdata op van <strong>Open-Meteo</strong> en pollendata van de <strong>Open-Meteo Air Quality API</strong>. Voor locaties in Nederland gebruikt hij het KNMI-model. In een verborgen tabblad wordt niet ververst; zodra je terugkomt of de verbinding terug is wel.</p>
       <p>Standaardlocatie: <code>52.0964° N, 4.3268° O</code>, het ANWB-hoofdkantoor in Den Haag. Via het potlood kan de app je huidige locatie gebruiken (afgerond op ongeveer 100 meter; plaatsnaam via OpenStreetMap). Die keuze blijft bewaard tot je terugschakelt naar ANWB HQ.</p>
-      <div class="callout"><strong>Live check:</strong> het groene LIVE-bolletje pulseert zolang de data vers is. Bij openen toont de app meteen de laatst bekende data (hoogstens 6 uur oud). Data ouder dan een half uur staat als NIET LIVE, met het tijdstip van het advies.</div>
+      <div class="callout"><strong>Live check:</strong> het groene LIVE-bolletje betekent dat de data vers is; in de advieskaart staat wanneer hij is bijgewerkt. Bij openen toont de app meteen de laatst bekende data (hoogstens 6 uur oud). Data ouder dan een half uur staat als NIET LIVE, met het tijdstip van het advies.</div>
     </div>
     <div class="explain-section">
       <h2>2. Wat wordt er gemeten?</h2>
@@ -879,7 +960,7 @@ function renderExplainHtml() {
     <div class="explain-section">
       <h2>3. Jastype en jas-o-meter</h2>
       <table class="threshold-table">
-        <tr><th>Gevoelstemperatuur (voor jou)</th><th>Advies</th></tr>
+        <tr><th>Gevoelstemperatuur (voor jou)</th><th>Jastype</th></tr>
         <tr><td>17 °C of warmer</td><td><span class="badge-inline">Geen jas</span></td></tr>
         <tr><td>12 tot 17 °C</td><td><span class="badge-inline">Dun jasje</span></td></tr>
         <tr><td>5 tot 12 °C</td><td><span class="badge-inline">Herfstjas</span></td></tr>
@@ -892,11 +973,11 @@ function renderExplainHtml() {
       <h2>4. Jouw type en kalibratie</h2>
       <table class="threshold-table">
         <tr><th>Type</th><th>Correctie</th></tr>
-        <tr><td>Kouwelijk</td><td><code>+3 °C kouder</code></td></tr>
+        <tr><td>Kouwelijk</td><td>3 °C kouder</td></tr>
         <tr><td>Normaal</td><td><code>0</code></td></tr>
-        <tr><td>Warmbloedig</td><td><code>−5 °C kouder</code></td></tr>
+        <tr><td>Warmbloedig</td><td>5 °C warmer</td></tr>
       </table>
-      <p>Na je lunch vraagt de app op werkdagen of het advies klopte. "Te koud" telt er 1 °C bij op, "te warm" haalt 1 °C eraf, tot maximaal 6 °C. Onder het advies zie je "voor jou X °C" zodra er een correctie geldt.</p>
+      <p>Na je lunch vraagt de app op werkdagen hoe het buiten was. Bij "Ik had het koud" rekent het advies 1 °C kouder, bij "Ik had het warm" 1 °C warmer, tot maximaal 6 °C. Onder het advies zie je "voor jou X °C" zodra er een bijstelling geldt; onder "Jouw type" zet je hem terug.</p>
     </div>
     <div class="explain-section">
       <h2>5. Regen, sneeuw en storm gaan voor</h2>
@@ -906,7 +987,8 @@ function renderExplainHtml() {
     <div class="explain-section">
       <h2>6. Pauze en beste moment</h2>
       <p>De countdown loopt naar je eigen lunchtijd (in te stellen onder "Jouw type") en de middagpauze om 15:00. Tijdens de pauze staat er "Nu!". Na vrijdagmiddag telt hij af naar maandag.</p>
-      <p>Het beste moment is een blok van 30 minuten tussen 11:00 en 15:00, in stappen van een kwartier. Droog weegt het zwaarst, daarna hoe dicht het bij je lunchtijd ligt, dan de temperatuur. Begint of stopt de regen binnen 3 uur, dan zie je wanneer. "Collega's vragen" deelt twee of drie droge opties via het deelmenu van je telefoon, of kopieert ze.</p>
+      <p>Het beste moment is een blok van 30 minuten tussen 11:00 en 15:00, in stappen van een kwartier. Droog weegt het zwaarst, daarna hoe dicht het bij je lunchtijd ligt, dan de temperatuur. Is zelfs het beste blok nat, dan heet het "Minst natte moment". "Collega's vragen" deelt twee of drie droge opties via het deelmenu van je telefoon, of kopieert ze; niet bij storm of in het weekend.</p>
+      <p>Begint of stopt de regen binnen 3 uur, dan staat in de strook in de advieskaart wanneer.</p>
     </div>
     <div class="explain-section">
       <h2>7. Extra tips</h2>
@@ -958,7 +1040,7 @@ function renderExplainHtml() {
     </div>
     <div class="explain-section disclaimer">
       <h2>Disclaimer</h2>
-      <p>Een fun-tool gebouwd door het DIGHV-team. Geen officieel ANWB-product. De drempels zijn gebaseerd op gezond verstand, niet op meteorologisch onderzoek. Als je nat wordt: niet onze schuld.</p>
+      <p>Een hobbyproject van het DIGHV-team. Geen officieel ANWB-product. De drempels zijn gebaseerd op gezond verstand, niet op meteorologisch onderzoek. Als je nat wordt: niet onze schuld.</p>
     </div>`;
 }
 
@@ -1079,14 +1161,27 @@ function applyDarkMode() {
 }
 
 // ─── Opslag ──────────────────────────────────────────────────────────────────
+// Wat niet in localStorage past (vol of geblokkeerd) staat in memStore; die gaat voor,
+// anders lees je na een mislukte schrijfactie de oude waarde terug.
 function localStorage_safe_get(key) {
-  try { return localStorage.getItem(key); } catch (e) { return memStore[key]; }
+  if (Object.prototype.hasOwnProperty.call(memStore, key)) return memStore[key];
+  try { return localStorage.getItem(key); } catch (e) { return null; }
 }
 function localStorage_safe_set(key, val) {
-  try { localStorage.setItem(key, val); return true; } catch (e) { memStore[key] = val; return false; }
+  try { localStorage.setItem(key, val); delete memStore[key]; return true; } catch (e) { memStore[key] = val; return false; }
 }
 function localStorage_safe_remove(key) {
-  try { localStorage.removeItem(key); } catch (e) { delete memStore[key]; }
+  delete memStore[key];
+  try { localStorage.removeItem(key); } catch (e) { /* niets te doen */ }
+}
+// Voor gegevens die de gebruiker zelf invoert: bij een volle opslag eerst de
+// weercache opruimen, en anders melden dat het alleen tijdelijk bewaard is.
+function saveImportant(key, val) {
+  if (localStorage_safe_set(key, val)) return true;
+  try { localStorage.removeItem(DATA_CACHE_KEY); } catch (e) { /* geblokkeerd */ }
+  if (localStorage_safe_set(key, val)) return true;
+  showToast('saveFailed');
+  return false;
 }
 function readJson(key, fallback) {
   try {
@@ -1104,9 +1199,12 @@ function setLocationPanelOpen(open) {
   btn.setAttribute('aria-expanded', String(open));
 }
 
-function setLocationStatus(message) {
+// Status als vertaalsleutel bewaren, zodat hij bij een taalwissel mee vertaalt.
+let locationStatusState = null;
+function setLocationStatus(key, ...args) {
+  locationStatusState = key ? { key, args } : null;
   const status = document.getElementById('locationStatus');
-  if (status) status.textContent = message || '';
+  if (status) status.textContent = key ? t(key, ...args) : '';
 }
 
 function setLocationButtonsDisabled(disabled) {
@@ -1116,18 +1214,20 @@ function setLocationButtonsDisabled(disabled) {
   });
 }
 
-function renderLocationUi(message) {
+// status: undefined = huidige status houden, null = leeg, [sleutel, ...args] = nieuw.
+function renderLocationUi(status) {
   const labelEl = document.getElementById('locationLabel');
   const panelCoords = document.getElementById('locationPanelCoords');
   const resetBtn = document.getElementById('resetLocationBtn');
   if (labelEl) labelEl.textContent = getLocationLabel();
   if (panelCoords) panelCoords.textContent = formatCoords();
   if (resetBtn) resetBtn.disabled = isDefaultLocation();
-  if (message !== undefined) setLocationStatus(message);
+  if (status !== undefined) setLocationStatus(...(status || [null]));
+  else if (locationStatusState) setLocationStatus(locationStatusState.key, ...locationStatusState.args);
   else if (currentLocation.mode === 'current' && currentLocation.savedAt) {
-    // "Huidige locatie" blijft bewaard; laat zien sinds wanneer.
+    // De eigen locatie blijft bewaard; laat zien sinds wanneer.
     const since = new Date(currentLocation.savedAt).toLocaleDateString(t('dateLocale'), { day: 'numeric', month: 'short' });
-    setLocationStatus(t('locationSince', since));
+    setLocationStatus('locationSince', since);
   }
 }
 
@@ -1139,6 +1239,7 @@ function showWeatherLoading() {
   if (tips) tips.innerHTML = '';
   const meter = document.getElementById('jacketMeter');
   if (meter) meter.hidden = true;
+  setNoData(true);
 }
 
 function setAppLocation(location, message) {
@@ -1149,13 +1250,13 @@ function setAppLocation(location, message) {
   lastUpdate = null;
   showWeatherLoading();
   updateClock();
-  renderLocationUi(message || '');
+  renderLocationUi(message || null);
   fetchWeather();
 }
 
 function useCurrentLocation() {
   if (!navigator.geolocation) {
-    setLocationStatus(t('locationNoGeo'));
+    setLocationStatus('locationNoGeo');
     return;
   }
   const currentBtn = document.getElementById('useCurrentLocationBtn');
@@ -1166,32 +1267,32 @@ function useCurrentLocation() {
     if (hadFocus) currentBtn?.focus();
   };
   setLocationButtonsDisabled(true);
-  setLocationStatus(t('locationFetching'));
+  setLocationStatus('locationFetching');
   navigator.geolocation.getCurrentPosition(
     position => {
       // Op ~100 m afronden: genoeg voor het weer, en we bewaren of versturen
       // geen exacte positie.
       const lat = Math.round(position.coords.latitude * 1000) / 1000;
       const lon = Math.round(position.coords.longitude * 1000) / 1000;
-      setLocationStatus(t('cityFetching'));
+      setLocationStatus('cityFetching');
       fetchWithTimeout(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&accept-language=${lang}`, 8000)
         .then(r => r.json())
         .then(data => {
           const a = data.address || {};
           const city = a.city || a.town || a.village || a.municipality || a.county || null;
-          const msg = city ? t('locationActiveCity', city) : t('locationActive');
+          const msg = city ? ['locationActiveCity', city] : ['locationActive'];
           done();
           setAppLocation({ mode: 'current', city, lat, lon, savedAt: Date.now() }, msg);
         })
         .catch(() => {
           done();
-          setAppLocation({ mode: 'current', city: null, lat, lon, savedAt: Date.now() }, t('locationActive'));
+          setAppLocation({ mode: 'current', city: null, lat, lon, savedAt: Date.now() }, ['locationActive']);
         });
     },
     error => {
       done();
       const denied = error.code === error.PERMISSION_DENIED;
-      setLocationStatus(denied ? t('locationDenied') : t('locationFailed'));
+      setLocationStatus(denied ? 'locationDenied' : 'locationFailed');
     },
     { enableHighAccuracy: false, timeout: 15000, maximumAge: 5 * 60000 }
   );
@@ -1210,7 +1311,7 @@ function bindLocationControls() {
   currentBtn?.addEventListener('click', useCurrentLocation);
 
   resetBtn?.addEventListener('click', () => {
-    setAppLocation({ ...DEFAULT_LOCATION }, t('anwbHqActive'));
+    setAppLocation({ ...DEFAULT_LOCATION }, ['anwbHqActive']);
     // De resetknop wordt nu disabled; zet de focus op een bruikbare knop.
     currentBtn?.focus();
   });
@@ -1298,6 +1399,9 @@ function updateClock() {
     else label += ` · ${t('dataAgeHours', Math.floor(mins / 60))}`;
   }
   document.getElementById('clock').textContent = label;
+  // Ook op mobiel (waar de klok verborgen is) zichtbaar hoe vers het advies is.
+  const updated = document.getElementById('adviceUpdated');
+  if (updated) updated.textContent = lastUpdate ? t('adviceUpdated', hhmm(lastUpdate.getTime())) : '';
   // Oude data (offline of een mislukte verversing) niet als LIVE tonen.
   const stale = !!lastUpdate && mins > 30;
   const noData = !weatherData && !!document.querySelector('#verdict .error');
@@ -1451,11 +1555,14 @@ async function fetchWeather() {
 
 function showWeatherError() {
   if (weatherData) {
-    // Verversen mislukt: laat het laatste advies staan. De klok en de
-    // datanotitie laten zien hoe oud het is.
+    // Verversen mislukt: laat het laatste advies staan, maar teken opnieuw zodat
+    // tijdgebonden onderdelen (vandaag/morgen, pauzemoment) kloppen. De klok en
+    // de datanotitie laten zien hoe oud de data is.
+    render();
     updateClock();
     return;
   }
+  setNoData(true);
   document.getElementById('verdict').innerHTML = `<div class="error" role="alert">${t('weatherError')}
     <button type="button" class="retry-btn" id="retryBtn">${t('retry')}</button></div>`;
   ['detail', 'feels'].forEach(id => { document.getElementById(id).textContent = ''; });
@@ -1472,6 +1579,15 @@ function showWeatherError() {
 }
 
 // ─── Hulpfuncties voor de weergave ───────────────────────────────────────────
+// Eén decimaal met de juiste komma voor de taal ("0,4 mm" in het Nederlands).
+function fmt1(n) {
+  return new Intl.NumberFormat(t('dateLocale'), { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(n);
+}
+
+function setNoData(on) {
+  document.querySelector('.advice-grid')?.classList.toggle('no-data', on);
+}
+
 function hhmm(ms) {
   const d = new Date(ms);
   return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
@@ -1550,6 +1666,7 @@ function weatherIcon(code, isDay = true, size = 24) {
 // ─── Weergave ────────────────────────────────────────────────────────────────
 function render() {
   if (!weatherData) return;
+  setNoData(false);
   renderMetrics();
   renderForecast();
   renderRainChart();
@@ -1607,7 +1724,8 @@ function renderLunchCountdown() {
       const temp = Math.round(hourly.temperature_2m[idx]);
       const rain = hourly.precipitation_probability?.[idx] || 0;
       const code = hourly.weather_code?.[idx] || 0;
-      preview = `<div class="countdown-preview">${weatherIcon(code, isDayTime(new Date(hourly.time[idx])), 18)} ${temp} °C · ${t('rainPreview', rain)}</div>`;
+      const snow = weatherKind(code) === 'snow';
+      preview = `<div class="countdown-preview">${weatherIcon(code, isDayTime(new Date(hourly.time[idx])), 18)} ${temp} °C · ${t('precipPreview', rain, snow)}</div>`;
     }
   }
 
@@ -1639,15 +1757,10 @@ function renderBestMoment() {
     if (sr && ss) sunHtml = `<p class="sun-line">${t('sunLine', hhmm(sr), hhmm(ss))}</p>`;
   }
 
-  const change = rainChange(weatherData, nowMs);
-  const changeHtml = change
-    ? `<p class="rain-change">${t(change.type === 'starts' ? 'rainStarts' : 'rainStops', hhmm(change.atMs))}</p>`
-    : '';
-
   const mins = now.getHours() * 60 + now.getMinutes();
   const best = mins <= BREAK_WINDOW.end + 30 ? bestBreakMoment(weatherData, nowMs, breakOptions()) : null;
   if (!best) {
-    el.innerHTML = `<p class="best-time-detail muted">${t('bestNoMore')}</p>${changeHtml}${sunHtml}`;
+    el.innerHTML = `<p class="best-time-detail muted">${t('bestNoMore')}</p>${sunHtml}`;
     if (shareBtn) shareBtn.hidden = true;
     return;
   }
@@ -1658,42 +1771,62 @@ function renderBestMoment() {
   const hIdx = hourlyNowIndex(weatherData.hourly.time, best.startMs);
   const code = weatherData.hourly.weather_code?.[hIdx] ?? 0;
   const dry = best.rainMm < 0.1 && best.prob < 30;
-  const detail = dry ? `${temp} °C · ${t('bestMomentDry')}` : t('bestMomentDetail', temp, best.prob);
-  // Ook het beste blok is nat: zeg dat eerlijk.
-  const noDryHtml = best.rainMm >= 0.1 || best.prob >= 70 ? `<p class="rain-change">${t('bestNoDry')}</p>` : '';
+  const detail = `${temp} °C · ${dry ? t('bestMomentDry') : t('precipPreview', best.prob, weatherKind(code) === 'snow')}`;
+  // Ook het beste blok is nat: zeg dat eerlijk, en noem het niet "beste".
+  const wetBest = best.rainMm >= 0.1 || best.prob >= 70;
+  const noDryHtml = wetBest ? `<p class="rain-change">${t('bestNoDry')}</p>` : '';
 
   el.innerHTML = `
     <div class="best-time-row">
-      <span class="best-time-label">${t('bestMomentLabel')}</span>
+      <span class="best-time-label">${t(wetBest ? 'bestLeastWetLabel' : 'bestMomentLabel')}</span>
       <span class="best-time-value">${timeStr}</span>
       ${weatherIcon(code, isDayTime(new Date(best.startMs)), 22)}
     </div>
     <p class="best-time-detail">${detail}</p>
-    ${noDryHtml}${changeHtml}${sunHtml}
+    ${noDryHtml}${sunHtml}
   `;
-  if (shareBtn) shareBtn.hidden = !isWorkday(now);
+  // Niet uitnodigen bij storm of in het weekend.
+  if (shareBtn) shareBtn.hidden = !isWorkday(now) || getConditions().stormy;
 }
 
 // Deelknop: 2-3 opties naar de teamchat, stemmen gebeurt daar.
+let shareStatusTimer = null;
 async function shareBreak() {
   const status = document.getElementById('shareStatus');
   const nowMs = Date.now();
   const options = topBreakOptions(weatherData, nowMs, breakOptions(), 3);
   if (!options.length) return;
-  const optText = options.map(o => t('shareOption', hhmm(o.startMs), Math.round(o.temp), o.rainMm < 0.1 && o.prob < 30)).join(t('shareJoin'));
+  const parts = options.map(o => t('shareOption', hhmm(o.startMs), Math.round(o.temp), o.rainMm < 0.1 && o.prob < 30));
+  // "11:30, 12:00 of 12:30" in de taal van de app
+  const list = typeof Intl.ListFormat === 'function'
+    ? new Intl.ListFormat(t('dateLocale'), { type: 'disjunction' }).format(parts)
+    : parts.join(', ');
   const verdict = document.querySelector('#verdict .verdict-text')?.textContent || '';
-  const text = t('shareText', verdict, optText);
-  const url = location.origin + location.pathname;
+  const text = `${t('shareText', list, verdict)} ${location.origin + location.pathname}`;
+  clearTimeout(shareStatusTimer);
   try {
     if (navigator.share) {
-      await navigator.share({ title: t('shareTitle'), text, url });
+      await navigator.share({ title: t('shareTitle'), text });
       status.textContent = '';
       return;
     }
-    await navigator.clipboard.writeText(`${text} ${url}`);
+    await navigator.clipboard.writeText(text);
     status.textContent = t('shareCopied');
+    shareStatusTimer = setTimeout(() => { status.textContent = ''; }, 8000);
   } catch (err) {
-    if (err?.name !== 'AbortError') status.textContent = t('shareFailed');
+    if (err?.name === 'AbortError') return;
+    // Geen deelmenu en geen klembord: toon de tekst zodat je hem zelf kopieert.
+    status.textContent = '';
+    const label = document.createElement('span');
+    label.textContent = t('shareFallback');
+    const area = document.createElement('textarea');
+    area.className = 'share-fallback';
+    area.readOnly = true;
+    area.rows = 3;
+    area.value = text;
+    status.append(label, area);
+    area.focus();
+    area.select();
   }
 }
 
@@ -1709,31 +1842,23 @@ function updateAppBadge() {
 function renderWachtFf() {
   const el = document.getElementById('wachtFf');
   if (!el) return;
-  const minutely = weatherData?.minutely_15;
-  if (!minutely?.time) { el.hidden = true; return; }
   const now = Date.now();
-  const startIdx = minutely.time.findIndex(ts => ts >= now);
-  if (startIdx === -1) { el.hidden = true; return; }
-
-  // Alleen als het nu echt regent; een regenkans in het afgelopen uur telt niet.
-  const isRaining = (minutely.precipitation[startIdx] ?? 0) >= 0.05 || weatherData.current.precipitation > 0.1;
-  if (!isRaining) { el.hidden = true; return; }
-
-  let clearIdx = -1;
-  for (let i = startIdx; i < Math.min(startIdx + 8, minutely.time.length); i++) {
-    if ((minutely.precipitation[i] || 0) < 0.05) { clearIdx = i; break; }
-  }
-
-  el.hidden = false;
-  if (clearIdx === -1) {
-    el.innerHTML = `${weatherIcon(61, true, 20)}<span>${t('rainContinues')}</span>`;
+  const nc = weatherData ? nowcast(weatherData, now) : null;
+  // Eén plek voor "regen begint/stopt": deze strook.
+  if (!nc || (!nc.raining && !nc.changeAtMs)) { el.hidden = true; return; }
+  const kind = nc.snow ? 'snow' : 'rain';
+  const icon = weatherIcon(nc.snow ? 73 : 61, true, 20);
+  let text;
+  if (!nc.raining) {
+    text = t(`${kind}StartsAt`, hhmm(nc.changeAtMs));
+  } else if (nc.continues) {
+    text = t(`${kind}Continues`);
   } else {
-    const clearTime = minutely.time[clearIdx];
-    const waitMins = Math.max(1, Math.round((clearTime - now) / 60000));
-    el.innerHTML = waitMins <= 5
-      ? `${weatherIcon(2, true, 20)}<span>${t('rainStopsSoon')}</span>`
-      : `${weatherIcon(2, true, 20)}<span>${t('rainWait', waitMins, hhmm(clearTime))}</span>`;
+    const waitMins = Math.max(1, Math.round((nc.changeAtMs - now) / 60000));
+    text = waitMins <= 5 ? t(`${kind}StopsSoon`) : t('rainWait', waitMins, hhmm(nc.changeAtMs));
   }
+  el.hidden = false;
+  el.innerHTML = `${nc.raining && !nc.continues ? weatherIcon(2, true, 20) : icon}<span>${text}</span>`;
 }
 
 function rainSlots() {
@@ -1767,7 +1892,7 @@ function renderRainChart() {
   const html = slots.map(s => {
     const heightPct = s.precip > 0 ? Math.max(4, (s.precip / maxPrecip) * 100) : 2;
     const isDry = s.precip < 0.05;
-    const valueStr = s.precip >= 0.1 ? s.precip.toFixed(1) : '';
+    const valueStr = s.precip >= 0.1 ? fmt1(s.precip) : '';
     return `<div class="bar-group">
       <div class="bar ${isDry ? 'dry' : ''}" style="height: ${heightPct}%">${valueStr ? `<span class="bar-value">${valueStr}</span>` : ''}</div>
       <span class="bar-label">${hhmm(s.time)}</span>
@@ -1779,11 +1904,11 @@ function renderRainChart() {
   // De balken zelf zijn voor schermlezers onzichtbaar; geef de data in het label.
   const wetSlots = slots.filter(s => s.precip >= 0.1);
   chart.setAttribute('aria-label', wetSlots.length
-    ? t('rainChartAria', wetSlots.map(s => `${hhmm(s.time)} ${s.precip.toFixed(1)} mm`).join(', '), totalRain.toFixed(1))
+    ? t('rainChartAria', wetSlots.map(sl => `${hhmm(sl.time)} ${fmt1(sl.precip)} mm`).join(', '), fmt1(totalRain))
     : t('rainChartAriaDry'));
 
   document.getElementById('rainSummary').innerHTML = `
-    <span>${t('rainTotal')}: <strong>${totalRain.toFixed(1)} mm</strong></span>
+    <span>${t('rainTotal')}: <strong>${fmt1(totalRain)} mm</strong></span>
     <span>${t('rainPeakChance')}: <strong>${maxProb}%</strong></span>
   `;
 }
@@ -1804,7 +1929,7 @@ function renderMetrics() {
     metric(t('metricFeels'), Math.round(c.apparent_temperature), '°C'),
     metric(t('metricWind'), Math.round(c.wind_speed_10m), `${t('unitKmh')} · ${windDirection(c.wind_direction_10m ?? 0)}`),
     c.wind_gusts_10m != null ? metric(t('metricGusts'), Math.round(c.wind_gusts_10m), t('unitKmh')) : '',
-    metric(t('metricPrecip'), (c.precipitation ?? 0).toFixed(1), 'mm'),
+    metric(t('metricPrecip'), fmt1(c.precipitation ?? 0), 'mm'),
     metric(t('metricUv'), uv == null ? '–' : Math.round(uv)),
   ].join('');
 }
@@ -1836,30 +1961,32 @@ function renderAdvice() {
   const cond = getConditions();
   const advice = adviceKeys(cond, getPollenLevel());
   const verdict = t(advice.verdict);
-  const jacketType = t(advice.jacket);
+  const jacketType = advice.jacket ? t(advice.jacket) : '';
 
-  const tips = advice.tips.map(tip => ({ text: t(tip.key, ...(tip.args || [])), primary: tip.primary }));
+  const tips = advice.tips.map(tip => ({ text: t(tip.key, ...(tip.args || [])), warn: tip.warn }));
   // Droog weer verdient ook een zin, nu de regenkaart dan verdwijnt.
   const slots = rainSlots();
-  if (!cond.wet && cond.rainProb < 30 && slots.length && slots.every(s => s.precip < 0.1)) {
-    tips.splice(1, 0, { text: t('rainDry') });
+  if (tips.length < 3 && !cond.wet && cond.rainProb < 30 && slots.length && slots.every(sl => sl.precip < WET_SLOT_MM)) {
+    tips.unshift({ text: t('rainDry') });
   }
+  // Eén jasterm: het jaslabel alleen als het oordeel zelf geen jas noemt.
+  if (advice.jacket) tips.unshift({ text: jacketType, primary: true });
 
   const isDay = isDayTime(new Date());
   document.getElementById('verdict').innerHTML = `<span class="verdict-text fade-in">${verdict}</span><span class="weather-illustration">${weatherIcon(c.weather_code, isDay, 72)}</span>`;
-  document.getElementById('detail').textContent = advice.detail.map(k => t(k)).join('');
+  document.getElementById('detail').textContent = t(advice.detail);
   document.getElementById('feels').textContent = t('feelsLine', cond.feels)
     + (currentOffset() !== 0 ? t('feelsForYou', cond.effectiveFeel) : '');
   document.getElementById('tips').innerHTML = tips.map(tip =>
-    `<li class="tip ${tip.primary ? 'primary' : ''}">${tip.text}</li>`
+    `<li class="tip${tip.primary ? ' primary' : ''}${tip.warn ? ' warn' : ''}">${tip.text}</li>`
   ).join('');
 
   renderJacketMeter(cond);
   renderExtremeNote(cond);
-  renderFeedbackRow();
+  renderFeedbackRow(cond);
 
   // Schermlezers: alleen aankondigen als het advies echt verandert.
-  const announcement = `${verdict}. ${jacketType}.`;
+  const announcement = jacketType ? `${verdict}. ${jacketType}.` : `${verdict}.`;
   if (announcement !== lastAdviceAnnouncement) {
     lastAdviceAnnouncement = announcement;
     document.getElementById('adviceLive').textContent = announcement;
@@ -1874,14 +2001,16 @@ function renderJacketMeter(cond) {
   if (!meter) return;
   const scale = jacketScale(cond.effectiveFeel);
   const levels = t('jacketLevels');
-  meter.hidden = false;
+  // Bij storm gaat het niet om de jas; dan geen meter.
+  meter.hidden = cond.stormy;
+  if (meter.hidden) return;
   document.getElementById('jacketNeedle').style.left = `${scale.pct}%`;
   meter.querySelectorAll('.jacket-meter-seg').forEach(seg => seg.classList.toggle('active', seg.dataset.level === scale.level));
   const track = meter.querySelector('.jacket-meter-track');
   track.setAttribute('role', 'img');
   track.setAttribute('aria-label', t('jacketMeterLabel', levels[scale.level], cond.effectiveFeel));
-  document.getElementById('jacketNote').textContent = scale.near && !cond.stormy
-    ? t('jacketNear', levels[scale.near.level], scale.near.delta)
+  document.getElementById('jacketNote').textContent = scale.near
+    ? t('jacketNear', t('jacketNeeds')[scale.near.level], scale.near.delta)
     : '';
 }
 
@@ -1901,29 +2030,34 @@ function renderExtremeNote(cond) {
   el.textContent = text;
 }
 
-// Na de lunch op werkdagen: klopte het advies? Eén keer per dag.
-function renderFeedbackRow() {
+// Na de lunch op werkdagen: hoe was het buiten? Eén keer per dag, niet bij storm.
+function renderFeedbackRow(cond = weatherData ? getConditions() : null) {
   const row = document.getElementById('feedbackRow');
   if (!row) return;
+  const question = document.getElementById('feedbackQuestion');
+  // Na een antwoord blijft de bedankregel staan (en wordt hij mee vertaald).
+  if (row.dataset.answer) {
+    question.textContent = t(row.dataset.answer);
+    return;
+  }
   const now = new Date();
   const mins = now.getHours() * 60 + now.getMinutes();
-  const today = getAmsterdamDateKey(now);
-  const answered = localStorage_safe_get('dighv_feedback_date') === today;
-  const show = isWorkday(now) && mins >= lunchMinutes + 30 && mins < 18 * 60 && !answered;
-  if (!show && !row.dataset.thanked) { row.hidden = true; return; }
-  if (row.dataset.thanked) return;
-  row.hidden = false;
-  document.getElementById('feedbackQuestion').textContent = t('feedbackQuestion');
+  const answered = localStorage_safe_get('dighv_feedback_date') === getAmsterdamDateKey(now);
+  const show = isWorkday(now) && mins >= lunchMinutes + 30 && mins < 18 * 60 && !answered && !cond?.stormy;
+  row.hidden = !show;
+  if (show) question.textContent = t('feedbackQuestion');
 }
 
 function giveFeedback(kind) {
-  calibration = calibrate(calibration, kind);
+  const before = calibration;
+  if (kind !== 'skip') calibration = calibrate(calibration, kind);
+  const atLimit = kind !== 'ok' && kind !== 'skip' && calibration === before;
   localStorage_safe_set('dighv_calibration', String(calibration));
   localStorage_safe_set('dighv_feedback_date', getAmsterdamDateKey(new Date()));
   const row = document.getElementById('feedbackRow');
-  row.dataset.thanked = '1';
+  row.dataset.answer = kind === 'skip' ? 'feedbackSkipped' : kind === 'ok' ? 'feedbackThanksOk' : atLimit ? 'calibrationLimit' : 'feedbackThanks';
   row.querySelector('.feedback-actions').hidden = true;
-  document.getElementById('feedbackQuestion').textContent = t(kind === 'ok' ? 'feedbackThanksOk' : 'feedbackThanks');
+  renderFeedbackRow();
   renderCalibrationNote();
   if (weatherData) renderAdvice();
 }
@@ -1932,7 +2066,25 @@ function renderCalibrationNote() {
   const el = document.getElementById('calibrationNote');
   if (!el) return;
   el.hidden = calibration === 0;
-  el.textContent = calibration === 0 ? '' : t('calibrationNote', calibration);
+  if (el.hidden) { el.textContent = ''; return; }
+  el.innerHTML = `${escapeHtml(t('calibrationNote', calibration))} <button type="button" class="text-btn calibration-reset" id="calibrationReset">${t('calibrationReset')}</button>`;
+  document.getElementById('calibrationReset').addEventListener('click', () => {
+    calibration = 0;
+    localStorage_safe_set('dighv_calibration', '0');
+    renderCalibrationNote();
+    renderPrefSummary();
+    if (weatherData) renderAdvice();
+    document.getElementById('lunchTime')?.focus();
+  });
+}
+
+// Ingeklapte voorkeuren tonen wat er nu geldt: "Normaal · lunch 12:00".
+function renderPrefSummary() {
+  const el = document.getElementById('prefCurrent');
+  if (!el) return;
+  const typeKey = { cold: 'prefCold', normal: 'prefNormal', warm: 'prefWarm' }[userPref];
+  const lunch = `${String(Math.floor(lunchMinutes / 60)).padStart(2, '0')}:${String(lunchMinutes % 60).padStart(2, '0')}`;
+  el.textContent = t('prefCurrentLine', t(typeKey), lunch);
 }
 
 function getPollenTip() {
@@ -2078,7 +2230,7 @@ function getLog() {
 }
 
 function saveLog(log) {
-  localStorage_safe_set('dighv_log', JSON.stringify(log));
+  saveImportant('dighv_log', JSON.stringify(log));
 }
 
 // Team: standaard de lijst uit de code, per toestel aan te passen.
@@ -2088,12 +2240,26 @@ function getTeam() {
 }
 
 function saveTeam(team) {
-  localStorage_safe_set('dighv_team', JSON.stringify(team));
+  saveImportant('dighv_team', JSON.stringify(team));
 }
 
 function updateLogTime() {
   const el = document.getElementById('logTime');
   if (el) el.textContent = hhmm(Date.now());
+}
+
+const X_ICON = '<svg class="x-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+
+// Opslaan kan pas als er iemand is aangevinkt; het aantal staat in de knop.
+let saveFeedbackTimer = null;
+function updateSaveButton() {
+  const saveBtn = document.getElementById('logSaveBtn');
+  const clearBtn = document.getElementById('logClearBtn');
+  if (!saveBtn || saveFeedbackTimer) return;
+  const n = selectedWalkers.size;
+  saveBtn.disabled = n === 0;
+  saveBtn.textContent = n ? t('logSaveCount', n) : t('logSave');
+  if (clearBtn) clearBtn.disabled = n === 0;
 }
 
 function renderWalkerGrid() {
@@ -2102,6 +2268,10 @@ function renderWalkerGrid() {
   const team = getTeam();
   [...selectedWalkers].forEach(name => { if (!team.includes(name)) selectedWalkers.delete(name); });
   grid.innerHTML = '';
+  if (!team.length) {
+    grid.innerHTML = `<p class="log-empty">${t('teamEmpty')}</p>`;
+  }
+  updateSaveButton();
   team.forEach(name => {
     const btn = document.createElement('button');
     btn.type = 'button';
@@ -2115,6 +2285,7 @@ function renderWalkerGrid() {
       if (nowOn) selectedWalkers.add(name); else selectedWalkers.delete(name);
       btn.classList.toggle('active', nowOn);
       btn.setAttribute('aria-pressed', String(nowOn));
+      updateSaveButton();
     });
     grid.appendChild(btn);
   });
@@ -2132,6 +2303,7 @@ function initLogTab() {
   });
 
   document.getElementById('logSaveBtn').addEventListener('click', () => {
+    if (!selectedWalkers.size) return;
     const log = getLog();
     const entry = { id: Date.now(), timestamp: new Date().toISOString(), people: [...selectedWalkers] };
     if (weatherData) {
@@ -2148,10 +2320,10 @@ function initLogTab() {
     renderWalkerGrid();
     renderLogHistory();
     const saveBtn = document.getElementById('logSaveBtn');
-    // Even uitschakelen, anders levert een dubbelklik een extra regel op.
+    // Even "Opgeslagen" tonen; de knop blijft uit tot iemand is aangevinkt.
     saveBtn.disabled = true;
     saveBtn.textContent = t('logSaved');
-    setTimeout(() => { saveBtn.textContent = t('logSave'); saveBtn.disabled = false; }, 1800);
+    saveFeedbackTimer = setTimeout(() => { saveFeedbackTimer = null; updateSaveButton(); }, 1800);
   });
 
   const editBtn = document.getElementById('teamEditBtn');
@@ -2169,7 +2341,7 @@ function initLogTab() {
     if (!name) return;
     const team = getTeam();
     if (team.some(n => n.toLowerCase() === name.toLowerCase())) {
-      showToast(t('teamExists'));
+      showToast('teamExists');
       return;
     }
     team.push(name);
@@ -2180,9 +2352,18 @@ function initLogTab() {
   });
 
   document.getElementById('teamResetBtn').addEventListener('click', () => {
+    // Eigen namen gaan verloren; daarom een paar seconden terug te draaien.
+    const previous = localStorage_safe_get('dighv_team');
     localStorage_safe_remove('dighv_team');
     renderTeamEditor();
     renderWalkerGrid();
+    if (previous) {
+      showToast('teamResetDone', 'toastUndo', () => {
+        saveImportant('dighv_team', previous);
+        renderTeamEditor();
+        renderWalkerGrid();
+      });
+    }
   });
 
   renderTeamEditor();
@@ -2193,7 +2374,7 @@ function renderTeamEditor() {
   if (!list) return;
   list.innerHTML = getTeam().map((name, i) => `<li class="team-item">
       <span>${escapeHtml(name)}</span>
-      <button type="button" class="icon-btn small" data-index="${i}" aria-label="${escapeHtml(t('teamRemove', name))}">×</button>
+      <button type="button" class="icon-btn small" data-index="${i}" aria-label="${escapeHtml(t('teamRemove', name))}">${X_ICON}</button>
     </li>`).join('');
   list.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => {
     const team = getTeam();
@@ -2212,7 +2393,7 @@ function renderLogStats(log) {
   section.hidden = stats.total === 0;
   if (section.hidden) return;
   const tile = (n, label) => `<div class="stat"><span class="stat-value">${n}</span><span class="stat-label">${label}</span></div>`;
-  let html = tile(stats.total, t('statTotal')) + tile(stats.thisMonth, t('statMonth')) + tile(stats.dryStreak, t('statStreak'));
+  let html = tile(stats.total, t('statTotal', stats.total)) + tile(stats.thisMonth, t('statMonth')) + tile(stats.dryStreak, t('statStreak'));
   const lines = [];
   if (stats.loyal) lines.push(t('statLoyal', escapeHtml(stats.loyal.name), stats.loyal.count));
   if (stats.bravest) lines.push(t('statBravest', escapeHtml(stats.bravest.name), stats.bravest.count));
@@ -2224,11 +2405,17 @@ function renderLogStats(log) {
     .join('');
 }
 
+const LOG_PAGE = 50;
+let logVisible = LOG_PAGE;
+
 function renderLogHistory() {
   const el = document.getElementById('logHistory');
   if (!el) return;
+  // Een lange log kost tijd; alleen tekenen als de Looplog open is.
+  if (!document.getElementById('view-log')?.classList.contains('active')) return;
   const log = getLog();
   renderLogStats(log);
+  updateSaveButton();
 
   if (log.length === 0) {
     el.innerHTML = `<p class="log-empty">${t('logEmpty')}</p>`;
@@ -2236,7 +2423,7 @@ function renderLogHistory() {
   }
 
   const days = {};
-  log.forEach(entry => {
+  log.slice(0, logVisible).forEach(entry => {
     const d = new Date(entry.timestamp);
     const key = d.toLocaleDateString(t('dateLocale'), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     if (!days[key]) days[key] = [];
@@ -2250,7 +2437,7 @@ function renderLogHistory() {
       const time = hhmm(new Date(entry.timestamp).getTime());
       const names = entry.people.map(escapeHtml).join(', ');
       const peopleStr = entry.people.length === 0 ? t('logNobodyWalked') : names;
-      const weather = entry.weather ? `<span class="log-entry-weather">${t('logWeather', entry.weather.feels, entry.weather.rain)}</span>` : '';
+      const weather = entry.weather ? `<span class="log-entry-weather">${escapeHtml(t('logWeather', Number(entry.weather.feels), Number(entry.weather.rain) || 0))}</span>` : '';
       const deleteLabel = escapeHtml(t('logDeleteAria', time, entry.people.join(', ')));
       html += `<li class="log-entry">
         <div class="log-entry-main">
@@ -2258,13 +2445,20 @@ function renderLogHistory() {
           <span class="log-entry-people">${peopleStr}</span>
           ${weather}
         </div>
-        <button class="log-delete-btn" type="button" data-id="${escapeHtml(entry.id)}" title="${deleteLabel}" aria-label="${deleteLabel}">×</button>
+        <button class="log-delete-btn" type="button" data-id="${escapeHtml(entry.id)}" title="${deleteLabel}" aria-label="${deleteLabel}">${X_ICON}</button>
       </li>`;
     });
     html += '</ul>';
   }
+  if (log.length > logVisible) {
+    html += `<button type="button" class="text-btn log-more" id="logMore">${t('logShowOlder', log.length - logVisible)}</button>`;
+  }
 
   el.innerHTML = html;
+  document.getElementById('logMore')?.addEventListener('click', () => {
+    logVisible += LOG_PAGE;
+    renderLogHistory();
+  });
   el.querySelectorAll('.log-delete-btn').forEach((btn, idx) => {
     btn.addEventListener('click', () => {
       const current = getLog();
@@ -2272,7 +2466,7 @@ function renderLogHistory() {
       saveLog(current.filter(e => e !== removed));
       renderLogHistory();
       // Verwijderen is direct, maar een paar seconden ongedaan te maken.
-      showToast(t('toastDeleted'), t('toastUndo'), () => {
+      showToast('toastDeleted', 'toastUndo', () => {
         const restored = [...getLog(), removed].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         saveLog(restored);
         renderLogHistory();
@@ -2286,17 +2480,27 @@ function renderLogHistory() {
   });
 }
 
+// Melding onderin, eventueel met een actie ("Ongedaan maken"). Tekst als
+// vertaalsleutel, zodat een taalwissel de zichtbare melding mee vertaalt.
 let toastTimer = null;
-function showToast(text, actionLabel, onAction) {
+let toastState = null;
+function showToast(key, actionKey, onAction) {
+  toastState = { key, actionKey, onAction };
+  renderToast();
   const toast = document.getElementById('toast');
-  const action = document.getElementById('toastAction');
-  document.getElementById('toastText').textContent = text;
-  action.hidden = !actionLabel;
-  action.textContent = actionLabel || '';
-  action.onclick = () => { toast.hidden = true; onAction?.(); };
   toast.hidden = false;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { toast.hidden = true; }, 6000);
+  toastTimer = setTimeout(() => { toast.hidden = true; toastState = null; }, 6000);
+}
+
+function renderToast() {
+  const toast = document.getElementById('toast');
+  const action = document.getElementById('toastAction');
+  const { key, actionKey, onAction } = toastState;
+  document.getElementById('toastText').textContent = t(key);
+  action.hidden = !actionKey;
+  action.textContent = actionKey ? t(actionKey) : '';
+  action.onclick = () => { toast.hidden = true; toastState = null; onAction?.(); };
 }
 
 // ─── Voorkeuren ──────────────────────────────────────────────────────────────
@@ -2312,6 +2516,10 @@ function renderLunchOptions() {
 }
 
 function bindPrefControls() {
+  // Eerste bezoek: voorkeuren open, daarna ingeklapt tot één regel.
+  const prefCard = document.getElementById('prefCard');
+  if (prefCard && !localStorage_safe_get('dighv_pref')) prefCard.open = true;
+
   document.querySelectorAll('.pref-btn').forEach(btn => {
     const on = btn.dataset.pref === userPref;
     btn.classList.toggle('active', on);
@@ -2323,6 +2531,7 @@ function bindPrefControls() {
       });
       userPref = btn.dataset.pref;
       localStorage_safe_set('dighv_pref', userPref);
+      renderPrefSummary();
       if (weatherData) renderAdvice();
     });
   });
@@ -2330,6 +2539,7 @@ function bindPrefControls() {
   document.getElementById('lunchTime')?.addEventListener('change', e => {
     lunchMinutes = Number(e.target.value);
     localStorage_safe_set('dighv_lunch', String(lunchMinutes));
+    renderPrefSummary();
     renderLunchCountdown();
     if (weatherData) { renderBestMoment(); renderFeedbackRow(); updateAppBadge(); }
   });
@@ -2351,8 +2561,14 @@ function bindPrefControls() {
 // ─── Vergelijking en seizoen ─────────────────────────────────────────────────
 function renderWeatherComparison() {
   const el = document.getElementById('comparisonGrid');
-  if (!el || !weatherData?.daily?.time?.[2]) return;
+  const card = el?.closest('.comparison-card');
+  if (!el || !weatherData?.daily?.time) return;
   const daily = weatherData.daily;
+  // Op datum zoeken, niet op vaste posities: na middernacht met oude data
+  // schuift "vandaag" anders een dag op.
+  const i = daily.time.indexOf(getAmsterdamDateKey(new Date()));
+  if (card) card.hidden = i < 1 || i + 1 >= daily.time.length;
+  if (card?.hidden) return;
 
   const getData = idx => ({
     tempMax: daily.temperature_2m_max?.[idx] ?? null,
@@ -2360,21 +2576,20 @@ function renderWeatherComparison() {
     rain: daily.precipitation_sum?.[idx] || 0,
     wind: daily.wind_speed_10m_max?.[idx] || 0,
   });
-  const calcScore = day => (day.tempMax ?? 15) - (day.rain > 0.5 ? 5 : 0) - (day.wind > 25 ? 3 : 0);
-  const days = [getData(0), getData(1), getData(2)];
-  const todayScore = Math.round(calcScore(days[1]));
-  const tomorrowScore = Math.round(calcScore(days[2]));
+  const days = [getData(i - 1), getData(i), getData(i + 1)];
+  const todayScore = Math.round(dayScore(days[1]));
+  const tomorrowScore = Math.round(dayScore(days[2]));
   const dir = tomorrowScore > todayScore ? 'better' : tomorrowScore === todayScore ? 'similar' : 'worse';
 
   const labels = [t('yesterday'), t('today'), t('tomorrow')];
-  el.innerHTML = days.map((day, i) => `
-    <div class="comparison-day ${i === 1 ? 'today' : ''}">
-      <div class="comparison-label">${labels[i]}</div>
+  el.innerHTML = days.map((day, n) => `
+    <div class="comparison-day ${n === 1 ? 'today' : ''}">
+      <div class="comparison-label">${labels[n]}</div>
       <div class="comparison-icon">${weatherIcon(day.code, true, 28)}</div>
       <div class="comparison-temp"><span class="sr-only">${t('maxLabel')} </span>${day.tempMax == null ? '–' : Math.round(day.tempMax)}°</div>
-      <div class="comparison-detail">${t('rainLabel', day.rain.toFixed(1))}</div>
+      <div class="comparison-detail">${t('rainLabel', fmt1(day.rain))}</div>
       <div class="comparison-detail">${t('windLabel', Math.round(day.wind))}</div>
-      ${i === 2 ? `<div class="comparison-verdict ${dir}">${t(dir)}</div>` : ''}
+      ${n === 2 ? `<div class="comparison-verdict ${dir}">${t(dir)}</div>` : ''}
     </div>`).join('');
 
   const dT = days[2].tempMax != null && days[1].tempMax != null ? Math.round(days[2].tempMax - days[1].tempMax) : 0;
@@ -2562,14 +2777,22 @@ function showTourStep(i, announce = false) {
 
   const target = tourTargetEl(step);
   tourEls.target = target;
+  // De voorkeuren zijn meestal ingeklapt; in de rondleiding tonen we ze open.
+  if (target?.tagName === 'DETAILS') target.open = true;
   if (tourEls.resizeObserver) {
     tourEls.resizeObserver.disconnect();
     tourEls.resizeObserver.observe(document.body);
     if (target) tourEls.resizeObserver.observe(target);
   }
   if (target && target.getBoundingClientRect().height > 0) {
-    try { target.scrollIntoView({ block: 'center', behavior: 'instant' }); }
-    catch (e) { target.scrollIntoView(); }
+    if (window.matchMedia(TOUR_MOBILE_QUERY).matches) {
+      // Op mobiel staat de uitleg onderin; zet het doel bovenaan zodat het niet bedekt wordt.
+      const header = document.querySelector('.tabs-nav')?.offsetHeight || 0;
+      window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - header - 12, behavior: 'instant' });
+    } else {
+      try { target.scrollIntoView({ block: 'center', behavior: 'instant' }); }
+      catch (e) { target.scrollIntoView(); }
+    }
   } else {
     window.scrollTo(0, 0);
   }
