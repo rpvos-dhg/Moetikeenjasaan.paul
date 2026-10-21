@@ -205,6 +205,13 @@ test('nowcast: regen begint, stopt of blijft', () => {
   drizzle.minutely_15.precipitation = drizzle.minutely_15.precipitation.map((v, i) => (i % 2 ? 0 : 0.2));
   drizzle.current.precipitation = 0.2;
   assert.equal(L.nowcast(drizzle, now).continues, true);
+  // Droog, dan één natte kwartier: die bui wordt wel gemeld.
+  const shower = forecast({ now });
+  const k = shower.minutely_15.time.findIndex(ts => ts >= now) + 4;
+  shower.minutely_15.precipitation[k] = 0.6;
+  const sc = L.nowcast(shower, now);
+  assert.equal(sc.raining, false);
+  assert.equal(sc.changeAtMs, shower.minutely_15.time[k] - 15 * 60000);
 });
 
 test('dagscore: dicht bij 18 °C wint, warmer is niet altijd beter', () => {
@@ -255,6 +262,9 @@ test('vooruitblik op de lunch: slot ná de start, temperatuur geïnterpoleerd', 
   // Om 11:30 is het nog droog: het slot van 12:00 telt 11:00-12:00.
   assert.equal(L.outlookAt(w, at('2026-10-21T11:30:00+02:00'), 0).wet, false);
   assert.equal(L.outlookAt({ hourly: { time: [] } }, lunch, 0), null);
+  // Zware windstoten rond de lunch: storm, geen dun jasje.
+  const gusty = forecast({ gust: 90, feels: 16, temp: 17, now });
+  assert.equal(L.outlookAt(gusty, lunch, 0).verdict, 'verdictStorm');
 });
 
 test('pauzevenster per dag: regen buiten 11-15 uur telt niet', () => {
@@ -263,6 +273,9 @@ test('pauzevenster per dag: regen buiten 11-15 uur telt niet', () => {
   const w = forecast({ rainFrom: at('2026-10-21T02:00:00+02:00'), rainTo: at('2026-10-21T05:00:00+02:00'), now });
   const s = L.windowDayStats(w, '2026-10-21');
   assert.equal(s.rain, 0);
+  // Regen om 13:00 lokale tijd telt wel, ook als het toestel in een andere zone staat.
+  const mid = forecast({ rainFrom: at('2026-10-21T12:00:00+02:00'), rainTo: at('2026-10-21T13:00:00+02:00'), now });
+  assert.ok(L.windowDayStats(mid, '2026-10-21').rain > 0);
   assert.equal(L.windowDayStats(w, '2030-01-01'), null);
 });
 

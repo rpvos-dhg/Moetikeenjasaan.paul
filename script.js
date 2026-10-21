@@ -537,11 +537,10 @@ async function fetchChangelogUpdates() {
     for (const commit of commits) {
       const isoDate = new Date(commit.date)
         .toLocaleDateString('sv', { timeZone: 'Europe/Amsterdam' });
-      if (!byDate[isoDate]) byDate[isoDate] = [];
       // Commit-onderwerpen zijn externe tekst: escapen voordat ze in innerHTML komen.
       const subject = String(commit.subject).replace(/\s*\(#\d+\)\s*$/, '');
       if (/^Merge /.test(subject)) continue; // merge-commits zeggen niets over de app
-      byDate[isoDate].push(subject);
+      (byDate[isoDate] ||= []).push(subject);
     }
 
     liveChangelogReleases = Object.entries(byDate)
@@ -1990,11 +1989,15 @@ function renderRainChart() {
   const card = document.getElementById('rainCard');
   const slots = rainSlots();
   const totalRain = slots.reduce((sum, s) => sum + s.precip, 0);
-  // Kwartierdata heeft geen kans; neem de hoogste uurkans over de 2 uur van de
-  // grafiek. Een uurslot telt het voorgaande uur, dus vanaf het slot ná nu.
-  const hourlyProb = weatherData.hourly?.precipitation_probability || [];
-  const probStart = Math.max(0, nowIndex());
-  const maxProb = Math.max(0, ...[1, 2, 3].map(o => hourlyProb[probStart + o] ?? 0));
+  // Kwartierdata heeft geen kans; neem de hoogste uurkans van de uren die voor
+  // minstens een half uur binnen de grafiek vallen. Een uurslot telt het voorgaande uur.
+  const hourly = weatherData.hourly;
+  const chartStart = slots.length ? slots[0].time - 15 * 60000 : 0;
+  const chartEnd = slots.length ? slots[slots.length - 1].time : 0;
+  const maxProb = Math.max(0, ...(hourly?.time || []).map((ts, i) => {
+    const overlap = Math.min(ts, chartEnd) - Math.max(ts - 3600000, chartStart);
+    return overlap >= 30 * 60000 ? hourly.precipitation_probability?.[i] ?? 0 : 0;
+  }));
   // Droog: de kaart verdwijnt en het advies zegt "droog de komende 2 uur".
   card.hidden = !slots.length || (totalRain < WET_SLOT_MM && maxProb < THRESHOLDS.rainTipProb);
   if (card.hidden) return;
@@ -2330,7 +2333,7 @@ function renderChecklist() {
     </li>`;
 
   let html = '';
-  ['Always', 'Zon', 'Regen', 'Kou', 'Wind', 'Info'].forEach(group => {
+  ['Always', 'Zon', 'Regen', 'Kou', 'Info'].forEach(group => {
     const list = grouped[group];
     if (!list || list.length === 0) return;
     const inner = `<ul class="checklist-list">${list.map(itemHtml).join('')}</ul>`;
