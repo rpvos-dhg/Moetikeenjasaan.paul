@@ -1,0 +1,208 @@
+/*
+ * ANWB base styles for plain HTML, slides and visuals.
+ * Re-implements the look of the Nomad components (Button, Tag, Alert, Bar, Tile, Lockup)
+ * with the Nomad tokens from tokens.css. Load tokens.css first.
+ * Class names mirror Nomad: .context-*, .prose-*, then .anwb-* for components.
+ */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font: var(--paragraph-body-medium);
+  font-family: var(--font-body);
+  color: var(--foreground-color-neutral);
+  background: var(--background-color-default);
+  -webkit-font-smoothing: antialiased;
+}
+img, svg { max-width: 100%; }
+:focus-visible { outline: 2px solid var(--border-color-interactive-focus); outline-offset: .125rem; }
+
+/* ---------- Typography: pick ONE role per element ---------- */
+/* Headings, hero and labels use Clan Pro; body copy and paragraph titles use Bernina Sans */
+.prose-hero { font: var(--hero-hero); font-family: var(--font-heading); margin: 0; }
+.prose-heading-x-large { font: var(--heading-x-large); font-family: var(--font-heading); margin: 0; }
+.prose-heading-large { font: var(--heading-large); font-family: var(--font-heading); margin: 0; }
+.prose-heading-medium { font: var(--heading-medium); font-family: var(--font-heading); margin: 0; }
+.prose-heading-medium-subtle { font: var(--heading-medium-subtle); font-family: var(--font-heading); margin: 0; }
+.prose-heading-small { font: var(--heading-small); font-family: var(--font-heading); margin: 0; }
+.prose-heading-small-subtle { font: var(--heading-small-subtle); font-family: var(--font-heading); margin: 0; }
+.prose-heading-x-small { font: var(--heading-x-small); font-family: var(--font-heading); margin: 0; }
+.prose-paragraph-title-x-large { font: var(--paragraph-title-x-large); font-family: var(--font-body); margin: 0; }
+.prose-paragraph-title-large { font: var(--paragraph-title-large); font-family: var(--font-body); margin: 0; }
+.prose-paragraph-title-medium { font: var(--paragraph-title-medium); font-family: var(--font-body); margin: 0; }
+.prose-paragraph-title-small { font: var(--paragraph-title-small); font-family: var(--font-body); margin: 0; }
+.prose-paragraph-body-x-large { font: var(--paragraph-body-x-large); font-family: var(--font-body); margin: 0; }
+.prose-paragraph-body-large { font: var(--paragraph-body-large); font-family: var(--font-body); margin: 0; }
+.prose-paragraph-body-medium { font: var(--paragraph-body-medium); font-family: var(--font-body); margin: 0; }
+.prose-paragraph-body-small { font: var(--paragraph-body-small); font-family: var(--font-body); margin: 0; }
+.prose-label-large { font: var(--label-large); font-family: var(--font-heading); }
+.prose-label-medium { font: var(--label-medium); font-family: var(--font-heading); }
+.prose-label-small { font: var(--label-small); font-family: var(--font-heading); }
+.prose-label-x-small { font: var(--label-x-small); font-family: var(--font-heading); }
+
+/* Text colour utilities (contextual) */
+.text-strong { color: var(--foreground-color-strong); }
+.text-neutral { color: var(--foreground-color-neutral); }
+.text-subtle { color: var(--foreground-color-subtle); }
+.text-highlight { color: var(--foreground-color-highlight-strong); }
+.text-inverse { color: var(--foreground-color-inverse-neutral); }
+
+/* ---------- Colour contexts: set surface + text together ---------- */
+.context-default, .context-weak, .context-strong {
+  background: var(--background-color-default);
+  color: var(--foreground-color-neutral);
+}
+
+/* ---------- Layout ---------- */
+.anwb-container {
+  width: 100%;
+  max-width: var(--size-grid-1392);
+  margin-inline: auto;
+  padding-inline: var(--spacing-300);
+}
+@media (min-width: 48rem) { .anwb-container { padding-inline: var(--spacing-500); } }
+@media (min-width: 64rem) { .anwb-container { padding-inline: var(--spacing-800); } }
+.anwb-section { padding-block: var(--spacing-500); }
+@media (min-width: 48rem) { .anwb-section { padding-block: var(--spacing-800); } }
+.anwb-stack { display: flex; flex-direction: column; gap: var(--spacing-200); }
+.anwb-grid { display: grid; gap: var(--spacing-300); grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
+
+/* ---------- Logo: only on white (default) or ocean blue (strong) backgrounds, never altered ---------- */
+.anwb-logo { display: inline-flex; align-items: center; }
+.anwb-logo img { width: 3.5rem; height: auto; }
+/* The logo's letters are ocean blue: on a dark (strong) surface give it a white plate, never recolour it */
+.context-strong .anwb-logo { background: #fff; padding: var(--spacing-100) var(--spacing-150); border-radius: var(--radius-200); }
+@media (min-width: 64rem) { .anwb-logo img { width: 5rem; } }
+
+/* ---------- Button (primary = yellow, secondary = ocean blue, tertiary = outline) ---------- */
+.anwb-button {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--spacing-100);
+  min-height: 3rem; padding-inline: var(--spacing-300);
+  font: var(--label-medium); font-family: var(--font-heading);
+  border: 1px solid transparent; border-radius: var(--radius-100);
+  text-decoration: none; cursor: pointer;
+  transition: background-color .15s, border-color .15s, color .15s;
+}
+@media (min-width: 48rem) { .anwb-button { min-height: 3.5rem; } }
+.anwb-button--small { min-height: 2.5rem; padding-inline: var(--spacing-200); font: var(--label-small); font-family: var(--font-heading); }
+.anwb-button--primary { background: var(--background-color-interactive-conversion); color: #003d86; }
+.anwb-button--primary:hover { background: var(--background-color-interactive-conversion-hover); }
+.anwb-button--primary:active { background: var(--background-color-interactive-conversion-active); }
+.anwb-button--secondary { background: var(--background-color-interactive-strong); color: var(--foreground-color-inverse-strong); }
+.anwb-button--secondary:hover { background: var(--background-color-interactive-strong-hover); }
+.anwb-button--secondary:active { background: var(--background-color-interactive-strong-active); }
+.anwb-button--tertiary { background: transparent; color: var(--foreground-color-neutral); border-color: var(--border-color-default); }
+.anwb-button--tertiary:hover { background: var(--background-color-interactive-weak-hover); border-color: var(--border-color-interactive-weak-hover); }
+.anwb-button--tertiary:active { background: var(--background-color-interactive-weak-active); }
+.anwb-button[disabled] { background: var(--background-color-interactive-disabled); color: var(--foreground-color-interactive-disabled); border-color: transparent; cursor: not-allowed; }
+.anwb-button .anwb-icon { transition: transform .2s; }
+.anwb-button:hover .anwb-icon { transform: translateX(var(--spacing-50)); }
+.anwb-icon { width: 1.5rem; height: 1.5rem; fill: currentColor; flex: none; }
+
+/* ---------- Tag / label (pill) and Badge ---------- */
+.anwb-tag {
+  display: inline-flex; align-items: center; gap: var(--spacing-100);
+  height: 2.5rem; padding-inline: var(--spacing-150);
+  border-radius: var(--radius-pill);
+  background: var(--background-color-weak); color: var(--foreground-color-neutral);
+  font: var(--paragraph-body-small); font-family: var(--font-body);
+}
+.anwb-tag--yellow { background: var(--brand-yellow); color: #003d86; font: var(--label-small); font-family: var(--font-heading); border-radius: var(--radius-100); }
+.anwb-badge {
+  display: inline-grid; place-items: center; min-width: 1.5rem; height: 1.5rem; padding-inline: .375rem;
+  border-radius: var(--radius-pill); background: var(--brand-red); color: #fff;
+  font: var(--label-x-small); font-family: var(--font-heading);
+}
+
+/* ---------- Alert (left border + weak tint) ---------- */
+.anwb-alert {
+  display: block;
+  padding: var(--spacing-200); border-left: 2px solid;
+  font: var(--paragraph-body-small); font-family: var(--font-body); color: #000307;
+}
+.anwb-alert > :first-child { font: var(--paragraph-title-small); font-family: var(--font-body); margin: 0 0 var(--spacing-100); }
+.anwb-alert--positive { border-color: var(--border-color-feedback-positive-strong); background: var(--background-color-feedback-positive-weak); }
+.anwb-alert--negative { border-color: var(--border-color-feedback-negative-strong); background: var(--background-color-feedback-negative-weak); }
+.anwb-alert--notice { border-color: var(--border-color-feedback-notice-strong); background: var(--background-color-feedback-notice-weak); }
+.anwb-alert--informative { border-color: var(--border-color-feedback-informative-strong); background: var(--background-color-informative-weak); }
+
+/* ---------- Tile (card): 8px radius, no heavy shadow ---------- */
+.anwb-tile {
+  display: flex; flex-direction: column; gap: var(--spacing-200);
+  padding: var(--spacing-300); border-radius: var(--radius-200);
+  background: var(--background-color-weak); color: var(--foreground-color-neutral);
+  overflow: hidden;
+}
+.anwb-tile--bordered { border: 2px solid var(--border-color-default); background: var(--background-color-default); }
+.anwb-tile--strong { background: var(--background-color-strong); color: var(--foreground-color-strong); }
+.anwb-tile--small { padding: var(--spacing-200); }
+
+/* ---------- Bar: full-width band that sets a colour context for its children ---------- */
+.anwb-bar { padding: var(--spacing-500) var(--spacing-300); }
+@media (min-width: 48rem) {
+  .anwb-bar { padding: var(--spacing-500); margin-inline: var(--spacing-200); border-radius: var(--radius-200); }
+}
+.anwb-bar__inner { max-width: var(--size-grid-1062); margin-inline: auto; display: flex; flex-direction: column; gap: var(--spacing-300); }
+.anwb-bar--center .anwb-bar__inner { text-align: center; align-items: center; }
+
+/* ---------- Lockup: the angled ANWB shape. Colour via background on a masked box ---------- */
+.anwb-lockup {
+  display: block; width: 13.5rem; aspect-ratio: 121 / 145;
+  background: var(--brand-yellow);
+  -webkit-mask: var(--lockup-url, none) center / cover no-repeat;
+          mask: var(--lockup-url, none) center / cover no-repeat;
+}
+.anwb-lockup--ocean { background: var(--brand-ocean); }
+.anwb-lockup--light { background: var(--neutral-100); }
+
+/* Hero lockup: corner accent that never sits under text. Small in the bottom-right corner on mobile
+   (the hero reserves room for it), large on desktop where the text column stays on the left. */
+.anwb-hero { position: relative; overflow: hidden; }
+.anwb-hero > .anwb-container { position: relative; z-index: 1; padding-bottom: calc(var(--spacing-500) + 4.5rem); }
+.anwb-hero__lockup { position: absolute; right: 0; bottom: 0; height: 6rem; color: var(--brand-yellow); }
+@media (min-width: 48rem) {
+  .anwb-hero > .anwb-container { padding-bottom: var(--spacing-800); }
+  .anwb-hero__lockup { height: min(75%, 24rem); }
+}
+
+/* ---------- Divider ---------- */
+.anwb-divider { border: 0; border-top: 1px solid var(--border-color-default); margin: var(--spacing-300) 0; }
+
+/* ================= Layout-hulpklassen: zodat een pagina GEEN eigen CSS nodig heeft =================
+ * Alleen spacing-, size- en breakpoint-tokens. Gebruik deze in plaats van style="..." of eigen <style>-regels. */
+.anwb-row { display: flex; flex-wrap: wrap; gap: var(--spacing-200); align-items: center; }
+.anwb-row--between { justify-content: space-between; }
+.anwb-row--start { align-items: flex-start; }
+.anwb-cols { display: grid; gap: var(--spacing-300); }                       /* 1 kolom mobiel */
+@media (min-width: 48rem) { .anwb-cols--2, .anwb-cols--3, .anwb-cols--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 64rem) { .anwb-cols--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } .anwb-cols--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } .anwb-cols--5-7 { grid-template-columns: 5fr 7fr; gap: var(--spacing-800); } .anwb-cols--calc { grid-template-columns: 20rem minmax(0, 1fr); } }
+.anwb-gap-100 { gap: var(--spacing-100); } .anwb-gap-150 { gap: var(--spacing-150); } .anwb-gap-200 { gap: var(--spacing-200); }
+.anwb-gap-300 { gap: var(--spacing-300); } .anwb-gap-400 { gap: var(--spacing-400); } .anwb-gap-500 { gap: var(--spacing-500); }
+.anwb-mt-100 { margin-top: var(--spacing-100); } .anwb-mt-200 { margin-top: var(--spacing-200); } .anwb-mt-300 { margin-top: var(--spacing-300); }
+.anwb-mt-400 { margin-top: var(--spacing-400); } .anwb-mt-500 { margin-top: var(--spacing-500); }
+.anwb-mb-0 { margin-bottom: 0; } .anwb-m-0 { margin: 0; }
+.anwb-measure { max-width: 68ch; }                                             /* leesbare regelbreedte voor lopende tekst */
+.anwb-maxw-640 { max-width: var(--size-grid-640); } .anwb-maxw-840 { max-width: var(--size-grid-840); } .anwb-maxw-1062 { max-width: var(--size-grid-1062); }
+.anwb-hidden { display: none !important; }
+.anwb-sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.anwb-num { font-variant-numeric: tabular-nums; }
+.anwb-text-positive { color: var(--foreground-color-feedback-positive) !important; } .anwb-text-negative { color: var(--foreground-color-feedback-negative) !important; } .anwb-text-notice { color: var(--foreground-color-feedback-notice) !important; }
+.anwb-text-small { font: var(--paragraph-body-small); font-family: var(--font-body); } .anwb-text-xsmall { font: var(--paragraph-body-x-small); font-family: var(--font-body); }
+.anwb-section--divided { border-top: 1px solid var(--border-color-subtle); }
+.anwb-sticky-top { position: sticky; top: 0; z-index: var(--z-sticky); }
+@media print { .anwb-no-print { display: none !important; } }
+
+/* ---------- Paginakader en formulierlayout (zodat templates geen eigen CSS nodig hebben) ---------- */
+.anwb-header > .anwb-container { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-200); padding-block: var(--spacing-200); }
+.anwb-footer > .anwb-container { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--spacing-200); padding-block: var(--spacing-400); }
+.anwb-form { display: grid; gap: var(--spacing-300); }
+.anwb-fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: var(--spacing-150); }
+.anwb-fieldset > legend { padding: 0; margin-bottom: var(--spacing-100); }
+.anwb-actions { display: flex; flex-wrap: wrap; gap: var(--spacing-150); align-items: center; }
+.anwb-hero__text { max-width: 34rem; }
+.anwb-hero__text > * { margin: 0; }
+.anwb-hero__text { display: flex; flex-direction: column; gap: var(--spacing-300); }
+.anwb-block { display: grid; gap: var(--spacing-400); }
+.anwb-block > * { margin: 0; }
+.anwb-tile > h3, .anwb-tile > p { margin: 0; }

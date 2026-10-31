@@ -1,0 +1,304 @@
+/*
+ * ANWB Nomad design tokens (curated subset for HTML, slides and visuals).
+ * Source: https://nomad.anwb.nl (Fundamentals/Tokens), read 2026-10-28.
+ * Names and values match Nomad's own CSS custom properties, so code written
+ * against this file ports to @anwb/nomad without renaming.
+ *
+ * Colour tokens are CONTEXTUAL: put class "context-default" (white page),
+ * "context-weak" (light grey page) or "context-strong" (dark blue page) on a
+ * container and every semantic token below re-maps itself. Never hardcode hex
+ * in components; use var(--token). Hex only appears in this file.
+ */
+
+/* ---------- Fonts (licensed ANWB fonts: not bundled, see references/typografie.md) ---------- */
+:root {
+  --font-heading: "Clan Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif;
+  --font-body: "Bernina Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif;
+  --font-accent: Verveine, "Clan Pro", cursive; /* handwritten accent; use sparingly */
+}
+
+/* ---------- Static brand colours (never change with context) ---------- */
+:root {
+  --brand-ocean: #003d86;        /* ANWB dark blue ("ocean"), primary brand colour */
+  --brand-yellow: #ffcd00;       /* ANWB yellow, conversion + logo accent */
+  --brand-highlight: #0096da;    /* bright blue, highlights */
+  --brand-highlight-strong: #0071a4;
+  --brand-highlight-hover: #0080b9;
+  --feedback-negative: #bb0606;
+  --brand-red: #cc2c26;
+  --brand-green: #0e7d33;
+  --brand-orange: #ce6f00;
+  --brand-informative: #0056be;
+  --neutral-900: #000307;        /* body text black */
+  --neutral-600: #606060;
+  --neutral-400: #a6a6a6;
+  --neutral-300: #d9d9d9;
+  --neutral-200: #e5e5e5;
+  --neutral-100: #f2f2f2;
+  --white: #fff;
+  --member-tier1: #47ace2; --member-tier2: #b68665; --member-tier3: #bdbec2;
+  --member-tier4: #bda36b; --member-tier5: #cecabd; --member-profit: #f28200;
+}
+
+/* ---------- Spacing / size / radius / border / z / breakpoints ---------- */
+:root {
+  --spacing-25: .125rem;  --spacing-50: .25rem;   --spacing-75: .375rem;  --spacing-100: .5rem;
+  --spacing-150: .75rem;  --spacing-200: 1rem;    --spacing-300: 1.5rem;   --spacing-400: 2rem;
+  --spacing-450: 2.25rem; --spacing-500: 2.5rem;  --spacing-600: 3rem;    --spacing-700: 3.5rem;
+  --spacing-800: 4rem;    --spacing-900: 4.5rem;  --spacing-1000: 5rem;   --spacing-1500: 7.5rem;
+  --spacing-2000: 10rem;
+  /* Responsive spacing ("R" tokens): value below is mobile, desktop override at the bottom */
+  --spacing-100R: .5rem; --spacing-150R: .75rem; --spacing-200R: 1rem; --spacing-300R: 1.5rem; --spacing-630R: 3rem;
+
+  --size-100: .5rem;  --size-200: 1rem;   --size-250: 1.25rem; --size-300: 1.5rem; --size-400: 2rem;
+  --size-500: 2.5rem; --size-600: 3rem;   --size-700: 3.5rem;  --size-800: 4rem;   --size-1000: 5rem;
+  --size-1500: 7.5rem; --size-1800: 9rem; --size-2200: 11rem;  --size-2700: 13.5rem;
+  --size-600R: 3rem;
+
+  --radius-50: .125rem; --radius-100: .25rem; --radius-150: .375rem; --radius-200: .5rem;
+  --radius-pill: 6.25rem; --radius-circle: 50%;
+  --border-width-100: 1px; --border-width-200: 2px;
+
+  --opacity-15: 15%; --opacity-40: 40%; --opacity-60: 60%; --opacity-80: 80%;
+
+  --breakpoint-sm: 30rem; --breakpoint-md: 48rem; --breakpoint-lg: 64rem; --breakpoint-xl: 90rem;
+  --size-grid-640: 40rem; --size-grid-840: 52.5rem; --size-grid-1062: 66.375rem; --size-grid-1392: 87rem;
+
+  --z-sticky: 100; --z-drawer: 200; --z-dropdown: 800; --z-tooltip: 900; --z-toast: 1000;
+}
+
+/* ---------- Typography shorthands: weight size/line-height family (mobile values) ---------- */
+:root {
+  --hero-hero: 500 2.25rem/2.75rem "Clan Pro";
+  --heading-x-large: 500 1.75rem/2.375rem "Clan Pro";
+  --heading-large: 500 1.75rem/2.375rem "Clan Pro";
+  --heading-medium: 500 1.375rem/2.125rem "Clan Pro";
+  --heading-medium-subtle: 475 1.125rem/1.75rem "Clan Pro";
+  --heading-small: 500 1.125rem/1.75rem "Clan Pro";
+  --heading-small-subtle: 475 1rem/1.5rem "Clan Pro";
+  --heading-x-small: 500 1rem/1.5rem "Clan Pro";
+  --paragraph-title-x-large: 600 1.25rem/1.875rem "Bernina Sans";
+  --paragraph-title-large: 600 1.125rem/1.75rem "Bernina Sans";
+  --paragraph-title-medium: 600 1rem/1.5rem "Bernina Sans";
+  --paragraph-title-small: 600 .875rem/1.375rem "Bernina Sans";
+  --paragraph-title-x-small: 600 .75rem/1.125rem "Bernina Sans";
+  --paragraph-body-x-large: 400 1.25rem/1.875rem "Bernina Sans";
+  --paragraph-body-large: 400 1.125rem/1.75rem "Bernina Sans";
+  --paragraph-body-medium: 400 1rem/1.5rem "Bernina Sans";
+  --paragraph-body-small: 400 .875rem/1.375rem "Bernina Sans";
+  --paragraph-body-x-small: 400 .75rem/1.125rem "Bernina Sans";
+  --label-3-x-large: 500 2.25rem/2.875rem "Clan Pro";
+  --label-2-x-large: 500 1.625rem/2.25rem "Clan Pro";
+  --label-x-large: 500 1.25rem/1.875rem "Clan Pro";
+  --label-large: 500 1.125rem/1.75rem "Clan Pro";
+  --label-medium: 500 1rem/1.5rem "Clan Pro";
+  --label-small: 500 .875rem/1.375rem "Clan Pro";
+  --label-x-small: 500 .75rem/1.125rem "Clan Pro";
+}
+
+/* Desktop overrides (Nomad applies these at the md+ breakpoint) */
+@media (min-width: 48rem) {
+  :root {
+    --spacing-100R: 1rem; --spacing-150R: 1rem; --spacing-200R: 1.5rem; --spacing-300R: 2.5rem; --spacing-630R: 5rem;
+    --size-600R: 3.5rem;
+    --hero-hero: 500 4rem/4.5rem "Clan Pro";
+    --heading-x-large: 500 3rem/3.625rem "Clan Pro";
+    --heading-large: 500 2rem/2.75rem "Clan Pro";
+    --heading-medium: 500 1.625rem/2.25rem "Clan Pro";
+    --heading-medium-subtle: 475 1.5rem/2rem "Clan Pro";
+    --heading-small: 500 1.25rem/1.875rem "Clan Pro";
+    --heading-small-subtle: 475 1.25rem/1.875rem "Clan Pro";
+  }
+}
+
+/* ---------- Semantic colours: DEFAULT context (white) ---------- */
+:root,
+.context-default {
+  --shadow-subtle: 0 0 2rem 0 #0003071a;
+  --shadow-neutral: 0 0 2rem 0 #00030726;
+  --shadow-strong: 0 0 2rem 0 #00030740;
+
+  /* foreground = text and icons */
+  --foreground-color-strong: #003d86;
+  --foreground-color-neutral: #000307;
+  --foreground-color-subtle: #606060;
+  --foreground-color-weak: #a6a6a6;
+  --foreground-color-highlight-strong: #0071a4;
+  --foreground-color-highlight-subtle: #0096da;
+  --foreground-color-inverse-strong: #fff;
+  --foreground-color-inverse-neutral: #fff;
+  --foreground-color-feedback-positive: #0e7d33;
+  --foreground-color-feedback-notice: #ce6f00;
+  --foreground-color-feedback-negative: #bb0606;
+  --foreground-color-feedback-marked: #8b3393;
+  --foreground-color-accent-yellow: #ffcd00;
+  --foreground-color-accent-red: #cc2c26;
+  --foreground-color-interactive-disabled: #a6a6a6;
+  --foreground-color-interactive-highlight-strong: #0071a4;
+  --foreground-color-interactive-highlight-strong-hover: #003d86;
+  --foreground-color-interactive-highlight-strong-active: #003d86;
+  --foreground-color-interactive-strong: #003d86;
+  --foreground-color-interactive-strong-hover: #0071a4;
+  --foreground-color-interactive-neutral: #000307;
+  --foreground-color-interactive-neutral-hover: #0071a4;
+
+  /* background = surfaces */
+  --background-color-default: #fff;
+  --background-color-highlight: #0096da;
+  --background-color-strong: #003d86;
+  --background-color-subtle: #e5e5e5;
+  --background-color-weak: #f2f2f2;
+  --background-color-form-controls: #f2f2f2;
+  --background-color-informative-weak: #ebf2fa;
+  --background-color-feedback-positive-strong: #0e7d33;
+  --background-color-feedback-positive-weak: #e8f4ec;
+  --background-color-feedback-notice-strong: #ce6f00;
+  --background-color-feedback-notice-weak: #fef7eb;
+  --background-color-feedback-negative-strong: #bb0606;
+  --background-color-feedback-negative-weak: #faebeb;
+
+  /* interactive surfaces (buttons etc.) */
+  --background-color-interactive-conversion: #ffcd00;        /* primary button: yellow */
+  --background-color-interactive-conversion-hover: #f2b91d;
+  --background-color-interactive-conversion-active: #e6b01c;
+  --background-color-interactive-strong: #003d86;            /* secondary button: dark blue */
+  --background-color-interactive-strong-hover: #002e65;
+  --background-color-interactive-strong-active: #00224a;
+  --background-color-interactive-weak: #f2f2f2;
+  --background-color-interactive-weak-hover: #e5e5e5;
+  --background-color-interactive-weak-active: #d9d9d9;
+  --background-color-interactive-default: #fff;
+  --background-color-interactive-default-hover: #f2f2f2;
+  --background-color-interactive-default-active: #e5e5e5;
+  --background-color-interactive-highlight-subtle: #0096da;
+  --background-color-interactive-highlight-subtle-hover: #0080b9;
+  --background-color-interactive-highlight-subtle-active: #0071a4;
+  --background-color-interactive-disabled: #e5e5e5;
+
+  --background-image-gradient-black-top-bottom: linear-gradient(to bottom, #0009, #0003);
+  --background-image-gradient-black-left-right: linear-gradient(to right, #0009, #0003);
+  --background-image-gradient-black-bottom-top: linear-gradient(to top, #0009, #0000);
+
+  /* borders */
+  --border-color-default: #d9d9d9;
+  --border-color-strong: #003d86;
+  --border-color-subtle: #e5e5e5;
+  --border-color-weak: #f2f2f2;
+  --border-color-inverse: #fff;
+  --border-color-feedback-positive-strong: #0e7d33;
+  --border-color-feedback-notice-strong: #ce6f00;
+  --border-color-feedback-negative-strong: #bb0606;
+  --border-color-feedback-informative-strong: #0056be;
+  --border-color-interactive-neutral: #606060;
+  --border-color-interactive-focus: #0080b9;
+  --border-color-interactive-disabled: #e5e5e5;
+  --border-color-interactive-disabled-strong: #d9d9d9;
+  --border-color-interactive-strong: #003d86;
+  --border-color-interactive-highlight-subtle-hover: #0080b9;
+  --border-color-interactive-weak-hover: #e5e5e5;
+  --border-color-interactive-weak-active: #d9d9d9;
+}
+
+/* ---------- WEAK context (light grey page): only the differences ---------- */
+.context-weak {
+  --foreground-color-highlight-subtle: #1393cc;
+  --foreground-color-accent-yellow: #f2b91d;
+  --background-color-default: #f2f2f2;
+  --background-color-highlight: #1393cc;
+  --background-color-subtle: #d9d9d9;
+  --background-color-weak: #fff;
+  --background-color-form-controls: #fff;
+  --background-color-feedback-positive-weak: #dff0e4;
+  --background-color-feedback-notice-weak: #fff7e9;
+  --background-color-feedback-negative-weak: #f8e7e7;
+  --background-color-informative-weak: #e5ecf4;
+  --background-color-interactive-default: #f2f2f2;
+  --background-color-interactive-default-hover: #fff;
+  --background-color-interactive-default-active: #d9d9d9;
+  --background-color-interactive-weak: #fff;
+  --background-color-interactive-weak-hover: #d9d9d9;
+  --background-color-interactive-weak-active: #ccc;
+  --background-color-interactive-highlight-subtle: #1393cc;
+  --border-color-default: #ccc;
+  --border-color-subtle: #d9d9d9;
+  --border-color-weak: #fff;
+  --border-color-interactive-weak-hover: #d9d9d9;
+  --border-color-interactive-weak-active: #ccc;
+}
+
+/* ---------- STRONG context (dark blue "ocean" page): text becomes white ---------- */
+.context-strong {
+  --shadow-subtle: 0 0 2rem 0 #00030733;
+  --shadow-neutral: 0 0 2rem 0 #00030740;
+  --shadow-strong: 0 0 2rem 0 #00030759;
+
+  --foreground-color-strong: #fff;
+  --foreground-color-neutral: #fff;
+  --foreground-color-subtle: #fff;
+  --foreground-color-highlight-strong: #59bbe7;
+  --foreground-color-highlight-subtle: #59bbe7;
+  --foreground-color-inverse-strong: #003d86;
+  --foreground-color-inverse-neutral: #000307;
+  --foreground-color-feedback-positive: #87c59c;
+  --foreground-color-feedback-notice: #f9c78c;
+  --foreground-color-feedback-negative: #eab2b2;
+  --foreground-color-feedback-marked: #d3b2d6;
+  --foreground-color-accent-red: #ebaba8;
+  --foreground-color-interactive-disabled: #999;
+  --foreground-color-interactive-highlight-strong: #59bbe7;
+  --foreground-color-interactive-highlight-strong-hover: #fff;
+  --foreground-color-interactive-highlight-strong-active: #fff;
+  --foreground-color-interactive-strong: #fff;
+  --foreground-color-interactive-strong-hover: #59bbe7;
+  --foreground-color-interactive-neutral: #fff;
+  --foreground-color-interactive-neutral-hover: #59bbe7;
+
+  --background-color-default: #003d86;
+  --background-color-highlight: #59bbe7;
+  --background-color-strong: #fff;
+  --background-color-subtle: #002e65;
+  --background-color-weak: #002e65;
+  --background-color-form-controls: #fff;
+  --background-color-interactive-default: #003d86;
+  --background-color-interactive-default-hover: #002e65;
+  --background-color-interactive-default-active: #00224a;
+  --background-color-interactive-strong: #fff;
+  --background-color-interactive-strong-hover: #e5e5e5;
+  --background-color-interactive-strong-active: #d9d9d9;
+  --background-color-interactive-weak: #002e65;
+  --background-color-interactive-weak-hover: #00224a;
+  --background-color-interactive-weak-active: #001b3c;
+  --background-color-interactive-highlight-subtle: #59bbe7;
+  --background-color-interactive-highlight-subtle-hover: #0096da;
+  --background-color-interactive-highlight-subtle-active: #0080b9;
+  --background-color-interactive-disabled: #d9d9d9;
+
+  --border-color-default: #fff;
+  --border-color-strong: #fff;
+  --border-color-subtle: #00224a;
+  --border-color-weak: #00224a;
+  --border-color-feedback-positive-strong: #87c59c;
+  --border-color-feedback-notice-strong: #f9c78c;
+  --border-color-feedback-negative-strong: #eab2b2;
+  --border-color-feedback-informative-strong: #3b7dcd;
+  --border-color-interactive-neutral: #fff;
+  --border-color-interactive-focus: #59bbe7;
+  --border-color-interactive-disabled: #d9d9d9;
+  --border-color-interactive-disabled-strong: #e5e5e5;
+  --border-color-interactive-strong: #fff;
+  --border-color-interactive-highlight-subtle-hover: #0096da;
+  --border-color-interactive-weak-hover: #00224a;
+  --border-color-interactive-weak-active: #001b3c;
+  --border-color-inverse: #d9d9d9;
+}
+
+/* ---------- Grafiekkleuren (afgeleid van merktokens; Nomad heeft geen datavisualisatiepalet, zie slides-en-visuals.md) ---------- */
+:root {
+  --chart-1: var(--brand-ocean);         /* hoofdreeks */
+  --chart-2: var(--brand-highlight);     /* tweede reeks */
+  --chart-accent: var(--brand-yellow);   /* "dit is het punt", max. eenmaal per grafiek */
+  --chart-muted: var(--neutral-600);     /* referentie, vergelijking */
+  --chart-off: var(--neutral-300);       /* niet-actief, achtergrond van spoor */
+  --chart-positive: var(--brand-green);  /* alleen voor "goed" */
+  --chart-negative: var(--feedback-negative); /* alleen voor "slecht" */
+}
