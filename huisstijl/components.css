@@ -1,6 +1,6 @@
 /*
  * ANWB componenten in plain CSS (aanvulling op base.css). Laad volgorde: tokens.css, base.css, components.css.
- * Gebouwd naar de gerenderde huisstijl-componenten (de huisstijl, 2026-10-28). Maten komen uit huisstijl:
+ * Gebouwd naar de gerenderde huisstijl-componenten. Maten komen uit de huisstijl:
  * 24px controls, 56px velden, 48px chips, 8px radius op kaarten. Gebruik alleen tokens, geen hex.
  * Voorbeeldmarkup per component: templates/componenten.html.
  */
@@ -263,7 +263,7 @@
 .anwb-skip { position: absolute; left: -999px; top: 0; }
 .anwb-skip:focus { left: var(--spacing-200); top: var(--spacing-200); z-index: var(--z-toast); background: var(--background-color-strong); color: var(--foreground-color-inverse-strong); padding: var(--spacing-100) var(--spacing-200); border-radius: var(--radius-100); }
 
-/* ---------- Range slider (huisstijl: spoor 4px, duim 24px, ocean-highlight) ---------- */
+/* ---------- Range slider (Huisstijl: spoor 4px, duim 24px, ocean-highlight) ---------- */
 .anwb-range { width: 100%; height: 1.5rem; margin: 0; background: transparent; appearance: none; -webkit-appearance: none; cursor: pointer; }
 .anwb-range::-webkit-slider-runnable-track { height: .25rem; background: var(--background-color-subtle); }
 .anwb-range::-moz-range-track { height: .25rem; background: var(--background-color-subtle); }

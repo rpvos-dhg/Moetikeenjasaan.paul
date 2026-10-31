@@ -1,5 +1,5 @@
 /*
- * Gegenereerd uit huisstijl.css door scripts/build-theme.py (zie README).
+ * Gegenereerd uit huisstijl.css door scripts/build-theme.py.
  * 1. Lettertokens met terugval: huisstijl noemt alleen "Clan Pro" en "Bernina Sans".
  *    Die fonts zitten niet in deze openbare repo; staan ze op het toestel, dan
  *    worden ze gebruikt, anders Inter.
@@ -306,7 +306,7 @@ html.dark .context-weak {
 
 /* ─── Handgeschreven: vlakken voor het donkere thema ─────────────────────── */
 /* Pagina (context weak) is het donkerst, kaarten (context default) een stap
-   lichter. Afgeleid van ANWB-ocean. Feedbackvlakken blijven licht, want huisstijl
+   lichter. Afgeleid van ANWB-ocean. Feedbackvlakken blijven licht, want de huisstijl
    zet daar vaste donkere tekst op. */
 html.dark,
 html.dark .context-weak {
