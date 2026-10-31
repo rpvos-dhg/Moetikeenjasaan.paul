@@ -14,13 +14,13 @@
 <meta name="theme-color" content="#001b3c" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Pauze-advies">
-<script src="theme-init.js?v=20"></script>
-<link rel="stylesheet" href="huisstijl/huisstijl.css?v=20">
-<link rel="stylesheet" href="huisstijl/tokens.css?v=20">
-<link rel="stylesheet" href="huisstijl/base.css?v=20">
-<link rel="stylesheet" href="huisstijl/components.css?v=20">
-<link rel="stylesheet" href="huisstijl/theme.css?v=20">
-<link rel="stylesheet" href="style.css?v=20">
+<script src="theme-init.js?v=21"></script>
+<link rel="stylesheet" href="huisstijl/huisstijl.css?v=21">
+<link rel="stylesheet" href="huisstijl/tokens.css?v=21">
+<link rel="stylesheet" href="huisstijl/base.css?v=21">
+<link rel="stylesheet" href="huisstijl/components.css?v=21">
+<link rel="stylesheet" href="huisstijl/theme.css?v=21">
+<link rel="stylesheet" href="style.css?v=21">
 </head>
 <body class="context-weak">
 <!-- huisstijl-lint-ignore: logo -->
@@ -75,10 +75,11 @@
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
       </button>
     </div>
-    <div class="location-panel" id="locationPanel" hidden>
-      <div class="flex justify-between gap-200 mb-100 prose-paragraph-title-small">
-        <span data-i18n="locationPanelTitle">Locatie</span>
-        <span id="locationPanelCoords">52.0964, 4.3268</span>
+    <!-- huisstijl Popover: titel, wit vlak, geen backdrop (Components/Overlay/Popover) -->
+    <div class="location-panel context-default flex-col gap-200 rounded-200 bg-default p-300 shadow-neutral flex" id="locationPanel" role="group" aria-labelledby="locationPanelTitle" hidden>
+      <div class="flex items-center justify-between gap-200 text-strong">
+        <p class="m-0 max-w-none prose-heading-small" id="locationPanelTitle" data-i18n="locationPanelTitle">Locatie</p>
+        <span class="prose-paragraph-body-x-small text-subtle anwb-num" id="locationPanelCoords">52.0964, 4.3268</span>
       </div>
       <div class="location-actions">
         <button id="useCurrentLocationBtn" class="anwb-button anwb-button--small anwb-button--secondary" type="button" data-i18n="useCurrentLocationBtn">Gebruik mijn locatie</button>
@@ -256,9 +257,12 @@
 
 <!-- Korte meldingen voor schermlezers; de toast zelf is alleen visueel -->
 <div class="sr-only" id="srStatus" role="status" aria-live="polite"></div>
-<div class="toast context-strong" id="toast" hidden>
-  <span id="toastText"></span>
-  <button type="button" class="inline-flex items-center min-h-500 px-50 text-interactive-highlight-strong underline hover:text-interactive-highlight-strong-hover active:text-interactive-highlight-strong-active focus-visible:rounded-50 focus-visible:outline-200 focus-visible:outline-offset-25 focus-visible:outline-interactive-focus prose-paragraph-body-small whitespace-nowrap" id="toastAction"></button>
+<!-- huisstijl Toast (informative): markup van de huisstijl, Components/Overlay/Toast -->
+<div class="fixed right-200R bottom-200R z-toast" id="toast" hidden>
+  <div class="contents context-strong"><div class="mt-100 flex max-w-grid-416 min-w-grid-288 flex-col gap-200 p-200 rounded-100 text-static-inverse bg-static-informative-strong shadow-neutral">
+    <div class="flex w-full flex-row items-start gap-200"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="size-250 p-[calc(theme('padding.25')*250/300)] inline-block shrink-0 fill-current align-middle" role="img" aria-hidden="true"><path d="M10 0C4.487 0 0 4.486 0 10c0 5.513 4.487 10 10 10 5.514 0 10-4.487 10-10 0-5.514-4.486-10-10-10m0 17.856c-4.333 0-7.856-3.524-7.856-7.856S5.667 2.144 10 2.144 17.856 5.668 17.856 10 14.333 17.856 10 17.856"></path><path d="M10.547 6.065c.727 0 1.341-.614 1.341-1.341 0-.729-.6-1.32-1.341-1.32-.75 0-1.36.592-1.36 1.32 0 .74.61 1.34 1.36 1.34Zm2.132 6.716h-1.096V8.198c0-.577-.468-1.046-1.046-1.046h-1.64a1.046 1.046 0 0 0 0 2.092h.594v3.537H8.394a1.046 1.046 0 0 0 0 2.092h4.285a1.046 1.046 0 0 0 0-2.092"></path></svg><p class="m-0 max-w-none prose-paragraph-body-small flex-1" id="toastText"></p><button type="button" id="toastClose" class="size-300 items-center justify-center rounded-100 border-static-transparent leading-none focus-visible:outline-200 focus-visible:outline-offset-25 focus-visible:outline-interactive-focus active:text-interactive-strong-active disabled:cursor-not-allowed disabled:text-interactive-disabled-strong text-interactive-strong hover:text-interactive-strong-hover" aria-label="Sluiten"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="size-300 p-25 inline-block shrink-0 fill-current align-middle" role="img" aria-hidden="true"><path d="m18.586 16 9.679-9.619c.714-.71.714-1.86 0-2.57s-1.871-.71-2.586 0L16 13.43 6.321 3.812c-.714-.71-1.871-.71-2.586 0s-.714 1.86 0 2.57l9.679 9.619-9.678 9.618a1.81 1.81 0 0 0 0 2.57c.357.355.825.532 1.293.532s.936-.177 1.293-.532l9.679-9.619 9.679 9.619c.357.355.825.532 1.293.532s.936-.177 1.293-.532a1.81 1.81 0 0 0 0-2.57L18.587 16Z"></path></svg></button></div>
+    <button type="button" id="toastAction" class="group items-center gap-100 focus-visible:rounded-50 focus-visible:outline-200 focus-visible:outline-offset-25 focus-visible:outline-interactive-focus inline-flex underline hover:text-interactive-highlight-strong-hover active:text-interactive-highlight-strong-active self-end text-static-inverse prose-paragraph-body-small"></button>
+  </div></div>
 </div>
 
 <footer class="anwb-footer context-strong">
@@ -269,7 +273,7 @@
 
 </div>
 
-<script src="logic.js?v=20"></script>
-<script src="script.js?v=20"></script>
+<script src="logic.js?v=21"></script>
+<script src="script.js?v=21"></script>
 </body>
 </html>
