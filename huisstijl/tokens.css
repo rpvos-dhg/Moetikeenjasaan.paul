@@ -1,8 +1,7 @@
 /*
- * ANWB Nomad design tokens (curated subset for HTML, slides and visuals).
- * Source: https://nomad.anwb.nl (Fundamentals/Tokens), read 2026-10-28.
- * Names and values match Nomad's own CSS custom properties, so code written
- * against this file ports to @anwb/nomad without renaming.
+ * ANWB huisstijl design tokens (curated subset for HTML, slides and visuals).
+ * Read 2026-10-28.
+ * Names and values match the design system's own CSS custom properties.
  *
  * Colour tokens are CONTEXTUAL: put class "context-default" (white page),
  * "context-weak" (light grey page) or "context-strong" (dark blue page) on a
@@ -96,7 +95,7 @@
   --label-x-small: 500 .75rem/1.125rem "Clan Pro";
 }
 
-/* Desktop overrides (Nomad applies these at the md+ breakpoint) */
+/* Desktop overrides (huisstijl applies these at the md+ breakpoint) */
 @media (min-width: 48rem) {
   :root {
     --spacing-100R: 1rem; --spacing-150R: 1rem; --spacing-200R: 1.5rem; --spacing-300R: 2.5rem; --spacing-630R: 5rem;
@@ -292,7 +291,7 @@
   --border-color-inverse: #d9d9d9;
 }
 
-/* ---------- Grafiekkleuren (afgeleid van merktokens; Nomad heeft geen datavisualisatiepalet, zie slides-en-visuals.md) ---------- */
+/* ---------- Grafiekkleuren (afgeleid van merktokens; huisstijl heeft geen datavisualisatiepalet, zie slides-en-visuals.md) ---------- */
 :root {
   --chart-1: var(--brand-ocean);         /* hoofdreeks */
   --chart-2: var(--brand-highlight);     /* tweede reeks */

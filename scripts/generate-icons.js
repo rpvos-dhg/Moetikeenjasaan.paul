@@ -8,7 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
 
-// ─── Kleuren (Nomad-tokens, gelijk aan favicon.svg) ────────────────────────
+// ─── Kleuren (huisstijl-tokens, gelijk aan favicon.svg) ────────────────────────
 // Gele tegel met een jas in ocean; kraag, rits en manchetten weer geel.
 const TILE = [255, 205, 0];    // --brand-yellow #ffcd00
 const JACKET = [0, 61, 134];   // --brand-ocean #003d86

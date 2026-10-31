@@ -1,11 +1,11 @@
 /*
- * App-stijl bovenop Nomad (nomad/tokens.css, base.css, components.css).
- * Regels: alleen Nomad-tokens (geen hex), typografie via de Nomad-shorthands,
- * vormtaal volgens Nomad (radius-200 voor kaarten, radius-100 voor knoppen,
+ * App-stijl bovenop huisstijl (huisstijl/tokens.css, base.css, components.css).
+ * Regels: alleen huisstijl-tokens (geen hex), typografie via de huisstijl-shorthands,
+ * vormtaal volgens huisstijl (radius-200 voor kaarten, radius-100 voor knoppen,
  * pill voor tags), geen gradiënten, geen zware schaduwen, geen hoofdletters.
  *
- * nomad-gap: Nomad heeft geen donker thema, geen grafieken en geen
- * rondleiding. Die drie zijn hier afgeleid van de Nomad-tokens.
+ * eigen aanvulling: huisstijl heeft geen donker thema, geen grafieken en geen
+ * rondleiding. Die drie zijn hier afgeleid van de huisstijl-tokens.
  */
 
 /* ─── Lettertypes ─────────────────────────────────────────────────────────── */
@@ -50,8 +50,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; background: none; border: 0; }
 ul { list-style: none; }
 
-/* Nomads basisstijl haalt de onderstreping weg; gewone tekstlinks houden die.
-   Nomad-componenten zetten zelf no-underline waar nodig. */
+/* de huisstijl-basisstijl haalt de onderstreping weg; gewone tekstlinks houden die.
+   huisstijl-componenten zetten zelf no-underline waar nodig. */
 a { text-decoration: underline; }
 
 /* Footer onderaan, ook op een korte pagina */
@@ -76,7 +76,7 @@ main { flex: 1; }
   border: 0;
 }
 
-/* Nomad-focusring: 2px in de focuskleur van de context */
+/* huisstijl-focusring: 2px in de focuskleur van de context */
 :focus-visible {
   outline: var(--border-width-200) solid var(--border-color-interactive-focus);
   outline-offset: var(--spacing-25);
@@ -139,7 +139,7 @@ header {
   min-width: 0;
 }
 
-/* Eigen beeldmerk in Nomad-stijl (geen ANWB-logo of lockup): gele tegel met
+/* Eigen beeldmerk in huisstijl-stijl (geen ANWB-logo of lockup): gele tegel met
    radius-200 en een jas in ocean, woordmerk in de heading-letter */
 .logo-mark {
   display: inline-grid;
@@ -163,7 +163,7 @@ header {
   white-space: nowrap;
 }
 
-/* Nomad IconButton (ghost) op ocean */
+/* huisstijl IconButton (ghost) op ocean */
 .auto-mark {
   position: absolute;
   top: calc(-1 * var(--spacing-75));
@@ -200,7 +200,7 @@ header {
 .live-indicator.stale .live-dot { background: var(--foreground-color-interactive-disabled); }
 
 
-/* ─── Tabs (Nomad Tabs: label-medium, actieve tab met ocean onderlijn) ──────── */
+/* ─── Tabs (huisstijl Tabs: label-medium, actieve tab met ocean onderlijn) ──────── */
 .tabs-nav {
   position: sticky;
   top: 0;
@@ -226,7 +226,7 @@ h1 {
   margin-bottom: var(--spacing-100);
 }
 
-/* "niet?" in helderblauw: Nomad-highlight, geen eigen markeerstift */
+/* "niet?" in helderblauw: huisstijl-highlight, geen eigen markeerstift */
 .lead {
   color: var(--foreground-color-subtle);
   max-width: 54ch;
@@ -242,7 +242,7 @@ h1 {
   margin-bottom: var(--spacing-200);
 }
 
-/* Nomad Tag */
+/* huisstijl Tag */
 #locationLabel {
   min-width: 0;
   overflow: hidden;
@@ -308,7 +308,7 @@ h1 {
 .no-data [data-needs-data],
 .no-data .best-moment { display: none; }
 
-/* ─── Kaarten die het script maakt (Nomad Tile; de rest gebruikt Nomad-klassen) */
+/* ─── Kaarten die het script maakt (huisstijl Tile; de rest gebruikt huisstijl-klassen) */
 .explain-section,
 .cl-release {
   min-width: 0;
@@ -339,7 +339,7 @@ h1 {
   pointer-events: none;
 }
 
-/* ─── Advieskaart (context strong: Nomad-ocean, ook in donker thema) ──────── */
+/* ─── Advieskaart (context strong: huisstijl-ocean, ook in donker thema) ──────── */
 .advice-card {
   position: relative;
   overflow: hidden;
@@ -407,7 +407,7 @@ h1 {
 
 .verdict-feels:empty { display: none; }
 
-/* Jas-o-meter (nomad-gap: afgeleid van Nomad Meter) */
+/* Jas-o-meter (eigen aanvulling: afgeleid van huisstijl Meter) */
 .jacket-meter { margin-bottom: var(--spacing-200); }
 
 .jacket-meter-track {
@@ -464,7 +464,7 @@ h1 {
   margin-bottom: var(--spacing-200);
 }
 
-/* Meldingen in de kaart: Nomad-alertvorm (zijstreep) op het ocean-vlak */
+/* Meldingen in de kaart: huisstijl-alertvorm (zijstreep) op het ocean-vlak */
 .extreme-note,
 .data-note,
 .wacht-strip {
@@ -508,7 +508,7 @@ h1 {
   background: currentColor;
 }
 
-/* Belangrijkste tip als Nomad Label (geel) */
+/* Belangrijkste tip als huisstijl Label (geel) */
 .tip.primary {
   justify-self: start;
   margin-bottom: var(--spacing-50);
@@ -556,7 +556,7 @@ h1 {
   font-family: var(--font-body);
 }
 
-/* Nomad Spinner op ocean */
+/* huisstijl Spinner op ocean */
 .spinner {
   width: var(--size-200);
   height: var(--size-200);
@@ -619,7 +619,7 @@ details[open] > .pref-summary .pref-current { display: none; }
 
 .pref-body { margin-top: var(--spacing-150); }
 
-/* Nomad ToggleButton: aaneengesloten, geselecteerd = ocean */
+/* huisstijl ToggleButton: aaneengesloten, geselecteerd = ocean */
 .pref-row {
   display: flex;
   align-items: center;
@@ -632,7 +632,7 @@ details[open] > .pref-summary .pref-current { display: none; }
 
 .pref-row .anwb-select { width: auto; min-width: 7.5rem; }
 
-/* Nomad Select en Input in het donker thema: lichte pijl, lichte tekst */
+/* huisstijl Select en Input in het donker thema: lichte pijl, lichte tekst */
 .anwb-select,
 .anwb-input { color: var(--foreground-color-neutral); border-bottom-color: var(--border-color-interactive-neutral); }
 
@@ -657,14 +657,14 @@ html.dark .anwb-select {
   margin-bottom: var(--spacing-100);
 }
 
-/* Nomad Accordion: chevron rechts, geen eigen pijltje */
+/* huisstijl Accordion: chevron rechts, geen eigen pijltje */
 .checklist-group.anwb-accordion { background: transparent; }
 .checklist-group.anwb-accordion summary { padding-block: var(--spacing-100); margin-bottom: 0; }
 .checklist-group.anwb-accordion[open] { padding-bottom: var(--spacing-100); }
 
 .checklist-list { display: grid; }
 
-/* Nomad Checkbox: 24px, raakvlak 40px, regel met scheidingslijn */
+/* huisstijl Checkbox: 24px, raakvlak 40px, regel met scheidingslijn */
 .checklist-item {
   display: flex;
   width: 100%;
@@ -765,7 +765,7 @@ html.dark .anwb-select {
   color: var(--foreground-color-subtle);
 }
 
-/* Nomad Textarea */
+/* huisstijl Textarea */
 .share-fallback {
   display: block;
   width: 100%;
@@ -781,7 +781,7 @@ html.dark .anwb-select {
   resize: none;
 }
 
-/* ─── Regen per kwartier (nomad-gap: staafgrafiek met grafiektokens) ──────── */
+/* ─── Regen per kwartier (eigen aanvulling: staafgrafiek met grafiektokens) ──────── */
 .rain-chart {
   display: flex;
   align-items: flex-end;
@@ -872,7 +872,7 @@ html.dark .anwb-select {
   background: var(--background-color-weak);
 }
 
-/* Nu: Nomad-selectie in ocean, geen geel vlak */
+/* Nu: huisstijl-selectie in ocean, geen geel vlak */
 .slot.now {
   background: var(--background-color-interactive-strong);
   color: var(--foreground-color-inverse-strong);
@@ -902,7 +902,7 @@ html.dark .anwb-select {
   color: var(--foreground-color-subtle);
 }
 
-/* ─── Weer nu (Nomad Counter/Stat) ────────────────────────────────────────── */
+/* ─── Weer nu (huisstijl Counter/Stat) ────────────────────────────────────────── */
 .metrics {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1005,7 +1005,7 @@ html.dark .anwb-select {
   text-align: center;
 }
 
-/* Vandaag: Nomad-rand in ocean, geen geel vlak */
+/* Vandaag: huisstijl-rand in ocean, geen geel vlak */
 .comparison-day.today { box-shadow: inset 0 0 0 var(--border-width-200) var(--border-color-strong); }
 
 .comparison-label {
@@ -1035,7 +1035,7 @@ html.dark .anwb-select {
   color: var(--foreground-color-subtle);
 }
 
-/* Nomad Label; in de smalle dagkolom mag de tekst afbreken (anders valt "Vergelijkbaar" weg) */
+/* huisstijl Label; in de smalle dagkolom mag de tekst afbreken (anders valt "Vergelijkbaar" weg) */
 .comparison-verdict {
   margin-top: var(--spacing-75);
   height: auto;
@@ -1071,7 +1071,7 @@ html.dark .anwb-select {
   gap: var(--spacing-100);
 }
 
-/* Nomad Chip; geselecteerd = ocean */
+/* huisstijl Chip; geselecteerd = ocean */
 .log-actions {
   display: flex;
   align-items: center;
@@ -1086,7 +1086,7 @@ html.dark .anwb-select {
 
 #teamAddForm .anwb-input { flex: 1; min-width: 0; min-height: var(--size-500); }
 
-/* Nomad Tag met verwijderknop */
+/* huisstijl Tag met verwijderknop */
 .team-item {
   display: inline-flex;
   align-items: center;
@@ -1106,7 +1106,7 @@ html.dark .anwb-select {
   gap: var(--spacing-150);
 }
 
-/* Nomad Counter */
+/* huisstijl Counter */
 .stat {
   display: flex;
   flex-direction: column;
@@ -1143,7 +1143,7 @@ html.dark .anwb-select {
   margin-top: var(--spacing-200);
 }
 
-/* Badge als kleine tegel met gele Nomad-accentlijn */
+/* Badge als kleine tegel met gele huisstijl-accentlijn */
 .badge {
   display: flex;
   flex-direction: column;
@@ -1275,10 +1275,10 @@ html.dark .anwb-select {
 
 .explain-section a { color: var(--foreground-color-interactive-highlight-strong); }
 
-/* Disclaimer als Nomad Tile in context strong */
+/* Disclaimer als huisstijl Tile in context strong */
 .explain-section.disclaimer h2 { color: var(--foreground-color-accent-yellow); }
 
-/* Nomad Table in een scrollbare kaart */
+/* huisstijl Table in een scrollbare kaart */
 .threshold-table { margin: var(--spacing-150) 0; }
 
 .threshold-table th,
@@ -1358,7 +1358,7 @@ footer strong { color: var(--foreground-color-accent-yellow); }
 
 footer a:hover { color: var(--foreground-color-interactive-neutral-hover); }
 
-/* ─── Rondleiding (nomad-gap: afgeleid van Nomad Popover) ─────────────────── */
+/* ─── Rondleiding (eigen aanvulling: afgeleid van huisstijl Popover) ─────────────────── */
 .tour-overlay {
   position: fixed;
   inset: 0;
@@ -1421,7 +1421,7 @@ footer a:hover { color: var(--foreground-color-interactive-neutral-hover); }
   margin-bottom: var(--spacing-200);
 }
 
-/* Nomad Pagination (stippen) */
+/* huisstijl Pagination (stippen) */
 .tour-dots {
   display: flex;
   gap: var(--spacing-75);

@@ -1,8 +1,8 @@
 /*
  * ANWB base styles for plain HTML, slides and visuals.
- * Re-implements the look of the Nomad components (Button, Tag, Alert, Bar, Tile, Lockup)
- * with the Nomad tokens from tokens.css. Load tokens.css first.
- * Class names mirror Nomad: .context-*, .prose-*, then .anwb-* for components.
+ * Re-implements the look of the huisstijl components (Button, Tag, Alert, Bar, Tile, Lockup)
+ * with the huisstijl tokens from tokens.css. Load tokens.css first.
+ * Class names: .context-*, .prose-*, then .anwb-* for components.
  */
 
 *, *::before, *::after { box-sizing: border-box; }

@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- Gele tegel (Nomad radius-200) -->
+  <!-- Gele tegel (huisstijl radius-200) -->
   <rect width="32" height="32" rx="7" fill="#ffcd00"/>
 
   <!-- Jacket: shoulders, full-length sleeves, body and a V-neck collar -->

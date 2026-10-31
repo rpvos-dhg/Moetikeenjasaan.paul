@@ -1,6 +1,6 @@
 /*
  * ANWB componenten in plain CSS (aanvulling op base.css). Laad volgorde: tokens.css, base.css, components.css.
- * Gebouwd naar de gerenderde Nomad-componenten (nomad.anwb.nl, 2026-10-28). Maten komen uit Nomad:
+ * Gebouwd naar de gerenderde huisstijl-componenten. Maten komen uit de huisstijl:
  * 24px controls, 56px velden, 48px chips, 8px radius op kaarten. Gebruik alleen tokens, geen hex.
  * Voorbeeldmarkup per component: templates/componenten.html.
  */
@@ -35,7 +35,7 @@
 
 /* ---------- Checkbox, radio, switch ---------- */
 .anwb-check, .anwb-radio, .anwb-switch {
-  /* min-height 2.5rem = raakvlak van 40px (Nomad vergroot het klikgebied rond de 24px control) */
+  /* min-height 2.5rem = raakvlak van 40px (huisstijl vergroot het klikgebied rond de 24px control) */
   display: inline-flex; gap: var(--spacing-150); align-items: center; min-height: 2.5rem; cursor: pointer;
   font: var(--paragraph-body-medium); font-family: var(--font-body); color: var(--foreground-color-interactive-neutral);
 }
@@ -207,7 +207,7 @@
 .anwb-chip:hover { background: var(--background-color-interactive-weak-hover); }
 .anwb-chip:active { background: var(--background-color-interactive-weak-active); }
 .anwb-chip--small { height: 2.5rem; font: var(--label-small); font-family: var(--font-heading); }
-.anwb-chip[aria-pressed="true"] { background: var(--background-color-interactive-strong); color: var(--foreground-color-inverse-strong); } /* selected-stijl: afgeleid, niet getoond in Nomad-default */
+.anwb-chip[aria-pressed="true"] { background: var(--background-color-interactive-strong); color: var(--foreground-color-inverse-strong); } /* selected-stijl: afgeleid, niet getoond in huisstijl-default */
 
 /* ---------- Voortgang: bar, stepper, paginering ---------- */
 .anwb-progress { display: flex; align-items: center; gap: var(--spacing-150); width: 100%; color: var(--foreground-color-neutral); }
@@ -252,7 +252,7 @@
 
 /* ================= Toegevoegd na review van "Herstelkanspotentie long read" =================
  * Bouwstenen die een lang, data-rijk document nodig heeft en die eerder ontbraken.
- * Bron: Nomad (RangeSlider, Counter, TileList, DescriptionList); tabel en chart-stijl zijn afgeleid met tokens. */
+ * Bron: huisstijl (RangeSlider, Counter, TileList, DescriptionList); tabel en chart-stijl zijn afgeleid met tokens. */
 
 /* ---------- Eyebrow (kleine regel boven een kop): label-small, subtle, GEEN hoofdletters of letterspatiëring ---------- */
 .anwb-eyebrow { margin: 0 0 var(--spacing-100); font: var(--label-small); font-family: var(--font-heading); color: var(--foreground-color-subtle); display: flex; justify-content: space-between; gap: var(--spacing-150); flex-wrap: wrap; }
@@ -263,7 +263,7 @@
 .anwb-skip { position: absolute; left: -999px; top: 0; }
 .anwb-skip:focus { left: var(--spacing-200); top: var(--spacing-200); z-index: var(--z-toast); background: var(--background-color-strong); color: var(--foreground-color-inverse-strong); padding: var(--spacing-100) var(--spacing-200); border-radius: var(--radius-100); }
 
-/* ---------- Range slider (Nomad: spoor 4px, duim 24px, ocean-highlight) ---------- */
+/* ---------- Range slider (Huisstijl: spoor 4px, duim 24px, ocean-highlight) ---------- */
 .anwb-range { width: 100%; height: 1.5rem; margin: 0; background: transparent; appearance: none; -webkit-appearance: none; cursor: pointer; }
 .anwb-range::-webkit-slider-runnable-track { height: .25rem; background: var(--background-color-subtle); }
 .anwb-range::-moz-range-track { height: .25rem; background: var(--background-color-subtle); }
@@ -276,7 +276,7 @@
 .anwb-range-field__head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--spacing-150); font: var(--paragraph-title-medium); font-family: var(--font-body); }
 .anwb-range-field__value { font-variant-numeric: tabular-nums; color: var(--foreground-color-strong); }
 
-/* ---------- Tabel (Nomad kent geen Table-component: tokens, geen hoofdletters, header = paragraph-title-x-small) ---------- */
+/* ---------- Tabel (huisstijl kent geen Table-component: tokens, geen hoofdletters, header = paragraph-title-x-small) ---------- */
 .anwb-table-wrap { overflow-x: auto; border: 1px solid var(--border-color-default); border-radius: var(--radius-200); background: var(--background-color-default); }
 .anwb-table { width: 100%; border-collapse: collapse; font: var(--paragraph-body-small); font-family: var(--font-body); }
 .anwb-table caption { text-align: left; padding: var(--spacing-150) var(--spacing-200); font: var(--paragraph-title-small); font-family: var(--font-body); color: var(--foreground-color-subtle); }
@@ -294,7 +294,7 @@
 .anwb-stat__note { font: var(--paragraph-body-x-small); font-family: var(--font-body); color: var(--foreground-color-subtle); }
 .anwb-stats { display: grid; gap: var(--spacing-150); grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); }
 
-/* ---------- Inhoudsopgave / TileList (Nomad-advies: minimaal 2, maximaal 6 links) ---------- */
+/* ---------- Inhoudsopgave / TileList (huisstijl-advies: minimaal 2, maximaal 6 links) ---------- */
 .anwb-tilelist { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--spacing-100); }
 .anwb-tilelist .anwb-tilelink { align-items: center; padding: var(--spacing-200); }
 .anwb-tilelist__n { font: var(--heading-medium); font-family: var(--font-heading); color: var(--foreground-color-strong); min-width: 2rem; }
@@ -316,7 +316,7 @@
 .anwb-legend .anwb-legend__a { background: var(--chart-1); }
 .anwb-legend .anwb-legend__b { background: none; border-top: 2px dashed var(--chart-muted); height: 0; }
 
-/* ================= Gaten die Nomad niet dekt: data-weergave uit tokens (toegevoegd bij herbouw van het Herstelkans-document) ================= */
+/* ================= Gaten die huisstijl niet dekt: data-weergave uit tokens (toegevoegd bij herbouw van het Herstelkans-document) ================= */
 .anwb-label--small { height: 1.5rem; padding-inline: var(--spacing-100); font: var(--label-x-small); font-family: var(--font-heading); }
 .anwb-check--top { align-items: flex-start; }
 .anwb-check--top input { margin-top: .5rem; }

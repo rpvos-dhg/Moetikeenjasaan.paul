@@ -5,22 +5,22 @@ const WALKERS = [
   'Nynke', 'Remco', 'Sjors', 'Steven', 'Sven', 'Timke'
 ];
 
-// ─── Nomad-klassen voor wat het script opbouwt of omschakelt ───────────────
-// Letterlijk uit de Nomad-componenten (nomad.anwb.nl); de stijl komt uit nomad/nomad.css.
-const NOMAD_FOCUS = 'focus-visible:outline-200 focus-visible:outline-offset-25 focus-visible:outline-interactive-focus';
-const NOMAD = {
+// ─── huisstijl-klassen voor wat het script opbouwt of omschakelt ───────────────
+// Letterlijk uit de huisstijl-componenten; de stijl komt uit huisstijl/huisstijl.css.
+const UI_FOCUS = 'focus-visible:outline-200 focus-visible:outline-offset-25 focus-visible:outline-interactive-focus';
+const UI = {
   // SubNavigation-item: geselecteerd en niet geselecteerd
   tabOn: 'border-b-static-interactive-highlight-subtle-active text-interactive-neutral-active',
   tabOff: 'border-static-transparent text-interactive-neutral',
   // FilterChip (small): aria-pressed true en false
-  chip: `group relative inline-flex cursor-pointer items-center gap-100 rounded-pill disabled:cursor-not-allowed disabled:bg-interactive-disabled disabled:text-interactive-disabled ${NOMAD_FOCUS} h-500 px-150 prose-label-small`,
+  chip: `group relative inline-flex cursor-pointer items-center gap-100 rounded-pill disabled:cursor-not-allowed disabled:bg-interactive-disabled disabled:text-interactive-disabled ${UI_FOCUS} h-500 px-150 prose-label-small`,
   chipOn: 'bg-interactive-strong text-inverse-strong hover:bg-interactive-strong-hover active:bg-interactive-strong-active',
   chipOff: 'bg-interactive-weak text-strong hover:bg-interactive-weak-hover active:bg-interactive-weak-active',
   // IconButton (tertiary) en ActionIcon
-  iconButton: `flex size-500 shrink-0 items-center justify-center rounded-100 ${NOMAD_FOCUS} active:border-interactive-weak-active active:bg-interactive-weak-active border-100 border-default text-neutral hover:text-neutral hover:border-interactive-weak-hover hover:bg-interactive-weak-hover`,
-  actionIcon: `inline-flex size-400 shrink-0 items-center justify-center rounded-100 leading-none ${NOMAD_FOCUS} text-interactive-strong hover:text-interactive-strong-hover active:text-interactive-strong-active`,
+  iconButton: `flex size-500 shrink-0 items-center justify-center rounded-100 ${UI_FOCUS} active:border-interactive-weak-active active:bg-interactive-weak-active border-100 border-default text-neutral hover:text-neutral hover:border-interactive-weak-hover hover:bg-interactive-weak-hover`,
+  actionIcon: `inline-flex size-400 shrink-0 items-center justify-center rounded-100 leading-none ${UI_FOCUS} text-interactive-strong hover:text-interactive-strong-hover active:text-interactive-strong-active`,
   // TextLink als knop
-  textLink: `inline-flex items-center min-h-500 px-50 text-interactive-highlight-strong underline hover:text-interactive-highlight-strong-hover active:text-interactive-highlight-strong-active focus-visible:rounded-50 ${NOMAD_FOCUS} prose-paragraph-body-small`,
+  textLink: `inline-flex items-center min-h-500 px-50 text-interactive-highlight-strong underline hover:text-interactive-highlight-strong-hover active:text-interactive-highlight-strong-active focus-visible:rounded-50 ${UI_FOCUS} prose-paragraph-body-small`,
   // Label (Data display/Label); kleur per niveau of uitkomst
   label: 'inline-flex items-center gap-100 overflow-hidden rounded-100 align-middle text-clip whitespace-nowrap px-150 h-500',
   labelColor: {
@@ -31,7 +31,7 @@ const NOMAD = {
   },
 };
 
-function setNomadState(el, on, onClasses, offClasses) {
+function setUiState(el, on, onClasses, offClasses) {
   el.classList.remove(...(on ? offClasses : onClasses).split(' '));
   el.classList.add(...(on ? onClasses : offClasses).split(' '));
 }
@@ -1423,7 +1423,7 @@ function selectTab(tab, focus, scroll = true) {
   tabs.forEach(other => {
     const active = other === tab;
     other.classList.toggle('active', active);
-    setNomadState(other, active, NOMAD.tabOn, NOMAD.tabOff);
+    setUiState(other, active, UI.tabOn, UI.tabOff);
     other.setAttribute('aria-selected', String(active));
     other.tabIndex = active ? 0 : -1;
   });
@@ -2231,7 +2231,7 @@ function renderCalibrationNote() {
   if (!el) return;
   el.hidden = calibration === 0;
   if (el.hidden) { el.textContent = ''; return; }
-  el.innerHTML = `${escapeHtml(t('calibrationNote', calibration))} <button type="button" class="calibration-reset ${NOMAD.textLink}" id="calibrationReset">${t('calibrationReset')}</button>`;
+  el.innerHTML = `${escapeHtml(t('calibrationNote', calibration))} <button type="button" class="calibration-reset ${UI.textLink}" id="calibrationReset">${t('calibrationReset')}</button>`;
   document.getElementById('calibrationReset').addEventListener('click', () => {
     calibration = 0;
     localStorage_safe_set('dighv_calibration', '0');
@@ -2288,13 +2288,13 @@ function renderPollenCard() {
     return { name: t('pollenNames')[k], value, threshold, level };
   }).sort((a, b) => b.value - a.value);
 
-  // Niveau als Nomad Label. Geen Meter: die betekent in Nomad "hoe voller, hoe beter".
+  // Niveau als huisstijl Label. Geen Meter: die betekent in huisstijl "hoe voller, hoe beter".
   const levelColor = { low: 'green', medium: 'yellow', high: 'red' };
   const list = `<ul class="pollen-items">${items.map(p => {
     return `<li class="pollen-item">
       <span class="pollen-name">${p.name}</span>
       <span class="pollen-value">${Math.round(p.value)} ${t('pollenUnit')}</span>
-      <span class="${NOMAD.label} ${NOMAD.labelColor[levelColor[p.level]]}"><span class="prose-label-small">${t('pollenItemLevel')[p.level]}</span></span>
+      <span class="${UI.label} ${UI.labelColor[levelColor[p.level]]}"><span class="prose-label-small">${t('pollenItemLevel')[p.level]}</span></span>
     </li>`;
   }).join('')}</ul>`;
 
@@ -2450,15 +2450,15 @@ function renderWalkerGrid() {
   team.forEach(name => {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = `walker-btn ${NOMAD.chip}`;
+    btn.className = `walker-btn ${UI.chip}`;
     btn.textContent = name;
     const on = selectedWalkers.has(name);
-    setNomadState(btn, on, NOMAD.chipOn, NOMAD.chipOff);
+    setUiState(btn, on, UI.chipOn, UI.chipOff);
     btn.setAttribute('aria-pressed', String(on));
     btn.addEventListener('click', () => {
       const nowOn = !selectedWalkers.has(name);
       if (nowOn) selectedWalkers.add(name); else selectedWalkers.delete(name);
-      setNomadState(btn, nowOn, NOMAD.chipOn, NOMAD.chipOff);
+      setUiState(btn, nowOn, UI.chipOn, UI.chipOff);
       btn.setAttribute('aria-pressed', String(nowOn));
       updateSaveButton();
     });
@@ -2555,7 +2555,7 @@ function renderTeamEditor() {
   if (!list) return;
   list.innerHTML = getTeam().map((name, i) => `<li class="team-item">
       <span>${escapeHtml(name)}</span>
-      <button type="button" class="team-remove ${NOMAD.actionIcon}" data-index="${i}" aria-label="${escapeHtml(t('teamRemove', name))}">${X_ICON}</button>
+      <button type="button" class="team-remove ${UI.actionIcon}" data-index="${i}" aria-label="${escapeHtml(t('teamRemove', name))}">${X_ICON}</button>
     </li>`).join('');
   list.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => {
     const team = getTeam();
@@ -2632,13 +2632,13 @@ function renderLogHistory() {
           <span class="log-entry-people">${peopleStr}</span>
           ${weather}
         </div>
-        <button class="log-delete-btn ${NOMAD.iconButton}" type="button" data-id="${escapeHtml(entry.id)}" title="${deleteLabel}" aria-label="${deleteLabel}">${X_ICON}</button>
+        <button class="log-delete-btn ${UI.iconButton}" type="button" data-id="${escapeHtml(entry.id)}" title="${deleteLabel}" aria-label="${deleteLabel}">${X_ICON}</button>
       </li>`;
     });
     html += '</ul>';
   }
   if (log.length > logVisible) {
-    html += `<button type="button" class="log-more ${NOMAD.textLink} mt-200" id="logMore">${t('logShowOlder', log.length - logVisible)}</button>`;
+    html += `<button type="button" class="log-more ${UI.textLink} mt-200" id="logMore">${t('logShowOlder', log.length - logVisible)}</button>`;
   }
 
   el.innerHTML = html;
@@ -2691,7 +2691,7 @@ function showToast(key, actionKey, onAction) {
   const toast = document.getElementById('toast');
   toast.hidden = false;
   clearTimeout(toastTimer);
-  // Nomad: een Toast met een actie mag niet vanzelf verdwijnen als die actie nergens
+  // Huisstijl: een Toast met een actie mag niet vanzelf verdwijnen als die actie nergens
   // anders op de pagina staat (ongedaan maken). Die blijft staan tot sluiten of actie.
   if (!actionKey) toastTimer = setTimeout(hideToast, 6000);
 }
@@ -2731,7 +2731,7 @@ function bindPrefControls() {
   const prefCard = document.getElementById('prefCard');
   if (prefCard && !localStorage_safe_get('dighv_pref')) prefCard.open = true;
 
-  // Nomad ToggleButton: radioknoppen, de stijl volgt :checked
+  // huisstijl ToggleButton: radioknoppen, de stijl volgt :checked
   document.querySelectorAll('input[name="pref"]').forEach(radio => {
     radio.checked = radio.value === userPref;
     radio.addEventListener('change', () => {
@@ -2798,7 +2798,7 @@ function renderWeatherComparison() {
       <div class="comparison-temp"><span class="comparison-max">${t('maxLabel')}</span> ${day.tempMax == null ? '–' : Math.round(day.tempMax)}°</div>
       <div class="comparison-detail">${t('rainLabel', fmt1(day.rain))}</div>
       <div class="comparison-detail">${t('windLabel', Math.round(day.wind))}</div>
-      ${n === 2 ? `<span class="comparison-verdict ${NOMAD.label} ${NOMAD.labelColor[{ better: 'green', worse: 'red', similar: 'grey' }[dir]]}"><span class="prose-label-small">${t(dir)}</span></span>` : ''}
+      ${n === 2 ? `<span class="comparison-verdict ${UI.label} ${UI.labelColor[{ better: 'green', worse: 'red', similar: 'grey' }[dir]]}"><span class="prose-label-small">${t(dir)}</span></span>` : ''}
     </div>`).join('');
 
   const dT = days[2].tempMax != null && days[1].tempMax != null ? Math.round(days[2].tempMax - days[1].tempMax) : 0;
@@ -2883,7 +2883,7 @@ function buildTourDom() {
     <div class="tour-tooltip" role="dialog" aria-modal="true" aria-labelledby="tourTitle" aria-describedby="tourText">
       <div class="tour-head">
         <span class="tour-count" id="tourCount"></span>
-        <button class="tour-close ${NOMAD.actionIcon}" id="tourClose" type="button">${X_ICON}</button>
+        <button class="tour-close ${UI.actionIcon}" id="tourClose" type="button">${X_ICON}</button>
       </div>
       <h2 class="tour-title" id="tourTitle" tabindex="-1"></h2>
       <p class="tour-text" id="tourText"></p>

@@ -1,11 +1,11 @@
-# Maakt nomad/nomad.css (zonder @font-face) en het gegenereerde deel van nomad/theme.css.
-# Gebruik: python3 scripts/build-nomad-theme.py [pad/naar/nieuwe/nomad.css]
-# Zonder argument wordt nomad/nomad.css zelf opnieuw verwerkt. Het handgeschreven
+# Maakt huisstijl/huisstijl.css (zonder @font-face) en het gegenereerde deel van huisstijl/theme.css.
+# Gebruik: python3 scripts/build-theme.py [pad/naar/nieuwe/huisstijl.css]
+# Zonder argument wordt huisstijl/huisstijl.css zelf opnieuw verwerkt. Het handgeschreven
 # deel onderaan theme.css (vanaf "Handgeschreven") blijft staan.
 import re, sys, os
 root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
-out_css = os.path.join(root, 'nomad', 'nomad.css')
-out_theme = os.path.join(root, 'nomad', 'theme.css')
+out_css = os.path.join(root, 'huisstijl', 'huisstijl.css')
+out_theme = os.path.join(root, 'huisstijl', 'theme.css')
 src = sys.argv[1] if len(sys.argv) > 1 else out_css
 css = open(src).read()
 css_nofont = re.sub(r'@font-face\{[^}]*\}', '', css)
@@ -27,18 +27,18 @@ for m in re.finditer(r'(@media\([^)]*\)\{)?:root\{([^{}]*)\}', css):
         sel = 'html:root {\n  ' + body + ';\n}'
         blocks.append((m.group(1) + '\n' + sel + '\n}') if m.group(1) else sel)
 
-# Donker thema: Nomads eigen context-strong-waarden (wit op ocean), zonder de vaste 'static'-kleuren
+# Donker thema: de eigen context-strong-waarden (wit op ocean), zonder de vaste 'static'-kleuren
 # Alleen het losse .context-strong-blok, niet de gedeelde selector die er ook op eindigt
 m = re.search(r'\}\.context-strong\{([^{}]*--text-color-strong:[^{}]*)\}', css)
 decls = [d.strip() for d in m.group(1).split(';') if d.strip().startswith('--') and '-static' not in d.split(':')[0]]
 dark = 'html.dark,\nhtml.dark .context-default,\nhtml.dark .context-weak {\n  ' + ';\n  '.join(decls) + ';\n  color-scheme: dark;\n}'
 
 head = """/*
- * Gegenereerd uit nomad.css door scripts/build-nomad-theme.py (zie README).
- * 1. Lettertokens met terugval: Nomad noemt alleen "Clan Pro" en "Bernina Sans".
+ * Gegenereerd uit huisstijl.css door scripts/build-theme.py.
+ * 1. Lettertokens met terugval: huisstijl noemt alleen "Clan Pro" en "Bernina Sans".
  *    Die fonts zitten niet in deze openbare repo; staan ze op het toestel, dan
  *    worden ze gebruikt, anders Inter.
- * 2. Donker thema (nomad-gap): Nomads eigen context-strong-waarden als basis.
+ * 2. Donker thema (eigen aanvulling): de eigen context-strong-waarden als basis.
  *    De vlakken staan in het handgeschreven deel onderaan.
  */
 """
