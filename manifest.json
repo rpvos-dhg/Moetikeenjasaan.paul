@@ -9,8 +9,8 @@
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#f3f5f8",
-  "theme_color": "#003a71",
+  "background_color": "#f2f2f2",
+  "theme_color": "#003d86",
   "categories": ["weather", "utilities", "productivity"],
   "icons": [
     { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },

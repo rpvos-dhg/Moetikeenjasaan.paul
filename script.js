@@ -1,9 +1,34 @@
 // ─── Personen: standaardlijst. In de app per toestel aan te passen (Looplog → Team bewerken) ───
 const WALKERS = [
-  'Adam', 'Bob', 'David', 'Frank H', 'Frank vd H', 'Fred',
-  'Gijs', 'Jeffrey', 'Louise', 'Muttalib', 'Noëlla', 'Nynke',
-  'Remco', 'Sjors', 'Steven', 'Tessa', 'Timke'
+  'Adam', 'Bob', 'David', 'David E', 'Frank H', 'Frank vd H',
+  'Fred', 'Gijs', 'Jeffrey', 'Louise', 'Marlene', 'Noëlla',
+  'Nynke', 'Remco', 'Sjors', 'Steven', 'Sven', 'Timke'
 ];
+
+// ─── huisstijl-klassen voor wat het script opbouwt of omschakelt ───────────────
+// Letterlijk uit de huisstijl-componenten (de huisstijl); de stijl komt uit huisstijl/huisstijl.css.
+const UI_FOCUS = 'focus-visible:outline-200 focus-visible:outline-offset-25 focus-visible:outline-interactive-focus';
+const UI = {
+  // SubNavigation-item: geselecteerd en niet geselecteerd
+  tabOn: 'border-b-static-interactive-highlight-subtle-active text-interactive-neutral-active',
+  tabOff: 'border-static-transparent text-interactive-neutral',
+  // FilterChip (small): aria-pressed true en false
+  chip: `group relative inline-flex cursor-pointer items-center gap-100 rounded-pill disabled:cursor-not-allowed disabled:bg-interactive-disabled disabled:text-interactive-disabled ${UI_FOCUS} h-500 px-150 prose-label-small`,
+  chipOn: 'bg-interactive-strong text-inverse-strong hover:bg-interactive-strong-hover active:bg-interactive-strong-active',
+  chipOff: 'bg-interactive-weak text-strong hover:bg-interactive-weak-hover active:bg-interactive-weak-active',
+  // IconButton (tertiary) en ActionIcon
+  iconButton: `flex size-500 shrink-0 items-center justify-center rounded-100 ${UI_FOCUS} active:border-interactive-weak-active active:bg-interactive-weak-active border-100 border-default text-neutral hover:text-neutral hover:border-interactive-weak-hover hover:bg-interactive-weak-hover`,
+  actionIcon: `inline-flex size-400 shrink-0 items-center justify-center rounded-100 leading-none ${UI_FOCUS} text-interactive-strong hover:text-interactive-strong-hover active:text-interactive-strong-active`,
+  // TextLink als knop
+  textLink: `inline-flex items-center min-h-500 px-50 text-interactive-highlight-strong underline hover:text-interactive-highlight-strong-hover active:text-interactive-highlight-strong-active focus-visible:rounded-50 ${UI_FOCUS} prose-paragraph-body-small`,
+  // Meter
+  meter: 'w-full meter-low:bg-fill-feedback-negative meter-low:bg-none meter-medium:bg-none meter-high:bg-none meter-medium:bg-fill-feedback-notice meter-high:bg-fill-feedback-positive overflow-hidden webkit-meter-bar:bg-none webkit-meter-bar:bg-static-subtle webkit-meter-bar:h-100 h-100 rounded-pill bg-static-subtle bg-none',
+};
+
+function setUiState(el, on, onClasses, offClasses) {
+  el.classList.remove(...(on ? offClasses : onClasses).split(' '));
+  el.classList.add(...(on ? onClasses : offClasses).split(' '));
+}
 
 // State
 let weatherData = null;
@@ -34,7 +59,7 @@ const i18n = {
   nl: {
     tabAdvice: 'Advies', tabLog: 'Looplog', tabExplain: 'Uitleg', tabChangelog: 'Nieuw',
     tabsLabel: 'Onderdelen',
-    h1Html: 'Jas aan of <span class="accent">niet?</span>',
+    h1Html: 'Jas aan of <span class="text-highlight-strong">niet?</span>',
     lead: 'De officieuze DIGHV pauze-scanner. Even checken voor je naar buiten loopt.',
     adviceLabel: 'Advies voor de komende 30 min',
     adviceUpdated: ts => `bijgewerkt ${ts}`,
@@ -238,7 +263,7 @@ const i18n = {
   en: {
     tabAdvice: 'Advice', tabLog: 'Walk log', tabExplain: 'Guide', tabChangelog: "What's new",
     tabsLabel: 'Sections',
-    h1Html: 'Jacket on or <span class="accent">not?</span>',
+    h1Html: 'Jacket on or <span class="text-highlight-strong">not?</span>',
     lead: 'The unofficial DIGHV break scanner. Check before you head outside.',
     adviceLabel: 'Advice for the next 30 min',
     adviceUpdated: ts => `updated ${ts}`,
@@ -790,10 +815,10 @@ function renderChangelogHtml() {
   ];
 
   const typeConfig = {
-    new:      { label: lang === 'en' ? 'New'       : 'Nieuw',       cls: 'cl-new' },
-    fix:      { label: lang === 'en' ? 'Fix'       : 'Opgelost',    cls: 'cl-fix' },
-    improve:  { label: lang === 'en' ? 'Improved'  : 'Verbeterd',   cls: 'cl-improve' },
-    security: { label: lang === 'en' ? 'Security'  : 'Beveiliging', cls: 'cl-security' },
+    new:      { label: lang === 'en' ? 'New'       : 'Nieuw',       cls: 'anwb-label--green' },
+    fix:      { label: lang === 'en' ? 'Fix'       : 'Opgelost',    cls: 'anwb-label--red' },
+    improve:  { label: lang === 'en' ? 'Improved'  : 'Verbeterd',   cls: 'anwb-label--lightblue' },
+    security: { label: lang === 'en' ? 'Security'  : 'Beveiliging', cls: 'anwb-label--grey' },
   };
 
   const today = new Date().toLocaleDateString('sv', { timeZone: 'Europe/Amsterdam' });
@@ -819,17 +844,17 @@ function renderChangelogHtml() {
     const tag = todayTag || staticTag;
     const items = lang === 'en' ? release.items.en : release.items.nl;
 
-    html += `<div class="cl-release">
+    html += `<div class="cl-release context-default">
       <div class="cl-header">
-        <h2 class="cl-date">${date}</h2>
-        ${tag ? `<span class="cl-tag">${tag}</span>` : ''}
+        <h2 class="cl-date prose-heading-small">${date}</h2>
+        ${tag ? `<span class="cl-tag anwb-label anwb-label--small anwb-label--yellow">${tag}</span>` : ''}
       </div>
       <ul class="cl-items">`;
 
     for (const item of items) {
       const cfg = typeConfig[item.type] || typeConfig.new;
       html += `<li class="cl-item">
-        <span class="cl-badge ${cfg.cls}">${cfg.label}</span>
+        <span class="cl-badge anwb-label anwb-label--small ${cfg.cls}">${cfg.label}</span>
         <span class="cl-text"${item.lang ? ` lang="${item.lang}"` : ''}>${item.text}</span>
       </li>`;
     }
@@ -866,15 +891,15 @@ function renderExplainHtml() {
   if (lang === 'en') return `
     <h1>How it works</h1>
     <p class="intro">The advice comes from live weather data and a few fixed thresholds. Here they are.</p>
-    <div class="explain-section">
+    <div class="explain-section context-default">
       <h2>1. Data source</h2>
       <p>Every 10 minutes the tool fetches weather data from <strong>Open-Meteo</strong> and pollen data from the <strong>Open-Meteo Air Quality API</strong>. For locations in the Netherlands it uses the KNMI model. A hidden tab does not refresh; it does as soon as you come back or the connection returns. The version number and release log come from the <strong>GitHub API</strong>; those requests are kept for a few hours.</p>
       <p>Default location: <code>52.0964° N, 4.3268° E</code>, ANWB headquarters in The Hague. Via the pencil the app can use your current location (rounded to about 100 metres; place name from OpenStreetMap). That choice is kept until you switch back to ANWB HQ.</p>
-      <div class="callout"><strong>Live check:</strong> the green LIVE dot means the data is fresh; the advice card shows when it was updated. When opening, the app immediately shows the last known data (at most 6 hours old). Data older than half an hour shows as NOT LIVE, with the time of the advice.</div>
+      <div class="callout anwb-alert anwb-alert--informative"><strong>Live check:</strong> the green LIVE dot means the data is fresh; the advice card shows when it was updated. When opening, the app immediately shows the last known data (at most 6 hours old). Data older than half an hour shows as NOT LIVE, with the time of the advice.</div>
     </div>
-    <div class="explain-section">
+    <div class="explain-section context-default">
       <h2>2. What is measured?</h2>
-      <table class="threshold-table">
+      <table class="threshold-table anwb-table">
         <tr><th>Signal</th><th>Used for</th></tr>
         <tr><td>Feels-like temperature (now)</td><td>Jacket type (accounts for wind, humidity and sun)</td></tr>
         <tr><td>Temperature</td><td>Lowest of now and the next hour; for scarf and gloves</td></tr>
@@ -884,21 +909,21 @@ function renderExplainHtml() {
         <tr><td>Weather type</td><td>Thunderstorms, snow and fog get their own advice or tip</td></tr>
       </table>
     </div>
-    <div class="explain-section">
+    <div class="explain-section context-default">
       <h2>3. Jacket type and jacket meter</h2>
-      <table class="threshold-table">
+      <table class="threshold-table anwb-table">
         <tr><th>Feels-like (for you)</th><th>Jacket type</th></tr>
-        <tr><td>17 °C or warmer</td><td><span class="badge-inline">No jacket</span></td></tr>
-        <tr><td>12 to 17 °C</td><td><span class="badge-inline">Light jacket</span></td></tr>
-        <tr><td>5 to 12 °C</td><td><span class="badge-inline">Autumn jacket</span></td></tr>
-        <tr><td>0 to 5 °C</td><td><span class="badge-inline">Winter coat</span></td></tr>
-        <tr><td>below 0 °C</td><td><span class="badge-inline">Winter coat + layers</span></td></tr>
+        <tr><td>17 °C or warmer</td><td><span class="badge-inline anwb-label anwb-label--small anwb-label--yellow">No jacket</span></td></tr>
+        <tr><td>12 to 17 °C</td><td><span class="badge-inline anwb-label anwb-label--small anwb-label--yellow">Light jacket</span></td></tr>
+        <tr><td>5 to 12 °C</td><td><span class="badge-inline anwb-label anwb-label--small anwb-label--yellow">Autumn jacket</span></td></tr>
+        <tr><td>0 to 5 °C</td><td><span class="badge-inline anwb-label anwb-label--small anwb-label--yellow">Winter coat</span></td></tr>
+        <tr><td>below 0 °C</td><td><span class="badge-inline anwb-label anwb-label--small anwb-label--yellow">Winter coat + layers</span></td></tr>
       </table>
       <p>The jacket meter shows where you are on this scale. Within 2 °C of the next jacket, it tells you how many degrees colder it needs to be.</p>
     </div>
-    <div class="explain-section">
+    <div class="explain-section context-default">
       <h2>4. Your type and calibration</h2>
-      <table class="threshold-table">
+      <table class="threshold-table anwb-table">
         <tr><th>Type</th><th>Offset</th></tr>
         <tr><td>I feel the cold</td><td>3 °C colder</td></tr>
         <tr><td>Normal</td><td><code>0</code></td></tr>
@@ -906,20 +931,20 @@ function renderExplainHtml() {
       </table>
       <p>After your lunch on workdays the app asks how it was outside. "I was cold" makes the advice count 1 °C colder, "I was warm" 1 °C warmer, up to 6 °C. Below the advice you see "for you X °C" whenever an adjustment applies; under "Your type" you can reset it.</p>
     </div>
-    <div class="explain-section">
+    <div class="explain-section context-default">
       <h2>5. Rain, snow and storms take priority</h2>
       <p>If more than <code>0.5 mm</code> per hour falls in the now + 30 minutes window <strong>or</strong> the chance of rain is <code>70%</code> or higher, the advice becomes "Waterproof jacket" (from 15 °C: "Rain jacket"; with snow: "Warm coat, snow"). With a chance of <code>30%</code> to <code>70%</code> you only get a tip.</p>
       <p>A thunderstorm, wind from <code>60 km/h</code> or gusts from <code>75 km/h</code> give "Better stay inside". From <code>40 km/h</code> wind or <code>50 km/h</code> gusts an umbrella is pointless; the app then suggests a hood or rain jacket.</p>
     </div>
-    <div class="explain-section">
+    <div class="explain-section context-default">
       <h2>6. Break and best moment</h2>
       <p>The countdown runs to your own lunch time (set under "Your type") and the afternoon break at 15:00. During the break it says "Now!". After Friday afternoon it counts to Monday.</p>
       <p>The best moment is a 30-minute block between 11:00 and 15:00, in steps of 15 minutes. Dry weighs most, then closeness to your lunch time, then temperature. If even the best block is wet, it is called "Least wet moment". "Ask colleagues" shares the two or three best times via your phone's share menu, or copies them; not in a storm. At the weekend there is no best moment.</p>
       <p>When rain starts or stops within 3 hours, the strip in the advice card says when.</p>
     </div>
-    <div class="explain-section">
+    <div class="explain-section context-default">
       <h2>7. Extra tips</h2>
-      <table class="threshold-table">
+      <table class="threshold-table anwb-table">
         <tr><th>Condition</th><th>Tip</th></tr>
         <tr><td>Gusts from 50 km/h</td><td>Gusts up to … km/h</td></tr>
         <tr><td>Wind from 40 km/h</td><td>Umbrella is pointless</td></tr>
@@ -932,9 +957,9 @@ function renderExplainHtml() {
         <tr><td>High pollen (measured)</td><td>Hay fever tip; no pollen data means no tip</td></tr>
       </table>
     </div>
-    <div class="explain-section">
+    <div class="explain-section context-default">
       <h2>8. Checklist</h2>
-      <table class="threshold-table">
+      <table class="threshold-table anwb-table">
         <tr><th>Condition</th><th>Items</th></tr>
         <tr><td><strong>Always</strong></td><td>Staff pass, visitor pass check, phone, route info</td></tr>
         <tr><td>UV index ≥ 3 / ≥ 7</td><td>Sunglasses, sunscreen / cap or hat</td></tr>
@@ -944,27 +969,27 @@ function renderExplainHtml() {
         <tr><td>Temp ≤ 8 / ≤ 3 °C</td><td>Scarf / gloves</td></tr>
       </table>
       <p>Jackets are not on the list: the advice already says which one you need.</p>
-      <div class="callout"><strong>Saved:</strong> ticks are kept for the rest of the day. "Always bring" folds away once everything is ticked.</div>
+      <div class="callout anwb-alert anwb-alert--informative"><strong>Saved:</strong> ticks are kept for the rest of the day. "Always bring" folds away once everything is ticked.</div>
     </div>
-    <div class="explain-section">
+    <div class="explain-section context-default">
       <h2>9. Pollen</h2>
       <p>Live concentrations in grains per m³. When everything is low you see one line; the types are behind "Show all types". Without pollen data (or outside Europe) the card says so.</p>
-      <table class="threshold-table">
+      <table class="threshold-table anwb-table">
         <tr><th>Type</th><th>High from</th></tr>
         <tr><td>Alder, birch, olive</td><td>&gt; 20 grains/m³</td></tr>
         <tr><td>Grasses</td><td>&gt; 50 grains/m³</td></tr>
         <tr><td>Mugwort, ragweed</td><td>&gt; 10 grains/m³</td></tr>
       </table>
     </div>
-    <div class="explain-section">
+    <div class="explain-section context-default">
       <h2>10. Walk log</h2>
       <p>Only stored on this device; colleagues cannot see it. Each walk saves a weather snapshot. That gives stats (walks, dry streak, most loyal and bravest walker) and badges such as Polar bear and Drowned rat. You can edit the team per device, and undo a deletion for a few seconds.</p>
     </div>
-    <div class="explain-section">
+    <div class="explain-section context-default">
       <h2>11. Theme</h2>
       <p>The theme button (moon or sun, top right) cycles through <strong>Automatic</strong> (device setting, and dark after sunset), <strong>Always dark</strong> and <strong>Always light</strong>. The small A means automatic.</p>
     </div>
-    <div class="explain-section disclaimer">
+    <div class="explain-section disclaimer context-strong">
       <h2>Disclaimer</h2>
       <p>A side project by the DIGHV team. Not an official ANWB product. The thresholds are based on common sense, not meteorological research. If you get wet: not our fault.</p>
     </div>`;
@@ -972,15 +997,15 @@ function renderExplainHtml() {
   return `
     <h1>Hoe werkt dit?</h1>
     <p class="intro">Het advies komt uit live weerdata en een paar vaste drempels. Hieronder staat welke.</p>
-    <div class="explain-section">
+    <div class="explain-section context-default">
       <h2>1. Databron</h2>
       <p>Elke 10 minuten haalt de tool weerdata op van <strong>Open-Meteo</strong> en pollendata van de <strong>Open-Meteo Air Quality API</strong>. Voor locaties in Nederland gebruikt hij het KNMI-model. In een verborgen tabblad wordt niet ververst; zodra je terugkomt of de verbinding terug is wel. Versienummer en releaselog komen van de <strong>GitHub-API</strong>; die gegevens bewaart de app een paar uur.</p>
       <p>Standaardlocatie: <code>52.0964° N, 4.3268° O</code>, het ANWB-hoofdkantoor in Den Haag. Via het potlood kan de app je huidige locatie gebruiken (afgerond op ongeveer 100 meter; plaatsnaam via OpenStreetMap). Die keuze blijft bewaard tot je terugschakelt naar ANWB HQ.</p>
-      <div class="callout"><strong>Live check:</strong> het groene LIVE-bolletje betekent dat de data vers is; in de advieskaart staat wanneer hij is bijgewerkt. Bij openen toont de app meteen de laatst bekende data (hoogstens 6 uur oud). Data ouder dan een half uur staat als NIET LIVE, met het tijdstip van het advies.</div>
+      <div class="callout anwb-alert anwb-alert--informative"><strong>Live check:</strong> het groene LIVE-bolletje betekent dat de data vers is; in de advieskaart staat wanneer hij is bijgewerkt. Bij openen toont de app meteen de laatst bekende data (hoogstens 6 uur oud). Data ouder dan een half uur staat als NIET LIVE, met het tijdstip van het advies.</div>
     </div>
-    <div class="explain-section">
+    <div class="explain-section context-default">
       <h2>2. Wat wordt er gemeten?</h2>
-      <table class="threshold-table">
+      <table class="threshold-table anwb-table">
         <tr><th>Signaal</th><th>Gebruikt voor</th></tr>
         <tr><td>Gevoelstemperatuur (nu)</td><td>Jastype (houdt rekening met wind, vocht en zon)</td></tr>
         <tr><td>Temperatuur</td><td>Laagste van nu en het volgende uur; voor sjaal en handschoenen</td></tr>
@@ -990,21 +1015,21 @@ function renderExplainHtml() {
         <tr><td>Weertype</td><td>Onweer, sneeuw en mist krijgen een eigen advies of tip</td></tr>
       </table>
     </div>
-    <div class="explain-section">
+    <div class="explain-section context-default">
       <h2>3. Jastype en jas-o-meter</h2>
-      <table class="threshold-table">
+      <table class="threshold-table anwb-table">
         <tr><th>Gevoelstemperatuur (voor jou)</th><th>Jastype</th></tr>
-        <tr><td>17 °C of warmer</td><td><span class="badge-inline">Geen jas</span></td></tr>
-        <tr><td>12 tot 17 °C</td><td><span class="badge-inline">Dun jasje</span></td></tr>
-        <tr><td>5 tot 12 °C</td><td><span class="badge-inline">Herfstjas</span></td></tr>
-        <tr><td>0 tot 5 °C</td><td><span class="badge-inline">Winterjas</span></td></tr>
-        <tr><td>onder 0 °C</td><td><span class="badge-inline">Winterjas + laagjes</span></td></tr>
+        <tr><td>17 °C of warmer</td><td><span class="badge-inline anwb-label anwb-label--small anwb-label--yellow">Geen jas</span></td></tr>
+        <tr><td>12 tot 17 °C</td><td><span class="badge-inline anwb-label anwb-label--small anwb-label--yellow">Dun jasje</span></td></tr>
+        <tr><td>5 tot 12 °C</td><td><span class="badge-inline anwb-label anwb-label--small anwb-label--yellow">Herfstjas</span></td></tr>
+        <tr><td>0 tot 5 °C</td><td><span class="badge-inline anwb-label anwb-label--small anwb-label--yellow">Winterjas</span></td></tr>
+        <tr><td>onder 0 °C</td><td><span class="badge-inline anwb-label anwb-label--small anwb-label--yellow">Winterjas + laagjes</span></td></tr>
       </table>
       <p>De jas-o-meter laat zien waar je op deze schaal zit. Zit je binnen 2 °C van de volgende jas, dan staat erbij hoeveel graden kouder het moet worden.</p>
     </div>
-    <div class="explain-section">
+    <div class="explain-section context-default">
       <h2>4. Jouw type en kalibratie</h2>
-      <table class="threshold-table">
+      <table class="threshold-table anwb-table">
         <tr><th>Type</th><th>Correctie</th></tr>
         <tr><td>Kouwelijk</td><td>3 °C kouder</td></tr>
         <tr><td>Normaal</td><td><code>0</code></td></tr>
@@ -1012,20 +1037,20 @@ function renderExplainHtml() {
       </table>
       <p>Na je lunch vraagt de app op werkdagen hoe het buiten was. Bij "Ik had het koud" rekent het advies 1 °C kouder, bij "Ik had het warm" 1 °C warmer, tot maximaal 6 °C. Onder het advies zie je "voor jou X °C" zodra er een bijstelling geldt; onder "Jouw type" zet je hem terug.</p>
     </div>
-    <div class="explain-section">
+    <div class="explain-section context-default">
       <h2>5. Regen, sneeuw en storm gaan voor</h2>
       <p>Valt er in het venster nu + 30 minuten meer dan <code>0,5 mm</code> per uur <strong>of</strong> is de regenkans <code>70%</code> of hoger, dan wordt het advies "Waterdichte jas" (vanaf 15 °C: "Regenjas"; bij sneeuw: "Dikke jas, sneeuw"). Bij <code>30%</code> tot <code>70%</code> krijg je alleen een tip.</p>
       <p>Onweer, wind vanaf <code>60 km/u</code> of windstoten vanaf <code>75 km/u</code> geven "Blijf liever binnen". Vanaf <code>40 km/u</code> wind of <code>50 km/u</code> windstoten is een paraplu zinloos; dan adviseert de app een capuchon of regenjas.</p>
     </div>
-    <div class="explain-section">
+    <div class="explain-section context-default">
       <h2>6. Pauze en beste moment</h2>
       <p>De countdown loopt naar je eigen lunchtijd (in te stellen onder "Jouw type") en de middagpauze om 15:00. Tijdens de pauze staat er "Nu!". Na vrijdagmiddag telt hij af naar maandag.</p>
       <p>Het beste moment is een blok van 30 minuten tussen 11:00 en 15:00, in stappen van een kwartier. Droog weegt het zwaarst, daarna hoe dicht het bij je lunchtijd ligt, dan de temperatuur. Is zelfs het beste blok nat, dan heet het "Minst natte moment". "Collega's vragen" deelt de twee of drie beste tijdstippen via het deelmenu van je telefoon, of kopieert ze; niet bij storm. In het weekend is er geen beste moment.</p>
       <p>Begint of stopt de regen binnen 3 uur, dan staat in de strook in de advieskaart wanneer.</p>
     </div>
-    <div class="explain-section">
+    <div class="explain-section context-default">
       <h2>7. Extra tips</h2>
-      <table class="threshold-table">
+      <table class="threshold-table anwb-table">
         <tr><th>Conditie</th><th>Tip</th></tr>
         <tr><td>Windstoten vanaf 50 km/u</td><td>Windstoten tot … km/u</td></tr>
         <tr><td>Wind vanaf 40 km/u</td><td>Paraplu is kansloos</td></tr>
@@ -1038,9 +1063,9 @@ function renderExplainHtml() {
         <tr><td>Hoge pollen (gemeten)</td><td>Hooikoortstip; zonder pollendata geen tip</td></tr>
       </table>
     </div>
-    <div class="explain-section">
+    <div class="explain-section context-default">
       <h2>8. Checklist</h2>
-      <table class="threshold-table">
+      <table class="threshold-table anwb-table">
         <tr><th>Conditie</th><th>Items</th></tr>
         <tr><td><strong>Altijd</strong></td><td>Personeelspas, bezoekerspas-check, telefoon, route-info</td></tr>
         <tr><td>UV-index ≥ 3 / ≥ 7</td><td>Zonnebril, zonnebrandcrème / pet of hoed</td></tr>
@@ -1050,27 +1075,27 @@ function renderExplainHtml() {
         <tr><td>Temp ≤ 8 / ≤ 3 °C</td><td>Sjaal / handschoenen</td></tr>
       </table>
       <p>Jassen staan niet in de lijst: welke jas je nodig hebt, zegt het advies al.</p>
-      <div class="callout"><strong>Opgeslagen:</strong> afvinkjes gelden voor de rest van de dag. "Altijd mee" klapt in zodra alles is afgevinkt.</div>
+      <div class="callout anwb-alert anwb-alert--informative"><strong>Opgeslagen:</strong> afvinkjes gelden voor de rest van de dag. "Altijd mee" klapt in zodra alles is afgevinkt.</div>
     </div>
-    <div class="explain-section">
+    <div class="explain-section context-default">
       <h2>9. Pollen</h2>
       <p>Live concentraties in korrels per m³ lucht. Is alles laag, dan zie je één regel; de soorten staan achter "Alle soorten tonen". Zonder pollendata (of buiten Europa) staat dat er.</p>
-      <table class="threshold-table">
+      <table class="threshold-table anwb-table">
         <tr><th>Soort</th><th>Hoog vanaf</th></tr>
         <tr><td>Els, berk, olijf</td><td>&gt; 20 korrels/m³</td></tr>
         <tr><td>Grassen</td><td>&gt; 50 korrels/m³</td></tr>
         <tr><td>Bijvoet, ambrosia</td><td>&gt; 10 korrels/m³</td></tr>
       </table>
     </div>
-    <div class="explain-section">
+    <div class="explain-section context-default">
       <h2>10. Looplog</h2>
       <p>Wordt alleen op dit toestel bewaard; collega's zien het niet. Bij elke wandeling bewaart de app een weersnapshot. Daaruit komen statistieken (wandelingen, droge wandelingen op rij, trouwste en dapperste loper) en badges zoals IJsbeer en Verzopen kat. Het team pas je per toestel aan, en een verwijderde wandeling kun je een paar seconden lang terugzetten.</p>
     </div>
-    <div class="explain-section">
+    <div class="explain-section context-default">
       <h2>11. Thema</h2>
       <p>Met de themaknop rechtsboven (maan of zon) wissel je tussen <strong>Automatisch</strong> (apparaatinstelling, en donker na zonsondergang), <strong>Altijd donker</strong> en <strong>Altijd licht</strong>. De kleine A betekent automatisch.</p>
     </div>
-    <div class="explain-section disclaimer">
+    <div class="explain-section disclaimer context-strong">
       <h2>Disclaimer</h2>
       <p>Een hobbyproject van het DIGHV-team. Geen officieel ANWB-product. De drempels zijn gebaseerd op gezond verstand, niet op meteorologisch onderzoek. Als je nat wordt: niet onze schuld.</p>
     </div>`;
@@ -1392,6 +1417,7 @@ function selectTab(tab, focus, scroll = true) {
   tabs.forEach(other => {
     const active = other === tab;
     other.classList.toggle('active', active);
+    setUiState(other, active, UI.tabOn, UI.tabOff);
     other.setAttribute('aria-selected', String(active));
     other.tabIndex = active ? 0 : -1;
   });
@@ -1639,7 +1665,7 @@ function showWeatherError() {
   }
   setNoData(true);
   document.getElementById('verdict').innerHTML = `<div class="error" role="alert">${t('weatherError')}
-    <button type="button" class="retry-btn" id="retryBtn">${t('retry')}</button></div>`;
+    <button type="button" class="retry-btn anwb-button anwb-button--small anwb-button--primary" id="retryBtn">${t('retry')}</button></div>`;
   ['detail', 'feels'].forEach(id => { document.getElementById(id).textContent = ''; });
   document.getElementById('tips').innerHTML = '';
   document.getElementById('jacketMeter').hidden = true;
@@ -2199,7 +2225,7 @@ function renderCalibrationNote() {
   if (!el) return;
   el.hidden = calibration === 0;
   if (el.hidden) { el.textContent = ''; return; }
-  el.innerHTML = `${escapeHtml(t('calibrationNote', calibration))} <button type="button" class="text-btn calibration-reset" id="calibrationReset">${t('calibrationReset')}</button>`;
+  el.innerHTML = `${escapeHtml(t('calibrationNote', calibration))} <button type="button" class="calibration-reset ${UI.textLink}" id="calibrationReset">${t('calibrationReset')}</button>`;
   document.getElementById('calibrationReset').addEventListener('click', () => {
     calibration = 0;
     localStorage_safe_set('dighv_calibration', '0');
@@ -2257,13 +2283,12 @@ function renderPollenCard() {
   }).sort((a, b) => b.value - a.value);
 
   const list = `<ul class="pollen-items">${items.map(p => {
-    const percentage = Math.min(100, (p.value / (p.threshold * 2)) * 100);
     return `<li class="pollen-item ${p.level}">
       <div class="pollen-item-header">
         <span class="pollen-name">${p.name}</span>
         <span class="pollen-value">${Math.round(p.value)} ${t('pollenUnit')}${p.level !== 'low' ? ` · ${t('pollenItemLevel')[p.level]}` : ''}</span>
       </div>
-      <div class="pollen-bar" aria-hidden="true"><div class="pollen-bar-fill" style="width: ${percentage}%"></div></div>
+      <meter class="${UI.meter}" aria-hidden="true" min="0" max="${p.threshold * 2}" low="${p.threshold * 0.5}" high="${p.threshold}" optimum="0" value="${Math.min(p.value, p.threshold * 2)}"></meter>
     </li>`;
   }).join('')}</ul>`;
 
@@ -2278,7 +2303,7 @@ function renderPollenCard() {
   if (level === 'low') {
     // Buiten het seizoen geen zes lege balken: één regel, details op verzoek.
     setPollenHtml(pollenGrid, `<p class="pollen-summary">${t('pollenAllLowSummary')}</p>
-      <details class="pollen-details"><summary>${t('pollenShowAll')}</summary>${list}</details>${tomorrowHtml}`);
+      <details class="pollen-details anwb-accordion"><summary>${t('pollenShowAll')}</summary>${list}</details>${tomorrowHtml}`);
     return;
   }
   setPollenHtml(pollenGrid, `<p class="pollen-summary">${t('pollenLevelLabel', t('pollenLevelNames')[level])} · ${getPollenTip().live}</p>${list}${tomorrowHtml}`);
@@ -2327,7 +2352,7 @@ function renderChecklist() {
   });
 
   const groupKeyMap = { Always: 'groupAlways', Zon: 'groupSun', Regen: 'groupRain', Kou: 'groupCold', Info: 'groupInfo' };
-  const itemHtml = item => `<li class="checklist-item">
+  const itemHtml = item => `<li class="checklist-item anwb-check">
       <input type="checkbox" id="check_${item.id}" ${checked[item.id] ? 'checked' : ''}>
       <label for="check_${item.id}">${t(item.labelKey)}</label>
     </li>`;
@@ -2340,7 +2365,7 @@ function renderChecklist() {
     if (group === 'Always') {
       // Vaste spullen inklappen zodra alles is afgevinkt; het weer-deel blijft zichtbaar.
       const allDone = list.every(item => checked[item.id]);
-      html += `<details class="checklist-group" ${allDone ? '' : 'open'}>
+      html += `<details class="checklist-group anwb-accordion" ${allDone ? '' : 'open'}>
         <summary class="checklist-group-title">${t(groupKeyMap[group])}${allDone ? ' ✓' : ''}</summary>${inner}</details>`;
     } else {
       html += `<div class="checklist-group"><h3 class="checklist-group-title">${t(groupKeyMap[group])}</h3>${inner}</div>`;
@@ -2419,15 +2444,15 @@ function renderWalkerGrid() {
   team.forEach(name => {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'walker-btn';
+    btn.className = `walker-btn ${UI.chip}`;
     btn.textContent = name;
     const on = selectedWalkers.has(name);
-    btn.classList.toggle('active', on);
+    setUiState(btn, on, UI.chipOn, UI.chipOff);
     btn.setAttribute('aria-pressed', String(on));
     btn.addEventListener('click', () => {
       const nowOn = !selectedWalkers.has(name);
       if (nowOn) selectedWalkers.add(name); else selectedWalkers.delete(name);
-      btn.classList.toggle('active', nowOn);
+      setUiState(btn, nowOn, UI.chipOn, UI.chipOff);
       btn.setAttribute('aria-pressed', String(nowOn));
       updateSaveButton();
     });
@@ -2524,7 +2549,7 @@ function renderTeamEditor() {
   if (!list) return;
   list.innerHTML = getTeam().map((name, i) => `<li class="team-item">
       <span>${escapeHtml(name)}</span>
-      <button type="button" class="icon-btn small" data-index="${i}" aria-label="${escapeHtml(t('teamRemove', name))}">${X_ICON}</button>
+      <button type="button" class="team-remove ${UI.actionIcon}" data-index="${i}" aria-label="${escapeHtml(t('teamRemove', name))}">${X_ICON}</button>
     </li>`).join('');
   list.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => {
     const team = getTeam();
@@ -2601,13 +2626,13 @@ function renderLogHistory() {
           <span class="log-entry-people">${peopleStr}</span>
           ${weather}
         </div>
-        <button class="log-delete-btn" type="button" data-id="${escapeHtml(entry.id)}" title="${deleteLabel}" aria-label="${deleteLabel}">${X_ICON}</button>
+        <button class="log-delete-btn ${UI.iconButton}" type="button" data-id="${escapeHtml(entry.id)}" title="${deleteLabel}" aria-label="${deleteLabel}">${X_ICON}</button>
       </li>`;
     });
     html += '</ul>';
   }
   if (log.length > logVisible) {
-    html += `<button type="button" class="text-btn log-more" id="logMore">${t('logShowOlder', log.length - logVisible)}</button>`;
+    html += `<button type="button" class="log-more ${UI.textLink} mt-200" id="logMore">${t('logShowOlder', log.length - logVisible)}</button>`;
   }
 
   el.innerHTML = html;
@@ -2690,16 +2715,12 @@ function bindPrefControls() {
   const prefCard = document.getElementById('prefCard');
   if (prefCard && !localStorage_safe_get('dighv_pref')) prefCard.open = true;
 
-  document.querySelectorAll('.pref-btn').forEach(btn => {
-    const on = btn.dataset.pref === userPref;
-    btn.classList.toggle('active', on);
-    btn.setAttribute('aria-pressed', String(on));
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.pref-btn').forEach(b => {
-        b.classList.toggle('active', b === btn);
-        b.setAttribute('aria-pressed', String(b === btn));
-      });
-      userPref = btn.dataset.pref;
+  // huisstijl ToggleButton: radioknoppen, de stijl volgt :checked
+  document.querySelectorAll('input[name="pref"]').forEach(radio => {
+    radio.checked = radio.value === userPref;
+    radio.addEventListener('change', () => {
+      if (!radio.checked) return;
+      userPref = radio.value;
       localStorage_safe_set('dighv_pref', userPref);
       renderPrefSummary();
       if (weatherData) renderAdvice();
@@ -2714,7 +2735,7 @@ function bindPrefControls() {
     if (weatherData) { renderBestMoment(); renderFeedbackRow(); updateAppBadge(); }
   });
 
-  document.querySelectorAll('.feedback-btn').forEach(btn => btn.addEventListener('click', () => giveFeedback(btn.dataset.feedback)));
+  document.querySelectorAll('#feedbackRow [data-feedback]').forEach(btn => btn.addEventListener('click', () => giveFeedback(btn.dataset.feedback)));
   document.getElementById('shareBtn')?.addEventListener('click', shareBreak);
 
   document.getElementById('darkModeToggle').addEventListener('click', () => {
@@ -2731,7 +2752,7 @@ function bindPrefControls() {
 // ─── Vergelijking en seizoen ─────────────────────────────────────────────────
 function renderWeatherComparison() {
   const el = document.getElementById('comparisonGrid');
-  const card = el?.closest('.comparison-card');
+  const card = el?.closest('#comparisonCard');
   if (!el || !weatherData?.daily?.time) return;
   const daily = weatherData.daily;
   // Op datum zoeken, niet op vaste posities: na middernacht met oude data
@@ -2846,7 +2867,7 @@ function buildTourDom() {
     <div class="tour-tooltip" role="dialog" aria-modal="true" aria-labelledby="tourTitle" aria-describedby="tourText">
       <div class="tour-head">
         <span class="tour-count" id="tourCount"></span>
-        <button class="tour-close" id="tourClose" type="button">${X_ICON}</button>
+        <button class="tour-close ${UI.actionIcon}" id="tourClose" type="button">${X_ICON}</button>
       </div>
       <h2 class="tour-title" id="tourTitle" tabindex="-1"></h2>
       <p class="tour-text" id="tourText"></p>
@@ -2854,14 +2875,14 @@ function buildTourDom() {
       <div class="tour-actions">
         <button class="tour-skip" id="tourSkip" type="button"></button>
         <div class="tour-nav">
-          <button class="tour-nav-btn" id="tourPrev" type="button"></button>
-          <button class="tour-nav-btn primary" id="tourNext" type="button"></button>
+          <button class="tour-nav-btn anwb-button anwb-button--small anwb-button--tertiary" id="tourPrev" type="button"></button>
+          <button class="tour-nav-btn primary anwb-button anwb-button--small anwb-button--secondary" id="tourNext" type="button"></button>
         </div>
       </div>
     </div>`;
   document.body.appendChild(overlay);
   // Achtergrond onbereikbaar voor muis, toetsenbord en schermlezer.
-  const wrapper = document.querySelector('.wrapper');
+  const wrapper = document.querySelector('.app-shell');
   if (wrapper) wrapper.inert = true;
   tourEls = {
     overlay,

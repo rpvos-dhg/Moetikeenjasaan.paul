@@ -1,23 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- Navy rounded background -->
-  <rect width="32" height="32" rx="7" fill="#003a71"/>
+  <!-- Gele tegel (huisstijl radius-200) -->
+  <rect width="32" height="32" rx="7" fill="#ffcd00"/>
 
   <!-- Jacket: shoulders, full-length sleeves, body and a V-neck collar -->
   <path d="M16,9
            L19.2,6.4 L20.6,8.2 L24.6,10.6 L28.2,19.4 L27.2,21.4 L23.4,19.8 L21.2,14.2 L22.2,26.6
            L16,27.4
            L9.8,26.6 L10.8,14.2 L8.6,19.8 L4.8,21.4 L3.8,19.4 L7.4,10.6 L11.4,8.2 L12.8,6.4 Z"
-        fill="#ffcc00"/>
+        fill="#003d86"/>
 
   <!-- Folded collar (under-collar shadow on each side of the V) -->
-  <path d="M12.8,6.4 L16,9 L14.3,9.4 Z" fill="#002551"/>
-  <path d="M19.2,6.4 L16,9 L17.7,9.4 Z" fill="#002551"/>
+  <path d="M12.8,6.4 L16,9 L14.3,9.4 Z" fill="#ffcd00"/>
+  <path d="M19.2,6.4 L16,9 L17.7,9.4 Z" fill="#ffcd00"/>
 
   <!-- Centre zipper running the full length, plus pull -->
-  <rect x="15.5" y="9"   width="1"   height="17.8" rx="0.5" fill="#002551"/>
-  <rect x="14.9" y="9"   width="2.2" height="1.8"  rx="0.6" fill="#002551"/>
+  <rect x="15.5" y="9"   width="1"   height="17.8" rx="0.5" fill="#ffcd00"/>
+  <rect x="14.9" y="9"   width="2.2" height="1.8"  rx="0.6" fill="#ffcd00"/>
 
   <!-- Cuffs at the sleeve ends -->
-  <path d="M22.9,18.4 L27.7,18.0 L28.0,19.6 L23.2,20.0 Z" fill="#002551"/>
-  <path d="M9.1,18.4 L4.3,18.0 L4.0,19.6 L8.8,20.0 Z"     fill="#002551"/>
+  <path d="M22.9,18.4 L27.7,18.0 L28.0,19.6 L23.2,20.0 Z" fill="#ffcd00"/>
+  <path d="M9.1,18.4 L4.3,18.0 L4.0,19.6 L8.8,20.0 Z"     fill="#ffcd00"/>
 </svg>

@@ -1,0 +1,382 @@
+/*
+ * ANWB componenten in plain CSS (aanvulling op base.css). Laad volgorde: tokens.css, base.css, components.css.
+ * Gebouwd naar de gerenderde huisstijl-componenten (de huisstijl, 2026-10-28). Maten komen uit huisstijl:
+ * 24px controls, 56px velden, 48px chips, 8px radius op kaarten. Gebruik alleen tokens, geen hex.
+ * Voorbeeldmarkup per component: templates/componenten.html.
+ */
+
+/* ---------- Formulier: veld, input, textarea, select ---------- */
+.anwb-field { display: flex; flex-direction: column; gap: var(--spacing-100); }
+.anwb-field__label { font: var(--paragraph-title-medium); font-family: var(--font-body); color: var(--foreground-color-neutral); }
+.anwb-field__optional { font: var(--paragraph-body-medium); font-family: var(--font-body); color: var(--foreground-color-subtle); font-weight: 400; }
+.anwb-field__support { margin: 0; font: var(--paragraph-body-x-small); font-family: var(--font-body); color: var(--foreground-color-neutral); }
+.anwb-field--invalid .anwb-field__support { color: var(--foreground-color-feedback-negative); }
+.anwb-field--valid .anwb-field__support { color: var(--foreground-color-feedback-positive); }
+
+.anwb-input, .anwb-select, .anwb-textarea {
+  width: 100%; min-height: 3.5rem; padding-inline: var(--spacing-200);
+  font: var(--paragraph-body-medium); font-family: var(--font-body);
+  color: var(--neutral-900); background: var(--background-color-form-controls);
+  border: 0; border-bottom: 1px solid var(--neutral-600); border-radius: var(--radius-100) var(--radius-100) 0 0;
+  appearance: none; -webkit-appearance: none; text-overflow: ellipsis;
+}
+.anwb-input::placeholder, .anwb-textarea::placeholder { color: var(--neutral-600); }
+.anwb-input:hover, .anwb-select:hover, .anwb-textarea:hover { border-bottom: 2px solid var(--brand-highlight); }
+.anwb-input:focus-visible, .anwb-select:focus-visible, .anwb-textarea:focus-visible { outline: 2px solid var(--border-color-interactive-focus); border-bottom-color: transparent; }
+.anwb-input[aria-invalid="true"], .anwb-select[aria-invalid="true"], .anwb-textarea[aria-invalid="true"] { border-bottom-color: var(--feedback-negative); }
+.anwb-input[aria-invalid="false"], .anwb-select[aria-invalid="false"] { border-bottom-color: var(--brand-green); }
+.anwb-input:disabled, .anwb-select:disabled, .anwb-textarea:disabled { background: var(--background-color-interactive-disabled); color: var(--foreground-color-interactive-disabled); border-bottom-color: var(--border-color-interactive-disabled-strong, var(--neutral-300)); cursor: not-allowed; }
+.anwb-textarea { min-height: 8rem; padding-block: var(--spacing-200); resize: vertical; }
+.anwb-select {
+  padding-right: 3rem; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 22.5 5.5 12l2-2L16 18.5 24.5 10l2 2z' fill='%23003d86'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right var(--spacing-150) center; background-size: 1.5rem;
+}
+
+/* ---------- Checkbox, radio, switch ---------- */
+.anwb-check, .anwb-radio, .anwb-switch {
+  /* min-height 2.5rem = raakvlak van 40px (huisstijl vergroot het klikgebied rond de 24px control) */
+  display: inline-flex; gap: var(--spacing-150); align-items: center; min-height: 2.5rem; cursor: pointer;
+  font: var(--paragraph-body-medium); font-family: var(--font-body); color: var(--foreground-color-interactive-neutral);
+}
+.anwb-check input, .anwb-radio input, .anwb-switch input { appearance: none; -webkit-appearance: none; flex: none; margin: 0; cursor: pointer; }
+.anwb-check input, .anwb-radio input {
+  width: 1.5rem; height: 1.5rem; background: var(--white); border: 1px solid var(--neutral-600); display: grid; place-items: center;
+}
+.anwb-check input { border-radius: var(--radius-100); }
+.anwb-radio input { border-radius: var(--radius-circle); }
+.anwb-check input:hover, .anwb-radio input:hover { border: 2px solid var(--brand-highlight); }
+.anwb-check input:checked, .anwb-radio input:checked { background-color: var(--brand-highlight); border: 1px solid var(--brand-highlight); }
+.anwb-check input:checked {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5' fill='none' stroke='%23fff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-size: 100%; background-repeat: no-repeat;
+}
+.anwb-radio input:checked::before { content: ""; width: .5rem; height: .5rem; border-radius: var(--radius-circle); background: var(--white); }
+.anwb-check input:checked:hover, .anwb-radio input:checked:hover { background-color: var(--brand-highlight-hover); border-color: var(--brand-highlight-hover); }
+.anwb-check input:focus-visible, .anwb-radio input:focus-visible, .anwb-switch input:focus-visible { outline: 2px solid var(--border-color-interactive-focus); outline-offset: .125rem; }
+.anwb-check input[aria-invalid="true"], .anwb-radio input[aria-invalid="true"] { border-color: var(--feedback-negative); }
+.anwb-check input:disabled, .anwb-radio input:disabled { background: var(--background-color-interactive-disabled); border-color: var(--border-color-interactive-disabled); cursor: not-allowed; }
+
+.anwb-switch { align-items: center; }
+.anwb-switch input {
+  position: relative; width: 3rem; height: 1.75rem; border-radius: var(--radius-pill);
+  border: 1px solid var(--neutral-600); background: var(--background-color-interactive-weak); transition: background-color .15s;
+}
+.anwb-switch input::before {
+  content: ""; position: absolute; left: .375rem; top: .375rem; width: 1rem; height: 1rem; border-radius: var(--radius-circle);
+  background: var(--foreground-color-subtle); transition: transform .1s, width .1s, height .1s, top .1s, left .1s;
+}
+.anwb-switch input:checked { background: var(--brand-highlight); border-color: var(--brand-highlight); }
+.anwb-switch input:checked::before { background: var(--white); width: 1.25rem; height: 1.25rem; top: .25rem; left: .125rem; transform: translateX(1.5rem); }
+.anwb-switch input:disabled { background: var(--background-color-interactive-disabled); cursor: not-allowed; }
+
+/* ---------- Links ---------- */
+.anwb-textlink, .anwb-prose a {
+  color: var(--foreground-color-interactive-highlight-strong); text-decoration: underline;
+}
+.anwb-textlink:visited, .anwb-prose a:visited { color: var(--foreground-color-feedback-marked); }
+.anwb-textlink:hover, .anwb-prose a:hover { color: var(--foreground-color-interactive-highlight-strong-hover); }
+.anwb-textlink:active, .anwb-prose a:active { color: var(--brand-ocean); }
+
+/* ---------- Badge (geel), Label, Counter, Sticker ---------- */
+.anwb-badge { background: var(--brand-yellow); color: var(--brand-ocean); height: 1.25rem; min-width: 1.25rem; padding-inline: var(--spacing-75); }
+.anwb-label {
+  display: inline-flex; align-items: center; gap: var(--spacing-100); height: 2.5rem; padding-inline: var(--spacing-150);
+  border-radius: var(--radius-100); white-space: nowrap;
+  font: var(--label-small); font-family: var(--font-heading); background: var(--brand-ocean); color: var(--white);
+}
+.anwb-label--yellow { background: var(--brand-yellow); color: var(--brand-ocean); }
+.anwb-label--red { background: var(--brand-red); color: var(--white); }
+.anwb-label--green { background: var(--brand-green); color: var(--white); }
+.anwb-label--lightblue { background: var(--brand-highlight); color: var(--white); }
+.anwb-label--grey { background: var(--neutral-200); color: var(--neutral-900); }
+.anwb-label--white { background: var(--white); color: var(--brand-ocean); }
+.anwb-counter { display: flex; gap: var(--spacing-50); margin: 0; font: var(--label-3-x-large); font-family: var(--font-heading); color: var(--foreground-color-strong); }
+.anwb-counter span { padding: var(--spacing-100); border-radius: var(--radius-100); background: var(--background-color-strong); color: var(--foreground-color-inverse-strong); }
+.anwb-counter .anwb-counter__sep { padding: 0; background: none; color: inherit; margin-inline: -.125rem; align-self: center; }
+.anwb-sticker {
+  display: inline-flex; flex-direction: column; justify-content: center; text-align: center;
+  width: 5.5rem; height: 5.5rem; border-radius: var(--radius-circle);
+  background: var(--brand-red); color: var(--white); font: var(--label-large); font-family: var(--font-heading);
+}
+.anwb-sticker--yellow { background: var(--brand-yellow); color: var(--brand-ocean); }
+
+/* ---------- Lijst ---------- */
+.anwb-list { margin: 0; padding: 0 0 0 var(--spacing-300); display: flex; flex-direction: column; gap: var(--spacing-100); list-style: disc; font: var(--paragraph-body-medium); font-family: var(--font-body); }
+.anwb-list--ordered { list-style: decimal; }
+.anwb-list--plain { list-style: none; padding-left: 0; }
+.anwb-list--icons { list-style: none; padding-left: 0; }
+.anwb-list--icons li { display: flex; gap: var(--spacing-100); align-items: flex-start; }
+.anwb-list--icons .anwb-icon { margin-top: .0625rem; color: var(--foreground-color-highlight-strong); }
+
+/* ---------- Beschrijvingslijst ---------- */
+.anwb-dl { display: grid; gap: var(--spacing-200); margin: 0; }
+.anwb-dl > div { display: flex; flex-direction: column; }
+.anwb-dl dt { font: var(--paragraph-title-medium); font-family: var(--font-body); color: var(--foreground-color-subtle); }
+.anwb-dl dd { margin: 0; font: var(--paragraph-body-medium); font-family: var(--font-body); color: var(--foreground-color-neutral); }
+@media (min-width: 48rem) {
+  .anwb-dl { grid-template-columns: minmax(auto, 13.5rem) 1fr; }
+  .anwb-dl > div { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; gap: var(--spacing-200R, 1.5rem); }
+}
+
+/* ---------- Accordion en disclosure (native <details>) ---------- */
+.anwb-accordion { border-bottom: 1px solid var(--border-color-subtle); background: var(--background-color-interactive-default); color: var(--foreground-color-interactive-neutral); }
+.anwb-accordion summary {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-150);
+  padding-block: var(--spacing-200); cursor: pointer; list-style: none;
+  font: var(--paragraph-title-medium); font-family: var(--font-body);
+}
+.anwb-accordion summary::-webkit-details-marker { display: none; }
+.anwb-accordion summary:hover { color: var(--foreground-color-interactive-neutral-hover); }
+.anwb-accordion summary::after {
+  content: ""; width: 1.5rem; height: 1.5rem; flex: none; background: currentColor; transition: transform .2s;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 22.5 5.5 12l2-2L16 18.5 24.5 10l2 2z'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 22.5 5.5 12l2-2L16 18.5 24.5 10l2 2z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.anwb-accordion[open] summary::after { transform: rotate(180deg); }
+.anwb-accordion > div { padding-bottom: var(--spacing-200); }
+.anwb-disclosure summary {
+  display: inline-flex; align-items: center; gap: var(--spacing-100); cursor: pointer; list-style: none;
+  color: var(--foreground-color-interactive-highlight-strong); text-decoration: underline;
+  font: var(--paragraph-body-medium); font-family: var(--font-body);
+}
+.anwb-disclosure summary::-webkit-details-marker { display: none; }
+.anwb-disclosure summary:hover { color: var(--foreground-color-interactive-highlight-strong-hover); }
+.anwb-disclosure[open] summary { margin-bottom: var(--spacing-100); }
+
+/* ---------- Tijdlijn ---------- */
+.anwb-timeline { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.anwb-timeline li { display: flex; gap: var(--spacing-100); }
+.anwb-timeline__rail { display: flex; flex-direction: column; align-items: center; gap: var(--spacing-50); margin-inline: var(--spacing-75); }
+.anwb-timeline__dot {
+  display: grid; place-items: center; flex: none; width: 1.25rem; height: 1.25rem; margin-top: var(--spacing-50);
+  border-radius: var(--radius-pill); background: var(--background-color-strong); color: var(--foreground-color-inverse-strong);
+  font: var(--label-small); font-family: var(--font-heading);
+}
+.anwb-timeline__dot--done { background: var(--background-color-feedback-positive-strong); }
+.anwb-timeline__line { flex: 1; min-height: 2.5rem; border-left: 1px solid var(--border-color-strong); }
+.anwb-timeline li:last-child .anwb-timeline__line { display: none; }
+.anwb-timeline__body { display: flex; flex-direction: column; padding-bottom: var(--spacing-300); }
+.anwb-timeline__time { font: var(--label-small); font-family: var(--font-heading); color: var(--foreground-color-subtle); margin-top: .125rem; }
+.anwb-timeline__title { font: var(--heading-small); font-family: var(--font-heading); color: var(--foreground-color-neutral); }
+
+/* ---------- Tegel met link, tegel met afbeelding, navigatie-item ---------- */
+.anwb-tilelink {
+  display: flex; gap: var(--spacing-100); justify-content: space-between; padding: var(--spacing-300);
+  border-radius: var(--radius-200); text-decoration: none;
+  background: var(--background-color-interactive-weak); color: var(--foreground-color-strong);
+  font: var(--label-medium); font-family: var(--font-heading); transition: background-color .15s;
+}
+.anwb-tilelink:hover { background: var(--background-color-interactive-weak-hover); color: var(--foreground-color-strong); }
+.anwb-tilelink:active { background: var(--background-color-interactive-weak-active); }
+.anwb-tilelink > div { display: flex; flex-direction: column; justify-content: space-between; gap: var(--spacing-200); }
+.anwb-tilecard { display: flex; flex-direction: column; border-radius: var(--radius-200); overflow: hidden; }
+.anwb-tilecard img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+.anwb-tilecard__body { flex: 1; display: flex; flex-direction: column; gap: var(--spacing-200); padding: var(--spacing-300); background: var(--background-color-weak); color: var(--foreground-color-neutral); }
+.anwb-navitem {
+  display: flex; align-items: center; gap: var(--spacing-100); width: 100%; min-height: 3rem; padding: var(--spacing-100);
+  border: 0; border-radius: var(--radius-50); background: transparent; text-align: left; cursor: pointer;
+  color: var(--foreground-color-strong); font: var(--label-medium); font-family: var(--font-heading);
+}
+.anwb-navitem:hover { background: var(--background-color-interactive-default-hover); }
+.anwb-navitem:active { background: var(--background-color-interactive-default-active); }
+.anwb-navitem--small { font: var(--label-small); font-family: var(--font-heading); min-height: 2.5rem; }
+
+/* ---------- Toggle-groep en filter chip ---------- */
+.anwb-toggle { display: flex; }
+.anwb-toggle label {
+  flex: 1; min-height: 2.5rem; display: flex; align-items: center; justify-content: center; gap: var(--spacing-100);
+  padding-inline: var(--spacing-150); cursor: pointer; position: relative; overflow: hidden; white-space: nowrap;
+  background: var(--background-color-interactive-weak); color: var(--foreground-color-neutral);
+  font: var(--label-medium); font-family: var(--font-heading);
+}
+.anwb-toggle label:first-child { border-radius: var(--radius-100) 0 0 var(--radius-100); }
+.anwb-toggle label:last-child { border-radius: 0 var(--radius-100) var(--radius-100) 0; }
+.anwb-toggle label:hover { background: var(--background-color-interactive-weak-hover); }
+.anwb-toggle input { position: absolute; opacity: 0; pointer-events: none; }
+.anwb-toggle label:has(input:checked) { background: var(--background-color-interactive-strong); color: var(--foreground-color-inverse-strong); }
+.anwb-toggle label:has(input:checked):hover { background: var(--background-color-interactive-strong-hover); }
+.anwb-toggle label:has(input:focus-visible) { outline: 2px solid var(--border-color-interactive-focus); outline-offset: .125rem; z-index: 1; }
+
+.anwb-chip {
+  display: inline-flex; align-items: center; gap: var(--spacing-100); height: 3rem; padding-inline: var(--spacing-200);
+  border: 0; border-radius: var(--radius-pill); cursor: pointer;
+  background: var(--background-color-interactive-weak); color: var(--foreground-color-strong);
+  font: var(--label-medium); font-family: var(--font-heading);
+}
+.anwb-chip:hover { background: var(--background-color-interactive-weak-hover); }
+.anwb-chip:active { background: var(--background-color-interactive-weak-active); }
+.anwb-chip--small { height: 2.5rem; font: var(--label-small); font-family: var(--font-heading); }
+.anwb-chip[aria-pressed="true"] { background: var(--background-color-interactive-strong); color: var(--foreground-color-inverse-strong); } /* selected-stijl: afgeleid, niet getoond in huisstijl-default */
+
+/* ---------- Voortgang: bar, stepper, paginering ---------- */
+.anwb-progress { display: flex; align-items: center; gap: var(--spacing-150); width: 100%; color: var(--foreground-color-neutral); }
+.anwb-progress progress { flex: 1; height: .5rem; border: 0; border-radius: var(--radius-pill); background: var(--neutral-200); overflow: hidden; appearance: none; -webkit-appearance: none; }
+.anwb-progress progress::-webkit-progress-bar { background: var(--neutral-200); }
+.anwb-progress progress::-webkit-progress-value { background: var(--background-color-highlight); transition: width .5s; }
+.anwb-progress progress::-moz-progress-bar { background: var(--background-color-highlight); }
+.anwb-progress span { font: var(--label-small); font-family: var(--font-heading); }
+
+.anwb-stepper { display: flex; justify-content: center; gap: var(--spacing-200); margin: 0; padding: 0 var(--spacing-200); list-style: none; }
+@media (min-width: 48rem) { .anwb-stepper { gap: var(--spacing-300); padding-inline: var(--spacing-500); } }
+.anwb-stepper li {
+  min-width: 2rem; padding: var(--spacing-100) var(--spacing-50); text-align: center; border-bottom: 2px solid transparent;
+  font: var(--label-small); font-family: var(--font-heading); color: var(--foreground-color-interactive-strong);
+}
+@media (min-width: 48rem) { .anwb-stepper li { min-width: 5rem; } }
+.anwb-stepper li a { color: inherit; text-decoration: none; }
+.anwb-stepper li[aria-current="true"] { border-bottom-color: var(--border-color-interactive-strong); }
+.anwb-stepper li[aria-disabled="true"] { color: var(--foreground-color-interactive-disabled); cursor: not-allowed; }
+.anwb-stepper li:not([aria-current="true"]):not([aria-disabled="true"]):hover { border-bottom-color: var(--border-color-interactive-highlight-subtle-hover, var(--brand-highlight-hover)); }
+
+.anwb-pagination ul { display: flex; align-items: center; justify-content: center; gap: var(--spacing-100); margin: 0; padding: 0; list-style: none; }
+.anwb-pagination a {
+  display: flex; align-items: center; justify-content: center; min-width: 2rem; height: 2rem; padding-inline: var(--spacing-75);
+  border-radius: 999px; text-decoration: none; color: var(--foreground-color-strong); font: var(--label-medium); font-family: var(--font-heading);
+}
+.anwb-pagination a:hover { background: var(--background-color-interactive-default-hover); }
+.anwb-pagination a[aria-current="page"] { background: var(--background-color-strong); color: var(--foreground-color-inverse-strong); }
+
+/* ---------- Skeleton en spinner ---------- */
+.anwb-skeleton { display: block; border-radius: var(--radius-100); background: linear-gradient(90deg, var(--neutral-200) 25%, var(--neutral-100) 50%, var(--neutral-200) 75%); background-size: 200% 100%; animation: anwb-shimmer 1.4s infinite linear; min-height: 1rem; }
+@keyframes anwb-shimmer { to { background-position: -200% 0; } }
+.anwb-spinner { display: inline-block; width: 2rem; height: 2rem; border: 3px solid var(--neutral-200); border-top-color: var(--brand-ocean); border-radius: 50%; animation: anwb-spin .8s linear infinite; }
+@keyframes anwb-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .anwb-skeleton, .anwb-spinner { animation: none; } }
+
+/* ---------- Toast en modal (statische opmaak; gedrag zelf toevoegen) ---------- */
+.anwb-toast { display: flex; gap: var(--spacing-150); align-items: flex-start; padding: var(--spacing-200); border-radius: var(--radius-100); box-shadow: var(--shadow-neutral); background: var(--background-color-strong); color: var(--foreground-color-strong); font: var(--paragraph-body-small); font-family: var(--font-body); }
+.anwb-modal { max-width: 32rem; padding: var(--spacing-300); border: 0; border-radius: var(--radius-200); background: var(--background-color-default); color: var(--foreground-color-neutral); box-shadow: var(--shadow-strong); }
+.anwb-modal::backdrop { background: var(--neutral-900)80; }
+.anwb-modal__actions { display: flex; flex-wrap: wrap; gap: var(--spacing-150); justify-content: flex-end; margin-top: var(--spacing-300); }
+
+/* ================= Toegevoegd na review van "Herstelkanspotentie long read" =================
+ * Bouwstenen die een lang, data-rijk document nodig heeft en die eerder ontbraken.
+ * Bron: huisstijl (RangeSlider, Counter, TileList, DescriptionList); tabel en chart-stijl zijn afgeleid met tokens. */
+
+/* ---------- Eyebrow (kleine regel boven een kop): label-small, subtle, GEEN hoofdletters of letterspatiëring ---------- */
+.anwb-eyebrow { margin: 0 0 var(--spacing-100); font: var(--label-small); font-family: var(--font-heading); color: var(--foreground-color-subtle); display: flex; justify-content: space-between; gap: var(--spacing-150); flex-wrap: wrap; }
+.anwb-eyebrow a { color: var(--foreground-color-interactive-highlight-strong); text-decoration: none; font-weight: 400; }
+.anwb-eyebrow a:hover { text-decoration: underline; }
+
+/* ---------- Skip-link ---------- */
+.anwb-skip { position: absolute; left: -999px; top: 0; }
+.anwb-skip:focus { left: var(--spacing-200); top: var(--spacing-200); z-index: var(--z-toast); background: var(--background-color-strong); color: var(--foreground-color-inverse-strong); padding: var(--spacing-100) var(--spacing-200); border-radius: var(--radius-100); }
+
+/* ---------- Range slider (huisstijl: spoor 4px, duim 24px, ocean-highlight) ---------- */
+.anwb-range { width: 100%; height: 1.5rem; margin: 0; background: transparent; appearance: none; -webkit-appearance: none; cursor: pointer; }
+.anwb-range::-webkit-slider-runnable-track { height: .25rem; background: var(--background-color-subtle); }
+.anwb-range::-moz-range-track { height: .25rem; background: var(--background-color-subtle); }
+.anwb-range::-webkit-slider-thumb { -webkit-appearance: none; width: 1.5rem; height: 1.5rem; margin-top: -.625rem; border-radius: var(--radius-circle); background: var(--background-color-interactive-highlight-subtle); border: 2px solid var(--background-color-default); box-shadow: 0 0 0 1px var(--background-color-interactive-highlight-subtle-active); }
+.anwb-range::-moz-range-thumb { width: 1.25rem; height: 1.25rem; border-radius: var(--radius-circle); background: var(--background-color-interactive-highlight-subtle); border: 2px solid var(--background-color-default); box-shadow: 0 0 0 1px var(--background-color-interactive-highlight-subtle-active); }
+.anwb-range:hover::-webkit-slider-thumb { background: var(--background-color-interactive-highlight-subtle-hover); }
+.anwb-range:active::-webkit-slider-thumb { background: var(--background-color-interactive-highlight-subtle-active); }
+.anwb-range:focus-visible { outline: 2px solid var(--border-color-interactive-focus); outline-offset: .125rem; border-radius: var(--radius-100); }
+.anwb-range-field { display: grid; gap: var(--spacing-100); }
+.anwb-range-field__head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--spacing-150); font: var(--paragraph-title-medium); font-family: var(--font-body); }
+.anwb-range-field__value { font-variant-numeric: tabular-nums; color: var(--foreground-color-strong); }
+
+/* ---------- Tabel (huisstijl kent geen Table-component: tokens, geen hoofdletters, header = paragraph-title-x-small) ---------- */
+.anwb-table-wrap { overflow-x: auto; border: 1px solid var(--border-color-default); border-radius: var(--radius-200); background: var(--background-color-default); }
+.anwb-table { width: 100%; border-collapse: collapse; font: var(--paragraph-body-small); font-family: var(--font-body); }
+.anwb-table caption { text-align: left; padding: var(--spacing-150) var(--spacing-200); font: var(--paragraph-title-small); font-family: var(--font-body); color: var(--foreground-color-subtle); }
+.anwb-table th { text-align: left; padding: var(--spacing-150) var(--spacing-200); font: var(--paragraph-title-x-small); font-family: var(--font-body); color: var(--foreground-color-subtle); border-bottom: 1px solid var(--border-color-default); white-space: nowrap; }
+.anwb-table td { padding: var(--spacing-150) var(--spacing-200); vertical-align: middle; border-bottom: 1px solid var(--border-color-subtle); }
+.anwb-table tr:last-child td { border-bottom: 0; }
+.anwb-table .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.anwb-table tbody th { font: var(--paragraph-title-small); font-family: var(--font-body); color: var(--foreground-color-neutral); border-bottom: 1px solid var(--border-color-subtle); white-space: normal; }
+
+/* ---------- Stat (kerncijfer-tegel; vervangt zelfgemaakte KPI-kaarten) ---------- */
+.anwb-stat { display: flex; flex-direction: column; gap: var(--spacing-50); padding: var(--spacing-200); border-radius: var(--radius-200); background: var(--background-color-weak); color: var(--foreground-color-neutral); }
+.anwb-stat__value { font: var(--heading-large); font-family: var(--font-heading); color: var(--foreground-color-strong); font-variant-numeric: tabular-nums; }
+.anwb-stat__was { font: var(--paragraph-body-small); font-family: var(--font-body); color: var(--foreground-color-subtle); margin-left: var(--spacing-100); }
+.anwb-stat__label { font: var(--paragraph-title-small); font-family: var(--font-body); }
+.anwb-stat__note { font: var(--paragraph-body-x-small); font-family: var(--font-body); color: var(--foreground-color-subtle); }
+.anwb-stats { display: grid; gap: var(--spacing-150); grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); }
+
+/* ---------- Inhoudsopgave / TileList (huisstijl-advies: minimaal 2, maximaal 6 links) ---------- */
+.anwb-tilelist { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--spacing-100); }
+.anwb-tilelist .anwb-tilelink { align-items: center; padding: var(--spacing-200); }
+.anwb-tilelist__n { font: var(--heading-medium); font-family: var(--font-heading); color: var(--foreground-color-strong); min-width: 2rem; }
+.anwb-tilelist__text { display: grid; gap: var(--spacing-25); flex: 1; }
+.anwb-tilelist__desc { font: var(--paragraph-body-small); font-family: var(--font-body); color: var(--foreground-color-subtle); }
+
+/* ---------- Grafiek (inline SVG): alles via tokens, geen hex, lettertype uit de tokens ---------- */
+.anwb-chart { display: block; width: 100%; height: auto; font-family: var(--font-body); }
+.anwb-chart text { font-family: var(--font-body); }
+.anwb-chart .grid { stroke: var(--border-color-default); stroke-width: 1; }
+.anwb-chart .axis { stroke: var(--foreground-color-subtle); stroke-width: 1; }
+.anwb-chart .s1 { stroke: var(--chart-1); fill: none; stroke-width: 2.5; stroke-linejoin: round; }
+.anwb-chart .s2 { stroke: var(--chart-2); fill: none; stroke-width: 2.5; stroke-linejoin: round; }
+.anwb-chart .s-ref { stroke: var(--chart-muted); fill: none; stroke-width: 1.75; stroke-dasharray: 5 4; }
+.anwb-chart .mark { fill: var(--brand-yellow); stroke: var(--chart-1); stroke-width: 2.5; }
+.anwb-legend { display: flex; flex-wrap: wrap; gap: var(--spacing-100) var(--spacing-300); margin: 0 0 var(--spacing-100); padding: 0; list-style: none; font: var(--paragraph-body-small); font-family: var(--font-body); color: var(--foreground-color-subtle); }
+.anwb-legend i { display: inline-block; width: 1.125rem; height: .1875rem; border-radius: .125rem; margin-right: var(--spacing-100); vertical-align: middle; }
+
+.anwb-legend .anwb-legend__a { background: var(--chart-1); }
+.anwb-legend .anwb-legend__b { background: none; border-top: 2px dashed var(--chart-muted); height: 0; }
+
+/* ================= Gaten die huisstijl niet dekt: data-weergave uit tokens (toegevoegd bij herbouw van het Herstelkans-document) ================= */
+.anwb-label--small { height: 1.5rem; padding-inline: var(--spacing-100); font: var(--label-x-small); font-family: var(--font-heading); }
+.anwb-check--top { align-items: flex-start; }
+.anwb-check--top input { margin-top: .5rem; }
+
+/* Meter-regel: kop met waarde, daaronder een <progress> in een reeks-kleur */
+.anwb-meter { display: grid; gap: var(--spacing-75); }
+.anwb-meter__head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--spacing-150); flex-wrap: wrap; }
+.anwb-meter__name { font: var(--paragraph-title-medium); font-family: var(--font-body); }
+.anwb-meter__value { font: var(--heading-small); font-family: var(--font-heading); font-variant-numeric: tabular-nums; }
+progress.anwb-track { width: 100%; height: .5rem; border: 0; border-radius: var(--radius-pill); overflow: hidden; appearance: none; -webkit-appearance: none; background: var(--chart-off); }
+progress.anwb-track::-webkit-progress-bar { background: var(--chart-off); }
+progress.anwb-track::-webkit-progress-value { background: var(--chart-1); border-radius: var(--radius-pill); }
+progress.anwb-track::-moz-progress-bar { background: var(--chart-1); }
+progress.anwb-track--ocean::-webkit-progress-value { background: var(--chart-1); } progress.anwb-track--ocean::-moz-progress-bar { background: var(--chart-1); }
+progress.anwb-track--highlight::-webkit-progress-value { background: var(--chart-2); } progress.anwb-track--highlight::-moz-progress-bar { background: var(--chart-2); }
+progress.anwb-track--positive::-webkit-progress-value { background: var(--chart-positive); } progress.anwb-track--positive::-moz-progress-bar { background: var(--chart-positive); }
+progress.anwb-track--negative::-webkit-progress-value { background: var(--chart-negative); } progress.anwb-track--negative::-moz-progress-bar { background: var(--chart-negative); }
+progress.anwb-track--accent::-webkit-progress-value { background: var(--chart-accent); } progress.anwb-track--accent::-moz-progress-bar { background: var(--chart-accent); }
+
+/* Puntenraster: 1 punt = 1 eenheid. Toestanden via modifier-klassen */
+.anwb-dots { display: grid; grid-template-columns: repeat(31, 1fr); gap: .125rem; }
+@media (min-width: 48rem) { .anwb-dots { grid-template-columns: repeat(62, 1fr); } }
+.anwb-dot { display: block; aspect-ratio: 1; border-radius: var(--radius-circle); background: var(--chart-off); transition: background-color .35s; }
+.anwb-dot--on { background: var(--chart-1); }
+.anwb-dot--target { background: var(--chart-accent); }
+@media (prefers-reduced-motion: reduce) { .anwb-dot { transition: none; } }
+.anwb-legend__swatch { display: inline-block; width: .75rem; height: .75rem; border-radius: var(--radius-circle); margin-right: var(--spacing-100); vertical-align: -.0625rem; }
+.anwb-legend__swatch--on { background: var(--chart-1); } .anwb-legend__swatch--target { background: var(--chart-accent); } .anwb-legend__swatch--off { background: var(--chart-off); }
+
+/* Verdeelbalk in twee delen (breedtes zet je met JavaScript) */
+.anwb-split { display: flex; height: 1.75rem; border-radius: var(--radius-100); overflow: hidden; background: var(--neutral-200); }
+.anwb-split__seg { display: flex; align-items: center; justify-content: center; min-width: 0; overflow: hidden; white-space: nowrap; font: var(--label-x-small); font-family: var(--font-heading); transition: width .2s; }
+.anwb-split__seg--a { background: var(--chart-2); color: var(--neutral-900); }
+.anwb-split__seg--b { background: var(--chart-1); color: var(--white); }
+@media (prefers-reduced-motion: reduce) { .anwb-split__seg { transition: none; } }
+
+/* Trap: label, balk en bedrag per trede */
+.anwb-ladder { display: grid; gap: var(--spacing-100); }
+.anwb-rung { display: grid; gap: var(--spacing-75) var(--spacing-200); align-items: center; padding: var(--spacing-150) var(--spacing-200); border-radius: var(--radius-200); background: var(--background-color-weak); }
+@media (min-width: 48rem) { .anwb-rung { grid-template-columns: 10rem minmax(0, 1fr) auto; } }
+.anwb-rung__label { font: var(--paragraph-title-medium); font-family: var(--font-body); }
+.anwb-rung__amount { font: var(--heading-small); font-family: var(--font-heading); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.anwb-rung__sub { grid-column: 1 / -1; margin: 0; font: var(--paragraph-body-x-small); font-family: var(--font-body); color: var(--foreground-color-subtle); }
+.anwb-rung--goal { outline: 2px solid var(--border-color-feedback-informative-strong); outline-offset: -2px; }
+
+/* Tabel-varianten, doelrij en winnaar-markering */
+.anwb-table--wide { min-width: 48rem; }
+.anwb-table tr:target > * { background: var(--background-color-informative-weak); }
+.anwb-stat--win { box-shadow: inset 0 .125rem 0 var(--brand-yellow); }
+.anwb-dl--amounts { grid-template-columns: 1fr; }
+.anwb-dl--amounts > div { display: flex; flex-direction: row; justify-content: space-between; align-items: baseline; gap: var(--spacing-200); padding-block: var(--spacing-100); border-bottom: 1px solid var(--border-color-subtle); }
+.anwb-dl--amounts > div:last-child { border-bottom: 0; }
+.anwb-dl--amounts dd { font: var(--heading-small); font-family: var(--font-heading); font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
+.anwb-modal { width: calc(100% - 2rem); max-height: calc(100dvh - 2rem); overflow: auto; }
+.anwb-chip-list { display: flex; flex-wrap: wrap; gap: var(--spacing-50); align-items: center; }
+
+.anwb-legend__swatch--a { background: var(--chart-2); } .anwb-legend__swatch--b { background: var(--chart-1); }
+.anwb-chip-list[role="button"] { cursor: pointer; }
+@media print {
+  .anwb-table-wrap { overflow: visible; }
+  .anwb-table--wide { min-width: 0; }
+  .anwb-table { font-size: .6875rem; }
+}

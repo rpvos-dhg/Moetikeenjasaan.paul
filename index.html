@@ -7,79 +7,97 @@
 <title>Jas of geen jas? | DIGHV Pauze-advies</title>
 <meta name="description" content="Jas aan of niet? De officieuze DIGHV pauze-scanner.">
 <link rel="preload" href="fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="icon" type="image/svg+xml" href="favicon.svg?v=3">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=3">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=4">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=4">
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#003a71" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#003d86" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#001b3c" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Pauze-advies">
-<script src="theme-init.js?v=18"></script>
-<link rel="stylesheet" href="style.css?v=18">
+<script src="theme-init.js?v=20"></script>
+<link rel="stylesheet" href="huisstijl/huisstijl.css?v=20">
+<link rel="stylesheet" href="huisstijl/tokens.css?v=20">
+<link rel="stylesheet" href="huisstijl/base.css?v=20">
+<link rel="stylesheet" href="huisstijl/components.css?v=20">
+<link rel="stylesheet" href="huisstijl/theme.css?v=20">
+<link rel="stylesheet" href="style.css?v=20">
 </head>
-<body>
-<div class="wrapper">
+<body class="context-weak">
+<!-- huisstijl-lint-ignore: logo -->
+<svg class="hidden" aria-hidden="true" focusable="false"><symbol id="nmd-ic-8" viewBox="0 0 32 32"><path d="M12.61 26.284c-.424 0-.831-.167-1.132-.469l-7.809-7.809a1.599 1.599 0 1 1 2.262-2.262l6.575 6.575L25.975 6.286a1.6 1.6 0 1 1 2.45 2.058L13.834 25.713c-.289.342-.708.55-1.156.569q-.032.003-.068.002"></path></symbol></svg>
+<a class="anwb-skip" href="#content">Naar de inhoud</a>
+<div class="app-shell">
 
-<header>
+<header class="anwb-header context-strong">
   <div class="logo">
-    <span class="logo-badge">DIGHV</span>
-    <span class="logo-name">Pauze-advies</span>
+    <span class="logo-mark" aria-hidden="true">
+      <svg viewBox="0 0 32 32" width="40" height="40" focusable="false">
+        <path class="logo-mark-jacket" d="M16,9 L19.2,6.4 L20.6,8.2 L24.6,10.6 L28.2,19.4 L27.2,21.4 L23.4,19.8 L21.2,14.2 L22.2,26.6 L16,27.4 L9.8,26.6 L10.8,14.2 L8.6,19.8 L4.8,21.4 L3.8,19.4 L7.4,10.6 L11.4,8.2 L12.8,6.4 Z"/>
+        <path class="logo-mark-detail" d="M12.8,6.4 L16,9 L14.3,9.4 Z M19.2,6.4 L16,9 L17.7,9.4 Z M22.9,18.4 L27.7,18.0 L28.0,19.6 L23.2,20.0 Z M9.1,18.4 L4.3,18.0 L4.0,19.6 L8.8,20.0 Z"/>
+        <rect class="logo-mark-detail" x="15.5" y="9" width="1" height="17.8" rx="0.5"/>
+        <rect class="logo-mark-detail" x="14.9" y="9" width="2.2" height="1.8" rx="0.6"/>
+      </svg>
+    </span>
+    <span class="logo-text">
+      <span class="logo-name">Pauze-advies</span>
+      <span class="prose-label-x-small text-accent-yellow">DIGHV</span>
+    </span>
   </div>
-  <div class="header-right" data-tour="header">
-    <button id="langToggle" class="icon-btn lang-btn" type="button" lang="en">EN</button>
-    <button id="tutorialBtn" class="icon-btn" type="button" aria-label="Rondleiding starten">?</button>
-    <button id="darkModeToggle" class="icon-btn dark-mode-btn" type="button" aria-label="Thema"></button>
-    <div class="live-indicator">
+  <div class="flex items-center gap-100" data-tour="header">
+    <button id="langToggle" class="flex size-500 items-center justify-center rounded-100 focus-visible:outline-200 focus-visible:outline-offset-25 focus-visible:outline-interactive-focus disabled:cursor-not-allowed disabled:bg-interactive-disabled disabled:text-interactive-disabled active:border-interactive-weak-active active:bg-interactive-weak-active border-100 border-default text-neutral hover:text-neutral hover:border-interactive-weak-hover hover:bg-interactive-weak-hover disabled:border-static-transparent prose-label-small" type="button" lang="en">EN</button>
+    <button id="tutorialBtn" class="flex size-500 items-center justify-center rounded-100 focus-visible:outline-200 focus-visible:outline-offset-25 focus-visible:outline-interactive-focus disabled:cursor-not-allowed disabled:bg-interactive-disabled disabled:text-interactive-disabled active:border-interactive-weak-active active:bg-interactive-weak-active border-100 border-default text-neutral hover:text-neutral hover:border-interactive-weak-hover hover:bg-interactive-weak-hover disabled:border-static-transparent prose-label-small" type="button" aria-label="Rondleiding starten">?</button>
+    <button id="darkModeToggle" class="relative flex size-500 items-center justify-center rounded-100 focus-visible:outline-200 focus-visible:outline-offset-25 focus-visible:outline-interactive-focus disabled:cursor-not-allowed disabled:bg-interactive-disabled disabled:text-interactive-disabled active:border-interactive-weak-active active:bg-interactive-weak-active border-100 border-default text-neutral hover:text-neutral hover:border-interactive-weak-hover hover:bg-interactive-weak-hover disabled:border-static-transparent" type="button" aria-label="Thema"></button>
+    <div class="live-indicator flex items-center max-md:hidden">
       <span class="live-dot" aria-hidden="true"></span>
       <span>LIVE</span>
     </div>
-    <div class="header-meta" id="clock">--:--</div>
+    <div class="anwb-num max-md:hidden prose-paragraph-body-x-small" id="clock">--:--</div>
   </div>
 </header>
 
 <nav class="tabs-nav" aria-label="Onderdelen" data-tour="tabs">
-  <div class="tabs" role="tablist">
-    <button class="tab active" id="tab-advice" data-tab="advice" data-i18n="tabAdvice" role="tab" aria-selected="true" aria-controls="view-advice-wrap" type="button">Advies</button>
-    <button class="tab" id="tab-log" data-tab="log" data-i18n="tabLog" role="tab" aria-selected="false" aria-controls="view-log" tabindex="-1" type="button">Looplog</button>
-    <button class="tab" id="tab-explain" data-tab="explain" data-i18n="tabExplain" role="tab" aria-selected="false" aria-controls="view-explain" tabindex="-1" type="button">Uitleg</button>
-    <button class="tab" id="tab-changelog" data-tab="changelog" data-i18n="tabChangelog" role="tab" aria-selected="false" aria-controls="view-changelog" tabindex="-1" type="button">Nieuw</button>
+  <div class="tabs anwb-container flex gap-300" role="tablist">
+    <button class="tab no-underline inline-flex h-full min-h-700 snap-start items-center border-b-200 p-50 prose-label-small hover:text-interactive-neutral-hover focus-visible:rounded-100 focus-visible:outline-200 focus-visible:-outline-offset-25 focus-visible:outline-interactive-focus active:text-interactive-neutral-active border-b-static-interactive-highlight-subtle-active text-interactive-neutral-active" id="tab-advice" data-tab="advice" data-i18n="tabAdvice" role="tab" aria-selected="true" aria-controls="view-advice-wrap" type="button">Advies</button>
+    <button class="tab no-underline inline-flex h-full min-h-700 snap-start items-center border-b-200 p-50 prose-label-small hover:text-interactive-neutral-hover focus-visible:rounded-100 focus-visible:outline-200 focus-visible:-outline-offset-25 focus-visible:outline-interactive-focus active:text-interactive-neutral-active border-static-transparent text-interactive-neutral" id="tab-log" data-tab="log" data-i18n="tabLog" role="tab" aria-selected="false" aria-controls="view-log" tabindex="-1" type="button">Looplog</button>
+    <button class="tab no-underline inline-flex h-full min-h-700 snap-start items-center border-b-200 p-50 prose-label-small hover:text-interactive-neutral-hover focus-visible:rounded-100 focus-visible:outline-200 focus-visible:-outline-offset-25 focus-visible:outline-interactive-focus active:text-interactive-neutral-active border-static-transparent text-interactive-neutral" id="tab-explain" data-tab="explain" data-i18n="tabExplain" role="tab" aria-selected="false" aria-controls="view-explain" tabindex="-1" type="button">Uitleg</button>
+    <button class="tab no-underline inline-flex h-full min-h-700 snap-start items-center border-b-200 p-50 prose-label-small hover:text-interactive-neutral-hover focus-visible:rounded-100 focus-visible:outline-200 focus-visible:-outline-offset-25 focus-visible:outline-interactive-focus active:text-interactive-neutral-active border-static-transparent text-interactive-neutral" id="tab-changelog" data-tab="changelog" data-i18n="tabChangelog" role="tab" aria-selected="false" aria-controls="view-changelog" tabindex="-1" type="button">Nieuw</button>
   </div>
 </nav>
 
 <main id="content">
 <div class="view active" id="view-advice-wrap" role="tabpanel" aria-labelledby="tab-advice">
-<section class="hero" id="hero" aria-labelledby="pageTitle">
+<section class="hero anwb-container" id="hero" aria-labelledby="pageTitle">
   <div class="location-control">
-    <div class="location-badge" data-tour="location">
+    <div class="location-badge inline-flex h-500 items-center rounded-pill bg-weak px-150 text-neutral max-w-full gap-100" data-tour="location">
       <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      <span id="locationLabel">ANWB HQ · Wassenaarseweg, Den Haag</span>
-      <button id="locationEditBtn" class="location-edit-btn" type="button" aria-label="Locatie wijzigen" aria-expanded="false" aria-controls="locationPanel">
+      <span id="locationLabel" class="m-0 max-w-none prose-paragraph-body-small truncate">ANWB HQ · Wassenaarseweg, Den Haag</span>
+      <button id="locationEditBtn" class="inline-flex size-400 shrink-0 items-center justify-center rounded-100 border-static-transparent leading-none focus-visible:outline-200 focus-visible:outline-offset-25 focus-visible:outline-interactive-focus active:text-interactive-strong-active disabled:cursor-not-allowed disabled:text-interactive-disabled-strong text-interactive-strong hover:text-interactive-strong-hover" type="button" aria-label="Locatie wijzigen" aria-expanded="false" aria-controls="locationPanel">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
       </button>
     </div>
     <div class="location-panel" id="locationPanel" hidden>
-      <div class="location-panel-head">
+      <div class="flex justify-between gap-200 mb-100 prose-paragraph-title-small">
         <span data-i18n="locationPanelTitle">Locatie</span>
         <span id="locationPanelCoords">52.0964, 4.3268</span>
       </div>
       <div class="location-actions">
-        <button id="useCurrentLocationBtn" class="location-action-btn" type="button" data-i18n="useCurrentLocationBtn">Gebruik mijn locatie</button>
-        <button id="resetLocationBtn" class="location-action-btn secondary" type="button" data-i18n="resetLocationBtn">ANWB HQ</button>
+        <button id="useCurrentLocationBtn" class="anwb-button anwb-button--small anwb-button--secondary" type="button" data-i18n="useCurrentLocationBtn">Gebruik mijn locatie</button>
+        <button id="resetLocationBtn" class="anwb-button anwb-button--small anwb-button--tertiary" type="button" data-i18n="resetLocationBtn">ANWB HQ</button>
       </div>
       <p class="location-source" data-i18n-html="locationSource">Weer via Open-Meteo · plaatsnaam © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap-bijdragers</a></p>
       <div class="location-status" id="locationStatus" role="status" aria-live="polite"></div>
     </div>
   </div>
-  <p class="season-banner" id="seasonBanner" hidden></p>
-  <h1 id="pageTitle" data-i18n-html="h1Html">Jas aan of <span class="accent">niet?</span></h1>
-  <p class="lead" data-i18n="lead">De officieuze DIGHV pauze-scanner. Even checken voor je naar buiten loopt.</p>
+  <p class="season-banner anwb-label anwb-label--small anwb-label--yellow" id="seasonBanner" hidden></p>
+  <h1 id="pageTitle" class="prose-heading-large" data-i18n-html="h1Html">Jas aan of <span class="text-highlight-strong">niet?</span></h1>
+  <p class="lead prose-paragraph-body-medium" data-i18n="lead">De officieuze DIGHV pauze-scanner. Even checken voor je naar buiten loopt.</p>
 </section>
 
-<div class="advice-grid">
+<div class="advice-grid anwb-container">
 
   <div class="col col-left">
-    <section class="advice-card" id="advice" data-tour="advice" aria-labelledby="adviceLabel">
-    <h2 class="advice-label" id="adviceLabel" tabindex="-1"><span data-i18n="adviceLabel">Advies voor nu + 30 min</span><span class="advice-updated" id="adviceUpdated"></span></h2>
+    <section class="advice-card context-strong" id="advice" data-tour="advice" aria-labelledby="adviceLabel">
+    <h2 class="prose-label-small text-accent-yellow mb-200" id="adviceLabel" tabindex="-1"><span data-i18n="adviceLabel">Advies voor nu + 30 min</span><span class="advice-updated" id="adviceUpdated"></span></h2>
     <div class="verdict" id="verdict">
       <div class="loading"><span class="spinner" aria-hidden="true"></span><span data-i18n="weatherLoading">Weer ophalen...</span></div>
     </div>
@@ -104,81 +122,82 @@
     <div class="feedback-row" id="feedbackRow" hidden>
       <p class="feedback-question" id="feedbackQuestion" tabindex="-1"></p>
       <div class="feedback-actions">
-        <button type="button" class="feedback-btn" data-feedback="cold" data-i18n="feedbackCold">Te koud</button>
-        <button type="button" class="feedback-btn" data-feedback="ok" data-i18n="feedbackOk">Klopte</button>
-        <button type="button" class="feedback-btn" data-feedback="warm" data-i18n="feedbackWarm">Te warm</button>
-        <button type="button" class="feedback-btn subtle" data-feedback="skip" data-i18n="feedbackSkip">Niet buiten geweest</button>
+        <button type="button" class="group relative inline-flex cursor-pointer items-center gap-100 rounded-pill disabled:cursor-not-allowed disabled:bg-interactive-disabled disabled:text-interactive-disabled bg-interactive-weak text-strong hover:bg-interactive-weak-hover active:bg-interactive-weak-active focus-visible:outline-200 focus-visible:outline-offset-25 focus-visible:outline-interactive-focus h-500 px-150 prose-label-small" data-feedback="cold" data-i18n="feedbackCold">Te koud</button>
+        <button type="button" class="group relative inline-flex cursor-pointer items-center gap-100 rounded-pill disabled:cursor-not-allowed disabled:bg-interactive-disabled disabled:text-interactive-disabled bg-interactive-weak text-strong hover:bg-interactive-weak-hover active:bg-interactive-weak-active focus-visible:outline-200 focus-visible:outline-offset-25 focus-visible:outline-interactive-focus h-500 px-150 prose-label-small" data-feedback="ok" data-i18n="feedbackOk">Klopte</button>
+        <button type="button" class="group relative inline-flex cursor-pointer items-center gap-100 rounded-pill disabled:cursor-not-allowed disabled:bg-interactive-disabled disabled:text-interactive-disabled bg-interactive-weak text-strong hover:bg-interactive-weak-hover active:bg-interactive-weak-active focus-visible:outline-200 focus-visible:outline-offset-25 focus-visible:outline-interactive-focus h-500 px-150 prose-label-small" data-feedback="warm" data-i18n="feedbackWarm">Te warm</button>
+        <button type="button" class="inline-flex items-center min-h-500 px-50 text-interactive-highlight-strong underline hover:text-interactive-highlight-strong-hover active:text-interactive-highlight-strong-active focus-visible:rounded-50 focus-visible:outline-200 focus-visible:outline-offset-25 focus-visible:outline-interactive-focus prose-paragraph-body-small" data-feedback="skip" data-i18n="feedbackSkip">Niet buiten geweest</button>
       </div>
     </div>
     <div class="sr-only" id="adviceLive" role="status" aria-live="polite"></div>
+    <svg class="lockup advice-lockup" viewBox="0 0 121 145" aria-hidden="true" focusable="false"><path fill="currentColor" d="M121 0v145H37L.89 54.189A7.884 7.884 0 0 1 5.4 43.888L120.431 0H121Z"/></svg>
   </section>
 
-    <section class="rain-card" id="rainCard" data-tour="rain" aria-labelledby="rainTitle" hidden>
-      <div class="card-title-row">
-        <h2 class="card-title" id="rainTitle" data-i18n="rainPer15">Regen per 15 minuten</h2>
-        <span class="card-meta" data-i18n="next2hours">komende 2 uur</span>
+    <section class="rounded-200 bg-default p-200 md:p-300 min-w-0 context-default" data-needs-data id="rainCard" data-tour="rain" aria-labelledby="rainTitle" hidden>
+      <div class="flex items-baseline justify-between gap-150 mb-200">
+        <h2 class="prose-heading-small text-strong m-0" id="rainTitle" data-i18n="rainPer15">Regen per 15 minuten</h2>
+        <span class="prose-paragraph-body-x-small text-subtle" data-i18n="next2hours">komende 2 uur</span>
       </div>
       <div class="rain-chart" id="rainChart" role="img" aria-label="Regenverwachting"></div>
       <div class="rain-summary" id="rainSummary"></div>
     </section>
 
-    <section class="break-card" data-tour="lunch" aria-labelledby="breakTitle">
-      <h2 class="card-title" id="breakTitle" data-i18n="nextBreak">Volgende pauze</h2>
+    <section class="rounded-200 bg-default p-200 md:p-300 min-w-0 context-default" data-tour="lunch" aria-labelledby="breakTitle">
+      <h2 class="prose-heading-small text-strong mb-200" id="breakTitle" data-i18n="nextBreak">Volgende pauze</h2>
       <div id="lunchCountdown" class="countdown"></div>
       <div class="best-moment" id="bestTime" data-tour="besttime"></div>
-      <button type="button" class="share-btn" id="shareBtn" hidden>
+      <button type="button" class="anwb-button anwb-button--small anwb-button--tertiary mt-200" id="shareBtn" hidden>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
         <span data-i18n="shareBtn">Collega's vragen</span>
       </button>
       <p class="share-status" id="shareStatus" role="status" aria-live="polite"></p>
     </section>
 
-    <details class="pref-card" id="prefCard" data-tour="pref">
+    <details class="rounded-200 bg-default p-200 md:p-300 min-w-0 context-default" id="prefCard" data-tour="pref">
       <summary class="pref-summary">
-        <h2 class="card-title" id="prefTitle" data-i18n="yourType">Jouw type</h2>
+        <h2 class="prose-heading-small text-strong m-0" id="prefTitle" data-i18n="yourType">Jouw type</h2>
         <span class="pref-current" id="prefCurrent"></span>
         <span class="pref-edit" data-i18n="prefEdit">Wijzig</span>
       </summary>
       <div class="pref-body">
-        <p class="card-hint" data-i18n="prefHint">Hoe snel heb jij het koud? We onthouden het op dit toestel.</p>
-        <div class="pref-options segmented" role="group" aria-labelledby="prefTitle">
-        <button class="pref-btn" data-pref="cold" data-i18n="prefCold" type="button">Kouwelijk</button>
-        <button class="pref-btn active" data-pref="normal" data-i18n="prefNormal" type="button">Normaal</button>
-        <button class="pref-btn" data-pref="warm" data-i18n="prefWarm" type="button">Warm&shy;bloedig</button>
+        <p class="prose-paragraph-body-x-small text-subtle mb-200" data-i18n="prefHint">Hoe snel heb jij het koud? We onthouden het op dit toestel.</p>
+        <div class="pref-options flex" role="radiogroup" aria-labelledby="prefTitle">
+        <label class="flex min-h-500 flex-1 cursor-pointer items-center justify-center gap-100 bg-interactive-weak px-150 text-neutral prose-label-medium first:rounded-l-100 last:rounded-r-100 hover:bg-interactive-weak-hover active:bg-interactive-weak-active has-checked:bg-interactive-strong has-checked:text-inverse-strong has-checked:hover:bg-interactive-strong-hover has-checked:active:bg-interactive-strong-active has-input-focus-visible:z-default has-input-focus-visible:outline-200 has-input-focus-visible:outline-offset-25 has-input-focus-visible:outline-interactive-focus"><input type="radio" class="peer absolute appearance-none" name="pref" value="cold"><svg class="size-250 p-[calc(theme('padding.25')*250/300)] shrink-0 fill-current align-middle hidden peer-checked:inline" role="img" aria-hidden="true" viewBox="0 0 32 32"><use href="#nmd-ic-8"/></svg><span data-i18n="prefCold">Kouwelijk</span></label>
+        <label class="flex min-h-500 flex-1 cursor-pointer items-center justify-center gap-100 bg-interactive-weak px-150 text-neutral prose-label-medium first:rounded-l-100 last:rounded-r-100 hover:bg-interactive-weak-hover active:bg-interactive-weak-active has-checked:bg-interactive-strong has-checked:text-inverse-strong has-checked:hover:bg-interactive-strong-hover has-checked:active:bg-interactive-strong-active has-input-focus-visible:z-default has-input-focus-visible:outline-200 has-input-focus-visible:outline-offset-25 has-input-focus-visible:outline-interactive-focus"><input type="radio" class="peer absolute appearance-none" name="pref" value="normal" checked><svg class="size-250 p-[calc(theme('padding.25')*250/300)] shrink-0 fill-current align-middle hidden peer-checked:inline" role="img" aria-hidden="true" viewBox="0 0 32 32"><use href="#nmd-ic-8"/></svg><span data-i18n="prefNormal">Normaal</span></label>
+        <label class="flex min-h-500 flex-1 cursor-pointer items-center justify-center gap-100 bg-interactive-weak px-150 text-neutral prose-label-medium first:rounded-l-100 last:rounded-r-100 hover:bg-interactive-weak-hover active:bg-interactive-weak-active has-checked:bg-interactive-strong has-checked:text-inverse-strong has-checked:hover:bg-interactive-strong-hover has-checked:active:bg-interactive-strong-active has-input-focus-visible:z-default has-input-focus-visible:outline-200 has-input-focus-visible:outline-offset-25 has-input-focus-visible:outline-interactive-focus"><input type="radio" class="peer absolute appearance-none" name="pref" value="warm"><svg class="size-250 p-[calc(theme('padding.25')*250/300)] shrink-0 fill-current align-middle hidden peer-checked:inline" role="img" aria-hidden="true" viewBox="0 0 32 32"><use href="#nmd-ic-8"/></svg><span data-i18n="prefWarm">Warm&shy;bloedig</span></label>
       </div>
       <div class="pref-row">
         <label for="lunchTime" data-i18n="lunchTimeLabel">Mijn lunch</label>
-        <select id="lunchTime" class="select"></select>
+        <select id="lunchTime" class="select anwb-select"></select>
       </div>
       <p class="calibration-note" id="calibrationNote" hidden></p>
       </div>
     </details>
 
-    <section class="checklist-card" data-tour="checklist" aria-labelledby="checklistTitle">
-      <h2 class="card-title" id="checklistTitle" data-i18n="checklistTitle">Wat mee naar buiten?</h2>
+    <section class="rounded-200 bg-default p-200 md:p-300 min-w-0 context-default" data-tour="checklist" aria-labelledby="checklistTitle">
+      <h2 class="prose-heading-small text-strong mb-200" id="checklistTitle" data-i18n="checklistTitle">Wat mee naar buiten?</h2>
       <div class="checklist-items" id="checklist"></div>
     </section>
   </div>
 
   <div class="col col-right">
-    <section class="weather-card" data-tour="forecast" aria-labelledby="forecastTitle">
-      <h2 class="card-title" id="forecastTitle" data-i18n="comingHours">Komende uren</h2>
+    <section class="rounded-200 bg-default p-200 md:p-300 min-w-0 context-default" data-needs-data data-tour="forecast" aria-labelledby="forecastTitle">
+      <h2 class="prose-heading-small text-strong mb-200" id="forecastTitle" data-i18n="comingHours">Komende uren</h2>
       <div class="forecast" id="forecast" role="list" aria-labelledby="forecastTitle" tabindex="0"></div>
     </section>
 
-    <section class="weather-card" data-tour="conditions" aria-labelledby="conditionsTitle">
-      <h2 class="card-title" id="conditionsTitle" data-i18n="currentConditions">Weer nu</h2>
+    <section class="rounded-200 bg-default p-200 md:p-300 min-w-0 context-default" data-needs-data data-tour="conditions" aria-labelledby="conditionsTitle">
+      <h2 class="prose-heading-small text-strong mb-200" id="conditionsTitle" data-i18n="currentConditions">Weer nu</h2>
       <div class="metrics" id="metrics"></div>
     </section>
 
-    <section class="pollen-card" data-tour="pollen" aria-labelledby="pollenTitle">
-      <h2 class="card-title" id="pollenTitle" data-i18n="pollenOverview">Pollen</h2>
+    <section class="rounded-200 bg-default p-200 md:p-300 min-w-0 context-default" data-needs-data data-tour="pollen" aria-labelledby="pollenTitle">
+      <h2 class="prose-heading-small text-strong mb-200" id="pollenTitle" data-i18n="pollenOverview">Pollen</h2>
       <div class="pollen-grid" id="pollenGrid"></div>
     </section>
 
-    <section class="comparison-card" data-tour="comparison" aria-labelledby="comparisonTitle">
-      <h2 class="card-title" id="comparisonTitle" data-i18n="todayVsTomorrow">Gisteren · vandaag · morgen</h2>
-      <p class="card-hint" data-i18n="compareWindow">Tussen 11:00 en 15:00, het pauzevenster.</p>
+    <section id="comparisonCard" class="rounded-200 bg-default p-200 md:p-300 min-w-0 context-default" data-needs-data data-tour="comparison" aria-labelledby="comparisonTitle">
+      <h2 class="prose-heading-small text-strong mb-200" id="comparisonTitle" data-i18n="todayVsTomorrow">Gisteren · vandaag · morgen</h2>
+      <p class="prose-paragraph-body-x-small text-subtle mb-200" data-i18n="compareWindow">Tussen 11:00 en 15:00, het pauzevenster.</p>
       <p class="comparison-summary" id="comparisonSummary"></p>
       <div class="comparison-grid" id="comparisonGrid"></div>
     </section>
@@ -188,42 +207,42 @@
 </div>
 
 <div class="view" id="view-explain" role="tabpanel" aria-labelledby="tab-explain">
-  <div class="explain-content"></div>
+  <div class="explain-content anwb-container"></div>
 </div>
 
 <div class="view" id="view-changelog" role="tabpanel" aria-labelledby="tab-changelog">
-  <div class="changelog-content"></div>
+  <div class="changelog-content anwb-container"></div>
 </div>
 
 <div class="view" id="view-log" role="tabpanel" aria-labelledby="tab-log">
-  <div class="log-content">
+  <div class="log-content anwb-container">
 
-    <section class="log-register-card" aria-labelledby="logTitle">
-      <div class="log-register-header">
-        <h1 class="log-title" id="logTitle" data-i18n="logTitle">Wie liep er mee?</h1>
+    <section class="rounded-200 bg-default p-200 md:p-300 min-w-0 context-default" aria-labelledby="logTitle">
+      <div class="flex items-baseline justify-between gap-150">
+        <h2 class="prose-heading-large text-strong m-0" id="logTitle" data-i18n="logTitle">Wie liep er mee?</h2>
         <span class="log-time" id="logTime">--:--</span>
       </div>
       <p class="log-note" data-i18n="logLocalNote">Wordt alleen op dit toestel bewaard. Collega's zien dit niet.</p>
       <div class="walker-grid" id="walkerGrid" role="group" aria-labelledby="logTitle"></div>
       <div class="log-actions">
-        <button class="text-btn" id="teamEditBtn" type="button" aria-expanded="false" aria-controls="teamEditor" data-i18n="teamEdit">Team bewerken</button>
+        <button class="inline-flex items-center min-h-500 px-50 text-interactive-highlight-strong underline hover:text-interactive-highlight-strong-hover active:text-interactive-highlight-strong-active focus-visible:rounded-50 focus-visible:outline-200 focus-visible:outline-offset-25 focus-visible:outline-interactive-focus prose-paragraph-body-small" id="teamEditBtn" type="button" aria-expanded="false" aria-controls="teamEditor" data-i18n="teamEdit">Team bewerken</button>
         <span class="log-actions-spacer"></span>
-        <button class="log-clear-btn" id="logClearBtn" type="button" data-i18n="logNobody">Wis selectie</button>
-        <button class="log-save-btn" id="logSaveBtn" type="button" data-i18n="logSave">Opslaan</button>
+        <button class="anwb-button anwb-button--small anwb-button--tertiary" id="logClearBtn" type="button" data-i18n="logNobody">Wis selectie</button>
+        <button class="anwb-button anwb-button--small anwb-button--primary" id="logSaveBtn" type="button" data-i18n="logSave">Opslaan</button>
       </div>
-      <div class="team-editor" id="teamEditor" hidden>
-        <form class="team-add" id="teamAddForm">
+      <div class="rounded-200 bg-weak p-200 mt-200" id="teamEditor" hidden>
+        <form class="flex gap-100" id="teamAddForm">
           <label for="teamAddInput" class="sr-only" data-i18n="teamAddLabel">Naam toevoegen</label>
-          <input id="teamAddInput" class="input" type="text" maxlength="30" autocomplete="off">
-          <button type="submit" class="log-save-btn" data-i18n="teamAdd">Toevoegen</button>
+          <input id="teamAddInput" class="input anwb-input" type="text" maxlength="30" autocomplete="off">
+          <button type="submit" class="anwb-button anwb-button--small anwb-button--secondary" data-i18n="teamAdd">Toevoegen</button>
         </form>
-        <ul class="team-list" id="teamList"></ul>
-        <button type="button" class="text-btn" id="teamResetBtn" data-i18n="teamReset">Standaardlijst terugzetten</button>
+        <ul class="flex flex-wrap gap-75 my-100" id="teamList"></ul>
+        <button type="button" class="inline-flex items-center min-h-500 px-50 text-interactive-highlight-strong underline hover:text-interactive-highlight-strong-hover active:text-interactive-highlight-strong-active focus-visible:rounded-50 focus-visible:outline-200 focus-visible:outline-offset-25 focus-visible:outline-interactive-focus prose-paragraph-body-small" id="teamResetBtn" data-i18n="teamReset">Standaardlijst terugzetten</button>
       </div>
     </section>
 
-    <section class="log-stats" id="logStats" aria-labelledby="logStatsTitle" hidden>
-      <h2 class="card-title" id="logStatsTitle" data-i18n="logStatsTitle">Statistieken</h2>
+    <section class="rounded-200 bg-default p-200 md:p-300 min-w-0 context-default mt-300" id="logStats" aria-labelledby="logStatsTitle" hidden>
+      <h2 class="prose-heading-small text-strong mb-200" id="logStatsTitle" data-i18n="logStatsTitle">Statistieken</h2>
       <div class="stats-grid" id="statsGrid"></div>
       <ul class="badges" id="badgeList" aria-label="Badges"></ul>
     </section>
@@ -237,19 +256,20 @@
 
 <!-- Korte meldingen voor schermlezers; de toast zelf is alleen visueel -->
 <div class="sr-only" id="srStatus" role="status" aria-live="polite"></div>
-<div class="toast" id="toast" hidden>
+<div class="toast context-strong" id="toast" hidden>
   <span id="toastText"></span>
-  <button type="button" class="toast-btn" id="toastAction"></button>
+  <button type="button" class="inline-flex items-center min-h-500 px-50 text-interactive-highlight-strong underline hover:text-interactive-highlight-strong-hover active:text-interactive-highlight-strong-active focus-visible:rounded-50 focus-visible:outline-200 focus-visible:outline-offset-25 focus-visible:outline-interactive-focus prose-paragraph-body-small whitespace-nowrap" id="toastAction"></button>
 </div>
 
-<footer>
+<footer class="anwb-footer context-strong">
+  <svg class="lockup footer-lockup" viewBox="0 0 121 145" aria-hidden="true" focusable="false"><path fill="currentColor" d="M121 0v145H37L.89 54.189A7.884 7.884 0 0 1 5.4 43.888L120.431 0H121Z"/></svg>
   <p data-i18n-html="footerHtml">Gebouwd door en voor <strong>DIGHV</strong> · Weerdata via Open&#8209;Meteo · Geen officieel ANWB-product</p>
-  <p class="footer-version"><a href="#releaselog" class="footer-link"><span id="appVersion"></span><span data-i18n="footerWhatsNew">Wat is er nieuw</span></a></p>
+  <p class="mt-50 prose-paragraph-body-x-small"><a href="#releaselog"><span id="appVersion"></span><span data-i18n="footerWhatsNew">Wat is er nieuw</span></a></p>
 </footer>
 
 </div>
 
-<script src="logic.js?v=18"></script>
-<script src="script.js?v=18"></script>
+<script src="logic.js?v=20"></script>
+<script src="script.js?v=20"></script>
 </body>
 </html>
