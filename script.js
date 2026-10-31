@@ -559,28 +559,34 @@ async function fetchChangelogUpdates() {
       if (!res.ok) return;
       const raw = await res.json();
       if (!Array.isArray(raw)) return;
-      commits = raw.map(c => ({ date: c.commit.author.date, subject: c.commit.message.split('\n')[0] }));
+      // Alleen datum en of het een merge is: committeksten komen nooit op de pagina.
+      commits = raw.map(c => ({ date: c.commit.author.date, merge: /^Merge /.test(c.commit.message) }));
       writeGithubCache('dighv_gh_commits', commits);
     }
     if (!commits.length) return;
 
-    const byDate = {};
+    // Wijzigingen zonder handgeschreven release tellen we alleen per dag. De
+    // commitberichten zelf tonen we niet: die zijn eentalig en niet voor gebruikers
+    // geschreven. Zo staat alles op deze pagina in het Nederlands en het Engels.
+    const countByDate = {};
     for (const commit of commits) {
+      // Oude cache (vóór 31-10) heeft nog een onderwerp in plaats van 'merge'
+      const merge = commit.merge ?? /^Merge /.test(String(commit.subject || ''));
+      if (merge) continue; // merge-commits zeggen niets over de app
       const isoDate = new Date(commit.date)
         .toLocaleDateString('sv', { timeZone: 'Europe/Amsterdam' });
-      // Commit-onderwerpen zijn externe tekst: escapen voordat ze in innerHTML komen.
-      const subject = String(commit.subject).replace(/\s*\(#\d+\)\s*$/, '');
-      if (/^Merge /.test(subject)) continue; // merge-commits zeggen niets over de app
-      (byDate[isoDate] ||= []).push(subject);
+      countByDate[isoDate] = (countByDate[isoDate] || 0) + 1;
     }
 
-    liveChangelogReleases = Object.entries(byDate)
+    liveChangelogReleases = Object.entries(countByDate)
       .sort(([a], [b]) => b.localeCompare(a))
-      .map(([isoDate, messages]) => {
-        // Commitberichten zijn Nederlands; lang="nl" zodat een schermlezer ze goed uitspreekt.
-        const items = messages.map(msg => ({ type: commitType(msg), text: escapeHtml(msg), lang: 'nl' }));
-        return { isoDate, items: { nl: items, en: items } };
-      });
+      .map(([isoDate, n]) => ({
+        isoDate,
+        items: {
+          nl: [{ type: 'improve', text: n === 1 ? '1 wijziging, beschrijving volgt' : `${n} wijzigingen, beschrijving volgt` }],
+          en: [{ type: 'improve', text: n === 1 ? '1 change, description to follow' : `${n} changes, description to follow` }],
+        },
+      }));
 
     const changelogEl = document.querySelector('.changelog-content');
     if (changelogEl) changelogEl.innerHTML = renderChangelogHtml();
@@ -591,6 +597,31 @@ async function fetchChangelogUpdates() {
 
 function renderChangelogHtml() {
   const releases = [
+    {
+      isoDate: '2026-10-31',
+      items: {
+        nl: [
+          { type: 'improve', text: 'Nieuw uiterlijk in de ANWB-huisstijl: kleuren, letters, knoppen, tabbladen en kaarten' },
+          { type: 'new',     text: 'Eigen logo linksboven: een gele tegel met een jas, ook als app-icoon' },
+          { type: 'improve', text: 'Donker thema opnieuw opgebouwd in de kleuren van de huisstijl' },
+          { type: 'improve', text: 'Pollen tonen hun niveau als label: laag, matig of hoog' },
+          { type: 'improve', text: 'Locatiekeuze opent in een eigen paneel met titel' },
+          { type: 'fix',     text: 'De melding "Ongedaan maken" verdwijnt niet meer vanzelf; sluiten kan met het kruisje' },
+          { type: 'improve', text: 'Standaardteam bijgewerkt: Sven, David E en Marlene erbij' },
+          { type: 'improve', text: 'Deze releaselog staat nu volledig in het Nederlands en het Engels' },
+        ],
+        en: [
+          { type: 'improve', text: 'New look in the ANWB house style: colours, type, buttons, tabs and cards' },
+          { type: 'new',     text: 'Own logo in the top left: a yellow tile with a jacket, also used as the app icon' },
+          { type: 'improve', text: 'Dark theme rebuilt in the house style colours' },
+          { type: 'improve', text: 'Pollen show their level as a label: low, moderate or high' },
+          { type: 'improve', text: 'Choosing a location opens in its own panel with a title' },
+          { type: 'fix',     text: 'The "Undo" message no longer disappears on its own; close it with the cross' },
+          { type: 'improve', text: 'Default team updated: Sven, David E and Marlene added' },
+          { type: 'improve', text: 'This release log is now fully in Dutch and English' },
+        ]
+      }
+    },
     {
       isoDate: '2026-10-21',
       items: {
