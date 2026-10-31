@@ -25,81 +25,6 @@
   color-scheme: light;
 }
 
-/* ─── Donker thema (nomad-gap) ────────────────────────────────────────────── */
-/* Afgeleid van ANWB-ocean. Context strong (header, advieskaart, footer) blijft
-   gewoon Nomad-ocean. Feedbackvlakken (alerts) blijven licht, want Nomad zet
-   daar vaste donkere tekst op. */
-html.dark,
-html.dark .context-default,
-html.dark .context-weak {
-  --shadow-subtle: 0 0 2rem 0 #00030766;
-  --shadow-neutral: 0 0 2rem 0 #00030780;
-
-  --foreground-color-strong: #fff;
-  --foreground-color-neutral: #fff;
-  --foreground-color-subtle: #c3cfdd;
-  --foreground-color-weak: #8295ad;
-  --foreground-color-highlight-strong: #59bbe7;
-  --foreground-color-highlight-subtle: #59bbe7;
-  --foreground-color-inverse-strong: #003d86;
-  --foreground-color-inverse-neutral: #000307;
-  --foreground-color-feedback-positive: #87c59c;
-  --foreground-color-feedback-notice: #f9c78c;
-  --foreground-color-feedback-negative: #eab2b2;
-  --foreground-color-accent-yellow: #ffcd00;
-  --foreground-color-interactive-disabled: #8295ad;
-  --foreground-color-interactive-highlight-strong: #59bbe7;
-  --foreground-color-interactive-highlight-strong-hover: #fff;
-  --foreground-color-interactive-strong: #fff;
-  --foreground-color-interactive-strong-hover: #59bbe7;
-  --foreground-color-interactive-neutral: #fff;
-  --foreground-color-interactive-neutral-hover: #59bbe7;
-
-  --background-color-default: #001634;
-  --background-color-weak: #00224a;
-  --background-color-subtle: #002e65;
-  --background-color-strong: #fff;
-  --background-color-highlight: #59bbe7;
-  --background-color-form-controls: #001634;
-  --background-color-interactive-strong: #fff;
-  --background-color-interactive-strong-hover: #e5e5e5;
-  --background-color-interactive-strong-active: #d9d9d9;
-  --background-color-interactive-weak: #002e65;
-  --background-color-interactive-weak-hover: #003d86;
-  --background-color-interactive-weak-active: #00224a;
-  --background-color-interactive-default: #00224a;
-  --background-color-interactive-default-hover: #002e65;
-  --background-color-interactive-default-active: #001634;
-  --background-color-interactive-disabled: #002e65;
-
-  --border-color-default: #2d5285;
-  --border-color-subtle: #1a3d6b;
-  --border-color-weak: #00224a;
-  --border-color-strong: #fff;
-  --border-color-interactive-neutral: #c3cfdd;
-  --border-color-interactive-focus: #59bbe7;
-  --border-color-interactive-strong: #fff;
-  --border-color-interactive-weak-hover: #003d86;
-  --border-color-interactive-weak-active: #00224a;
-
-  --chart-1: #59bbe7;
-  --chart-off: #2d5285;
-
-  color-scheme: dark;
-}
-
-/* Kaarten (context default) liggen een stap lichter dan de pagina */
-html.dark .context-default {
-  --background-color-default: #00224a;
-  --background-color-weak: #002e65;
-  --background-color-subtle: #003d86;
-  --background-color-form-controls: #001634;
-  --background-color-interactive-weak: #003d86;
-  --background-color-interactive-weak-hover: #0a4a99;
-  --background-color-interactive-default: #00224a;
-  --border-color-subtle: #1f4777;
-}
-
 /* ─── Basis ───────────────────────────────────────────────────────────────── */
 *, *::before, *::after { margin: 0; padding: 0; }
 
@@ -119,11 +44,15 @@ body {
 }
 
 h1, .verdict-text { text-wrap: balance; }
-.lead, .intro, .verdict-detail, .explain-section p, .card-hint { text-wrap: pretty; }
+.lead, .intro, .verdict-detail, .explain-section p { text-wrap: pretty; }
 
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; background: none; border: 0; }
 ul { list-style: none; }
+
+/* Nomads basisstijl haalt de onderstreping weg; gewone tekstlinks houden die.
+   Nomad-componenten zetten zelf no-underline waar nodig. */
+a { text-decoration: underline; }
 
 /* Footer onderaan, ook op een korte pagina */
 .app-shell {
@@ -152,8 +81,6 @@ main { flex: 1; }
   outline: var(--border-width-200) solid var(--border-color-interactive-focus);
   outline-offset: var(--spacing-25);
 }
-
-.tab:focus-visible { outline-offset: calc(-1 * var(--border-width-200)); }
 
 .fade-in { animation: fadeIn 0.35s ease; }
 
@@ -236,37 +163,7 @@ header {
   white-space: nowrap;
 }
 
-.logo-team {
-  font: var(--label-x-small);
-  font-family: var(--font-heading);
-  color: var(--foreground-color-accent-yellow);
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-100);
-}
-
 /* Nomad IconButton (ghost) op ocean */
-.icon-btn {
-  position: relative;
-  width: var(--size-500);
-  height: var(--size-500);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: var(--border-width-100) solid var(--border-color-default);
-  border-radius: var(--radius-100);
-  background: transparent;
-  color: var(--foreground-color-interactive-neutral);
-  font: var(--label-small);
-  font-family: var(--font-heading);
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.icon-btn:hover { background: var(--background-color-interactive-default-hover); color: var(--foreground-color-interactive-neutral-hover); }
-
 .auto-mark {
   position: absolute;
   top: calc(-1 * var(--spacing-75));
@@ -284,8 +181,6 @@ header {
 }
 
 .live-indicator {
-  display: flex;
-  align-items: center;
   gap: var(--spacing-75);
   padding: var(--spacing-25) var(--spacing-150);
   border: var(--border-width-100) solid var(--border-color-default);
@@ -304,11 +199,6 @@ header {
 .live-indicator.stale { color: var(--foreground-color-subtle); }
 .live-indicator.stale .live-dot { background: var(--foreground-color-interactive-disabled); }
 
-.header-meta {
-  font: var(--paragraph-body-x-small);
-  font-family: var(--font-body);
-  font-variant-numeric: tabular-nums;
-}
 
 /* ─── Tabs (Nomad Tabs: label-medium, actieve tab met ocean onderlijn) ──────── */
 .tabs-nav {
@@ -324,23 +214,6 @@ header {
   gap: var(--spacing-100);
 }
 
-.tab {
-  margin-bottom: calc(-1 * var(--border-width-100));
-  padding: var(--spacing-150) var(--spacing-200);
-  border-bottom: var(--spacing-50) solid transparent;
-  color: var(--foreground-color-interactive-neutral);
-  font: var(--label-medium);
-  font-family: var(--font-heading);
-  transition: color 0.15s ease, border-color 0.15s ease;
-}
-
-.tab:hover { color: var(--foreground-color-interactive-neutral-hover); }
-
-.tab.active {
-  color: var(--foreground-color-interactive-strong);
-  border-bottom-color: var(--border-color-strong);
-}
-
 .view { display: none; }
 .view.active { display: block; }
 
@@ -354,8 +227,6 @@ h1 {
 }
 
 /* "niet?" in helderblauw: Nomad-highlight, geen eigen markeerstift */
-h1 .accent { color: var(--foreground-color-highlight-strong); }
-
 .lead {
   color: var(--foreground-color-subtle);
   max-width: 54ch;
@@ -372,42 +243,12 @@ h1 .accent { color: var(--foreground-color-highlight-strong); }
 }
 
 /* Nomad Tag */
-.location-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-100);
-  max-width: 100%;
-  min-height: var(--size-500);
-  padding: var(--spacing-50) var(--spacing-50) var(--spacing-50) var(--spacing-150);
-  border-radius: var(--radius-pill);
-  background: var(--background-color-weak);
-  font: var(--paragraph-body-small);
-  font-family: var(--font-body);
-}
-
-.location-badge .icon { color: var(--foreground-color-strong); flex-shrink: 0; }
-
 #locationLabel {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
-.location-edit-btn {
-  width: var(--size-400);
-  height: var(--size-400);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  border-radius: var(--radius-circle);
-  background: var(--background-color-interactive-weak);
-  color: var(--foreground-color-interactive-strong);
-  transition: background-color 0.15s ease;
-}
-
-.location-edit-btn:hover { background: var(--background-color-interactive-weak-hover); }
 
 .location-panel {
   position: absolute;
@@ -421,16 +262,7 @@ h1 .accent { color: var(--foreground-color-highlight-strong); }
   box-shadow: var(--shadow-neutral);
 }
 
-.location-panel-head {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--spacing-200);
-  margin-bottom: var(--spacing-150);
-  font: var(--paragraph-title-small);
-  font-family: var(--font-body);
-}
-
-.location-panel-head span:last-child {
+#locationPanelCoords {
   color: var(--foreground-color-subtle);
   font-variant-numeric: tabular-nums;
 }
@@ -441,9 +273,10 @@ h1 .accent { color: var(--foreground-color-highlight-strong); }
   gap: var(--spacing-100);
 }
 
-.location-action-btn { padding-inline: var(--spacing-150); }
-.location-action-btn:disabled,
-.location-edit-btn:disabled { cursor: not-allowed; opacity: var(--opacity-60); }
+#locationEditBtn:disabled { cursor: not-allowed; opacity: var(--opacity-60); }
+
+/* Tag met ActionIcon: wat minder ruimte rechts, de knop heeft zelf marge */
+.location-badge { padding-right: var(--spacing-50); }
 
 .location-source,
 .location-status {
@@ -482,22 +315,10 @@ h1 .accent { color: var(--foreground-color-highlight-strong); }
 }
 
 /* Zonder weerdata (laden of fout) geen lege kaarten met alleen een kop */
-.no-data .weather-card,
-.no-data .pollen-card,
-.no-data .comparison-card,
-.no-data .rain-card,
+.no-data [data-needs-data],
 .no-data .best-moment { display: none; }
 
-/* ─── Kaarten (Nomad Tile: wit vlak op lichtgrijze pagina, radius-200) ────── */
-.pref-card,
-.break-card,
-.weather-card,
-.pollen-card,
-.comparison-card,
-.checklist-card,
-.rain-card,
-.log-register-card,
-.log-stats,
+/* ─── Kaarten die het script maakt (Nomad Tile; de rest gebruikt Nomad-klassen) */
 .explain-section,
 .cl-release {
   min-width: 0;
@@ -507,28 +328,11 @@ h1 .accent { color: var(--foreground-color-highlight-strong); }
   color: var(--foreground-color-neutral);
 }
 
-.card-title {
-  font-family: var(--font-heading);
-  color: var(--foreground-color-strong);
-  margin-bottom: var(--spacing-150);
-}
-
-.card-title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--spacing-150);
-}
-
-.card-meta,
-.card-hint {
+.card-meta {
   font: var(--paragraph-body-x-small);
   font-family: var(--font-body);
   color: var(--foreground-color-subtle);
 }
-
-.card-head .card-title { margin-bottom: var(--spacing-25); }
-.card-hint { margin-bottom: var(--spacing-150); }
 
 .muted { color: var(--foreground-color-subtle); }
 
@@ -572,12 +376,6 @@ h1 .accent { color: var(--foreground-color-highlight-strong); }
 
 .advice-card:has(.loading) { min-height: 23rem; } /* hoogte van een gevuld advies, tegen verspringen */
 .advice-card:has(.error) { min-height: 0; }
-
-.advice-label {
-  color: var(--foreground-color-accent-yellow);
-  font-family: var(--font-heading);
-  margin-bottom: var(--spacing-150);
-}
 
 .advice-updated {
   color: var(--foreground-color-subtle);
@@ -756,13 +554,6 @@ h1 .accent { color: var(--foreground-color-highlight-strong); }
   gap: var(--spacing-100);
 }
 
-.feedback-btn.subtle {
-  padding: var(--spacing-100) var(--spacing-50);
-  color: var(--foreground-color-interactive-highlight-strong);
-  font: var(--paragraph-body-small);
-  font-family: var(--font-body);
-}
-
 .calibration-reset { margin-left: var(--spacing-75); }
 
 /* Laden en fout */
@@ -806,16 +597,6 @@ h1 .accent { color: var(--foreground-color-highlight-strong); }
   font-family: var(--font-body);
 }
 
-.text-btn {
-  min-height: var(--size-500);
-  padding: var(--spacing-100) var(--spacing-50);
-  font: var(--paragraph-body-small);
-  font-family: var(--font-body);
-}
-
-.text-btn:hover,
-.toast-btn:hover { color: var(--foreground-color-interactive-highlight-strong-hover); }
-
 /* ─── Jouw type (inklapbaar zodra ingesteld) ──────────────────────────────── */
 .pref-summary {
   display: flex;
@@ -828,8 +609,6 @@ h1 .accent { color: var(--foreground-color-highlight-strong); }
 }
 
 .pref-summary::-webkit-details-marker { display: none; }
-
-.pref-summary .card-title { margin: 0; }
 
 .pref-current {
   flex: 1;
@@ -851,34 +630,6 @@ details[open] > .pref-summary .pref-current { display: none; }
 .pref-body { margin-top: var(--spacing-150); }
 
 /* Nomad ToggleButton: aaneengesloten, geselecteerd = ocean */
-.segmented {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.pref-btn {
-  min-height: var(--size-500);
-  padding: var(--spacing-100) var(--spacing-50);
-  overflow-wrap: anywhere;
-  hyphens: auto;
-  background: var(--background-color-interactive-weak);
-  color: var(--foreground-color-neutral);
-  font: var(--label-medium);
-  font-family: var(--font-heading);
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.pref-btn:first-child { border-radius: var(--radius-100) 0 0 var(--radius-100); }
-.pref-btn:last-child { border-radius: 0 var(--radius-100) var(--radius-100) 0; }
-.pref-btn:hover { background: var(--background-color-interactive-weak-hover); }
-
-.pref-btn.active {
-  background: var(--background-color-interactive-strong);
-  color: var(--foreground-color-inverse-strong);
-}
-
-.pref-btn.active:hover { background: var(--background-color-interactive-strong-hover); }
-
 .pref-row {
   display: flex;
   align-items: center;
@@ -1015,8 +766,6 @@ html.dark .anwb-select {
   font-family: var(--font-body);
   color: var(--foreground-color-subtle);
 }
-
-.share-btn { margin-top: var(--spacing-200); }
 
 .share-status {
   min-height: 1em;
@@ -1230,17 +979,6 @@ html.dark .anwb-select {
 }
 
 /* Nomad Meter: spoor + vulling; feedbackkleur, want het is een waarschuwing */
-.pollen-bar {
-  height: var(--spacing-75);
-  border-radius: var(--radius-pill);
-  background: var(--chart-off);
-  overflow: hidden;
-}
-
-.pollen-bar-fill { height: 100%; border-radius: var(--radius-pill); background: var(--foreground-color-feedback-positive); }
-.pollen-item.medium .pollen-bar-fill { background: var(--foreground-color-feedback-notice); }
-.pollen-item.high .pollen-bar-fill { background: var(--foreground-color-feedback-negative); }
-
 .pollen-tomorrow {
   margin-top: var(--spacing-150);
   padding-top: var(--spacing-150);
@@ -1328,18 +1066,6 @@ html.dark .anwb-select {
 /* ─── Looplog ─────────────────────────────────────────────────────────────── */
 .log-content { padding-top: var(--spacing-400); padding-bottom: var(--spacing-600); }
 
-.log-register-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--spacing-150);
-}
-
-.log-title {
-  font-family: var(--font-heading);
-  color: var(--foreground-color-strong);
-}
-
 .log-time {
   font: var(--label-x-large);
   font-family: var(--font-heading);
@@ -1361,9 +1087,6 @@ html.dark .anwb-select {
 }
 
 /* Nomad Chip; geselecteerd = ocean */
-.walker-btn.active { background: var(--background-color-interactive-strong); color: var(--foreground-color-inverse-strong); }
-.walker-btn.active:hover { background: var(--background-color-interactive-strong-hover); }
-
 .log-actions {
   display: flex;
   align-items: center;
@@ -1376,25 +1099,7 @@ html.dark .anwb-select {
 
 .log-actions-spacer { flex: 1; }
 
-.log-save-btn:disabled,
-.log-clear-btn:disabled { cursor: not-allowed; }
-
-.team-editor {
-  margin-top: var(--spacing-200);
-  padding: var(--spacing-200);
-  border-radius: var(--radius-200);
-  background: var(--background-color-weak);
-}
-
-.team-add { display: flex; align-items: stretch; gap: var(--spacing-100); }
-.team-add .anwb-input { flex: 1; min-width: 0; min-height: var(--size-500); }
-
-.team-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-75);
-  margin: var(--spacing-150) 0 var(--spacing-50);
-}
+#teamAddForm .anwb-input { flex: 1; min-width: 0; min-height: var(--size-500); }
 
 /* Nomad Tag met verwijderknop */
 .team-item {
@@ -1408,19 +1113,7 @@ html.dark .anwb-select {
   font-family: var(--font-body);
 }
 
-.icon-btn.small {
-  width: var(--size-400);
-  height: var(--size-400);
-  border: 0;
-  border-radius: var(--radius-circle);
-  color: var(--foreground-color-subtle);
-  font: var(--paragraph-body-medium);
-  font-family: var(--font-body);
-}
 
-.icon-btn.small:hover { background: var(--background-color-interactive-weak-hover); color: var(--foreground-color-feedback-negative); }
-
-.log-stats { margin-top: var(--spacing-300); }
 
 .stats-grid {
   display: grid;
@@ -1534,20 +1227,7 @@ html.dark .anwb-select {
   color: var(--foreground-color-subtle);
 }
 
-.log-delete-btn {
-  width: var(--size-500);
-  height: var(--size-500);
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-100);
-  color: var(--foreground-color-subtle);
-}
-
 .x-icon { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
-
-.log-delete-btn:hover { background: var(--background-color-interactive-weak-hover); color: var(--foreground-color-feedback-negative); }
 
 .log-empty {
   padding: var(--spacing-300);
@@ -1576,15 +1256,6 @@ html.dark .anwb-select {
   box-shadow: var(--shadow-neutral);
   font: var(--paragraph-body-small);
   font-family: var(--font-body);
-}
-
-.toast-btn {
-  white-space: nowrap;
-  min-height: var(--size-400);
-  color: var(--foreground-color-interactive-highlight-strong);
-  font: var(--paragraph-title-small);
-  font-family: var(--font-body);
-  text-decoration: underline;
 }
 
 /* ─── Uitleg en releaselog ────────────────────────────────────────────────── */
@@ -1723,14 +1394,7 @@ footer { position: relative; overflow: hidden; --lockup-h: 100%; }
 
 footer strong { color: var(--foreground-color-accent-yellow); }
 
-.footer-version {
-  margin-top: var(--spacing-50);
-  font: var(--paragraph-body-x-small);
-  font-family: var(--font-body);
-}
-
-.footer-link { color: inherit; }
-.footer-link:hover { color: var(--foreground-color-interactive-neutral-hover); }
+footer a:hover { color: var(--foreground-color-interactive-neutral-hover); }
 
 /* ─── Rondleiding (nomad-gap: afgeleid van Nomad Popover) ─────────────────── */
 .tour-overlay {
@@ -1778,17 +1442,6 @@ footer strong { color: var(--foreground-color-accent-yellow); }
   font-family: var(--font-heading);
   color: var(--foreground-color-subtle);
 }
-
-.tour-close {
-  display: inline-grid;
-  place-items: center;
-  width: var(--size-400);
-  height: var(--size-400);
-  border-radius: var(--radius-100);
-  color: var(--foreground-color-subtle);
-}
-
-.tour-close:hover { background: var(--background-color-interactive-weak-hover); color: var(--foreground-color-neutral); }
 
 .tour-title {
   font: var(--heading-small);
@@ -1852,13 +1505,6 @@ footer strong { color: var(--foreground-color-accent-yellow); }
     padding-bottom: var(--spacing-150);
   }
 
-  .header-right { gap: var(--spacing-75); }
-
-  .icon-btn { width: var(--size-500); height: var(--size-500); }
-
-  .live-indicator,
-  .header-meta { display: none; }
-
   .tabs {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1867,7 +1513,7 @@ footer strong { color: var(--foreground-color-accent-yellow); }
 
   .tab {
     min-width: 0;
-    padding: var(--spacing-150) var(--spacing-50);
+    justify-content: center;
     white-space: nowrap;
   }
 
@@ -1881,15 +1527,6 @@ footer strong { color: var(--foreground-color-accent-yellow); }
 
   .weather-illustration .wx { width: var(--size-700); height: var(--size-700); }
 
-  .pref-card,
-  .break-card,
-  .weather-card,
-  .pollen-card,
-  .comparison-card,
-  .checklist-card,
-  .rain-card,
-  .log-register-card,
-  .log-stats,
   .explain-section,
   .cl-release { padding: var(--spacing-200); }
 
@@ -1905,7 +1542,7 @@ footer strong { color: var(--foreground-color-accent-yellow); }
     grid-template-columns: 1fr 1fr;
   }
 
-  .log-actions .text-btn { grid-column: 1 / -1; justify-self: start; }
+  .log-actions > :first-child { grid-column: 1 / -1; justify-self: start; }
   .log-actions-spacer { display: none; }
 
   .log-content,
@@ -1926,7 +1563,7 @@ footer strong { color: var(--foreground-color-accent-yellow); }
 @media (max-width: 22.5rem) {
   /* Op de smalste schermen past de naam niet naast de knoppen; het beeldmerk blijft */
   .logo-text { display: none; }
-  .tab { font: var(--label-small); font-family: var(--font-heading); padding-inline: var(--spacing-25); }
+  .tab { padding-inline: var(--spacing-25); }
   /* Tijden onder de regengrafiek om en om, anders raken ze elkaar */
   .bar-group:nth-child(even) .bar-label { visibility: hidden; }
   .threshold-table th,
@@ -1935,18 +1572,13 @@ footer strong { color: var(--foreground-color-accent-yellow); }
 
 /* Touch: minstens 44px, ook op tablets en telefoons in landscape */
 @media (pointer: coarse) {
-  .icon-btn,
-  .location-edit-btn,
-  .icon-btn.small,
+  #locationEditBtn,
+  .team-remove,
   .log-delete-btn,
   .tour-close { width: 2.75rem; height: 2.75rem; }
-  .pref-btn,
-  .text-btn,
   .tour-skip,
   .pref-summary,
-  .toast-btn,
-  .anwb-button--small,
-  .anwb-chip--small { min-height: 2.75rem; }
+  .anwb-button--small { min-height: 2.75rem; }
   .pref-summary { align-items: center; }
 }
 

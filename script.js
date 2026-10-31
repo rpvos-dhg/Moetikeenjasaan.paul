@@ -1,9 +1,34 @@
 // ─── Personen: standaardlijst. In de app per toestel aan te passen (Looplog → Team bewerken) ───
 const WALKERS = [
-  'Adam', 'Bob', 'David', 'Frank H', 'Frank vd H', 'Fred',
-  'Gijs', 'Jeffrey', 'Louise', 'Muttalib', 'Noëlla', 'Nynke',
-  'Remco', 'Sjors', 'Steven', 'Tessa', 'Timke'
+  'Adam', 'Bob', 'David', 'David E', 'Frank H', 'Frank vd H',
+  'Fred', 'Gijs', 'Jeffrey', 'Louise', 'Marlene', 'Noëlla',
+  'Nynke', 'Remco', 'Sjors', 'Steven', 'Sven', 'Timke'
 ];
+
+// ─── Nomad-klassen voor wat het script opbouwt of omschakelt ───────────────
+// Letterlijk uit de Nomad-componenten (nomad.anwb.nl); de stijl komt uit nomad/nomad.css.
+const NOMAD_FOCUS = 'focus-visible:outline-200 focus-visible:outline-offset-25 focus-visible:outline-interactive-focus';
+const NOMAD = {
+  // SubNavigation-item: geselecteerd en niet geselecteerd
+  tabOn: 'border-b-static-interactive-highlight-subtle-active text-interactive-neutral-active',
+  tabOff: 'border-static-transparent text-interactive-neutral',
+  // FilterChip (small): aria-pressed true en false
+  chip: `group relative inline-flex cursor-pointer items-center gap-100 rounded-pill disabled:cursor-not-allowed disabled:bg-interactive-disabled disabled:text-interactive-disabled ${NOMAD_FOCUS} h-500 px-150 prose-label-small`,
+  chipOn: 'bg-interactive-strong text-inverse-strong hover:bg-interactive-strong-hover active:bg-interactive-strong-active',
+  chipOff: 'bg-interactive-weak text-strong hover:bg-interactive-weak-hover active:bg-interactive-weak-active',
+  // IconButton (tertiary) en ActionIcon
+  iconButton: `flex size-500 shrink-0 items-center justify-center rounded-100 ${NOMAD_FOCUS} active:border-interactive-weak-active active:bg-interactive-weak-active border-100 border-default text-neutral hover:text-neutral hover:border-interactive-weak-hover hover:bg-interactive-weak-hover`,
+  actionIcon: `inline-flex size-400 shrink-0 items-center justify-center rounded-100 leading-none ${NOMAD_FOCUS} text-interactive-strong hover:text-interactive-strong-hover active:text-interactive-strong-active`,
+  // TextLink als knop
+  textLink: `inline-flex items-center min-h-500 px-50 text-interactive-highlight-strong underline hover:text-interactive-highlight-strong-hover active:text-interactive-highlight-strong-active focus-visible:rounded-50 ${NOMAD_FOCUS} prose-paragraph-body-small`,
+  // Meter
+  meter: 'w-full meter-low:bg-fill-feedback-negative meter-low:bg-none meter-medium:bg-none meter-high:bg-none meter-medium:bg-fill-feedback-notice meter-high:bg-fill-feedback-positive overflow-hidden webkit-meter-bar:bg-none webkit-meter-bar:bg-static-subtle webkit-meter-bar:h-100 h-100 rounded-pill bg-static-subtle bg-none',
+};
+
+function setNomadState(el, on, onClasses, offClasses) {
+  el.classList.remove(...(on ? offClasses : onClasses).split(' '));
+  el.classList.add(...(on ? onClasses : offClasses).split(' '));
+}
 
 // State
 let weatherData = null;
@@ -34,7 +59,7 @@ const i18n = {
   nl: {
     tabAdvice: 'Advies', tabLog: 'Looplog', tabExplain: 'Uitleg', tabChangelog: 'Nieuw',
     tabsLabel: 'Onderdelen',
-    h1Html: 'Jas aan of <span class="accent">niet?</span>',
+    h1Html: 'Jas aan of <span class="text-highlight-strong">niet?</span>',
     lead: 'De officieuze DIGHV pauze-scanner. Even checken voor je naar buiten loopt.',
     adviceLabel: 'Advies voor de komende 30 min',
     adviceUpdated: ts => `bijgewerkt ${ts}`,
@@ -238,7 +263,7 @@ const i18n = {
   en: {
     tabAdvice: 'Advice', tabLog: 'Walk log', tabExplain: 'Guide', tabChangelog: "What's new",
     tabsLabel: 'Sections',
-    h1Html: 'Jacket on or <span class="accent">not?</span>',
+    h1Html: 'Jacket on or <span class="text-highlight-strong">not?</span>',
     lead: 'The unofficial DIGHV break scanner. Check before you head outside.',
     adviceLabel: 'Advice for the next 30 min',
     adviceUpdated: ts => `updated ${ts}`,
@@ -1392,6 +1417,7 @@ function selectTab(tab, focus, scroll = true) {
   tabs.forEach(other => {
     const active = other === tab;
     other.classList.toggle('active', active);
+    setNomadState(other, active, NOMAD.tabOn, NOMAD.tabOff);
     other.setAttribute('aria-selected', String(active));
     other.tabIndex = active ? 0 : -1;
   });
@@ -2199,7 +2225,7 @@ function renderCalibrationNote() {
   if (!el) return;
   el.hidden = calibration === 0;
   if (el.hidden) { el.textContent = ''; return; }
-  el.innerHTML = `${escapeHtml(t('calibrationNote', calibration))} <button type="button" class="text-btn anwb-textlink calibration-reset" id="calibrationReset">${t('calibrationReset')}</button>`;
+  el.innerHTML = `${escapeHtml(t('calibrationNote', calibration))} <button type="button" class="calibration-reset ${NOMAD.textLink}" id="calibrationReset">${t('calibrationReset')}</button>`;
   document.getElementById('calibrationReset').addEventListener('click', () => {
     calibration = 0;
     localStorage_safe_set('dighv_calibration', '0');
@@ -2257,13 +2283,12 @@ function renderPollenCard() {
   }).sort((a, b) => b.value - a.value);
 
   const list = `<ul class="pollen-items">${items.map(p => {
-    const percentage = Math.min(100, (p.value / (p.threshold * 2)) * 100);
     return `<li class="pollen-item ${p.level}">
       <div class="pollen-item-header">
         <span class="pollen-name">${p.name}</span>
         <span class="pollen-value">${Math.round(p.value)} ${t('pollenUnit')}${p.level !== 'low' ? ` · ${t('pollenItemLevel')[p.level]}` : ''}</span>
       </div>
-      <div class="pollen-bar" aria-hidden="true"><div class="pollen-bar-fill" style="width: ${percentage}%"></div></div>
+      <meter class="${NOMAD.meter}" aria-hidden="true" min="0" max="${p.threshold * 2}" low="${p.threshold * 0.5}" high="${p.threshold}" optimum="0" value="${Math.min(p.value, p.threshold * 2)}"></meter>
     </li>`;
   }).join('')}</ul>`;
 
@@ -2419,15 +2444,15 @@ function renderWalkerGrid() {
   team.forEach(name => {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'walker-btn anwb-chip anwb-chip--small';
+    btn.className = `walker-btn ${NOMAD.chip}`;
     btn.textContent = name;
     const on = selectedWalkers.has(name);
-    btn.classList.toggle('active', on);
+    setNomadState(btn, on, NOMAD.chipOn, NOMAD.chipOff);
     btn.setAttribute('aria-pressed', String(on));
     btn.addEventListener('click', () => {
       const nowOn = !selectedWalkers.has(name);
       if (nowOn) selectedWalkers.add(name); else selectedWalkers.delete(name);
-      btn.classList.toggle('active', nowOn);
+      setNomadState(btn, nowOn, NOMAD.chipOn, NOMAD.chipOff);
       btn.setAttribute('aria-pressed', String(nowOn));
       updateSaveButton();
     });
@@ -2524,7 +2549,7 @@ function renderTeamEditor() {
   if (!list) return;
   list.innerHTML = getTeam().map((name, i) => `<li class="team-item">
       <span>${escapeHtml(name)}</span>
-      <button type="button" class="icon-btn small" data-index="${i}" aria-label="${escapeHtml(t('teamRemove', name))}">${X_ICON}</button>
+      <button type="button" class="team-remove ${NOMAD.actionIcon}" data-index="${i}" aria-label="${escapeHtml(t('teamRemove', name))}">${X_ICON}</button>
     </li>`).join('');
   list.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => {
     const team = getTeam();
@@ -2601,13 +2626,13 @@ function renderLogHistory() {
           <span class="log-entry-people">${peopleStr}</span>
           ${weather}
         </div>
-        <button class="log-delete-btn" type="button" data-id="${escapeHtml(entry.id)}" title="${deleteLabel}" aria-label="${deleteLabel}">${X_ICON}</button>
+        <button class="log-delete-btn ${NOMAD.iconButton}" type="button" data-id="${escapeHtml(entry.id)}" title="${deleteLabel}" aria-label="${deleteLabel}">${X_ICON}</button>
       </li>`;
     });
     html += '</ul>';
   }
   if (log.length > logVisible) {
-    html += `<button type="button" class="text-btn log-more" id="logMore">${t('logShowOlder', log.length - logVisible)}</button>`;
+    html += `<button type="button" class="log-more ${NOMAD.textLink} mt-200" id="logMore">${t('logShowOlder', log.length - logVisible)}</button>`;
   }
 
   el.innerHTML = html;
@@ -2690,16 +2715,12 @@ function bindPrefControls() {
   const prefCard = document.getElementById('prefCard');
   if (prefCard && !localStorage_safe_get('dighv_pref')) prefCard.open = true;
 
-  document.querySelectorAll('.pref-btn').forEach(btn => {
-    const on = btn.dataset.pref === userPref;
-    btn.classList.toggle('active', on);
-    btn.setAttribute('aria-pressed', String(on));
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.pref-btn').forEach(b => {
-        b.classList.toggle('active', b === btn);
-        b.setAttribute('aria-pressed', String(b === btn));
-      });
-      userPref = btn.dataset.pref;
+  // Nomad ToggleButton: radioknoppen, de stijl volgt :checked
+  document.querySelectorAll('input[name="pref"]').forEach(radio => {
+    radio.checked = radio.value === userPref;
+    radio.addEventListener('change', () => {
+      if (!radio.checked) return;
+      userPref = radio.value;
       localStorage_safe_set('dighv_pref', userPref);
       renderPrefSummary();
       if (weatherData) renderAdvice();
@@ -2714,7 +2735,7 @@ function bindPrefControls() {
     if (weatherData) { renderBestMoment(); renderFeedbackRow(); updateAppBadge(); }
   });
 
-  document.querySelectorAll('.feedback-btn').forEach(btn => btn.addEventListener('click', () => giveFeedback(btn.dataset.feedback)));
+  document.querySelectorAll('#feedbackRow [data-feedback]').forEach(btn => btn.addEventListener('click', () => giveFeedback(btn.dataset.feedback)));
   document.getElementById('shareBtn')?.addEventListener('click', shareBreak);
 
   document.getElementById('darkModeToggle').addEventListener('click', () => {
@@ -2731,7 +2752,7 @@ function bindPrefControls() {
 // ─── Vergelijking en seizoen ─────────────────────────────────────────────────
 function renderWeatherComparison() {
   const el = document.getElementById('comparisonGrid');
-  const card = el?.closest('.comparison-card');
+  const card = el?.closest('#comparisonCard');
   if (!el || !weatherData?.daily?.time) return;
   const daily = weatherData.daily;
   // Op datum zoeken, niet op vaste posities: na middernacht met oude data
@@ -2846,7 +2867,7 @@ function buildTourDom() {
     <div class="tour-tooltip" role="dialog" aria-modal="true" aria-labelledby="tourTitle" aria-describedby="tourText">
       <div class="tour-head">
         <span class="tour-count" id="tourCount"></span>
-        <button class="tour-close" id="tourClose" type="button">${X_ICON}</button>
+        <button class="tour-close ${NOMAD.actionIcon}" id="tourClose" type="button">${X_ICON}</button>
       </div>
       <h2 class="tour-title" id="tourTitle" tabindex="-1"></h2>
       <p class="tour-text" id="tourText"></p>

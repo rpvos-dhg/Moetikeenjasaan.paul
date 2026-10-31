@@ -1,0 +1,360 @@
+/*
+ * Gegenereerd uit nomad.css door scripts/build-nomad-theme.py (zie README).
+ * 1. Lettertokens met terugval: Nomad noemt alleen "Clan Pro" en "Bernina Sans".
+ *    Die fonts zitten niet in deze openbare repo; staan ze op het toestel, dan
+ *    worden ze gebruikt, anders Inter.
+ * 2. Donker thema (nomad-gap): Nomads eigen context-strong-waarden als basis.
+ *    De vlakken staan in het handgeschreven deel onderaan.
+ */
+html:root {
+  --hero-hero:500 2.25rem/2.75rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-x-large:500 1.75rem/2.375rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-large:500 1.75rem/2.375rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-medium:500 1.375rem/2.125rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-medium-subtle:475 1.125rem/1.75rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-small:500 1.125rem/1.75rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-small-subtle:475 1rem/1.5rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-x-small:500 1rem/1.5rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-x-large:600 1.25rem/1.875rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-large:600 1.125rem/1.75rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-medium:600 1rem/1.5rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-small:600 .875rem/1.375rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-x-small:600 .75rem/1.125rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-x-large:400 1.25rem/1.875rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-large:400 1.125rem/1.75rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-medium:400 1rem/1.5rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-small:400 .875rem/1.375rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-x-small:400 .75rem/1.125rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-3-x-large:500 2.25rem/2.875rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-2-x-large:500 1.625rem/2.25rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-x-large:500 1.25rem/1.875rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-large:500 1.125rem/1.75rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-medium:500 1rem/1.5rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-small:500 .875rem/1.375rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-x-small:500 .75rem/1.125rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+@media(min-width:30rem){
+html:root {
+  --hero-hero:500 2.25rem/2.75rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-x-large:500 1.75rem/2.375rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-large:500 1.75rem/2.375rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-medium:500 1.375rem/2.125rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-medium-subtle:475 1.125rem/1.75rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-small:500 1.125rem/1.75rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-small-subtle:475 1rem/1.5rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-x-small:500 1rem/1.5rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-x-large:600 1.25rem/1.875rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-large:600 1.125rem/1.75rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-medium:600 1rem/1.5rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-small:600 .875rem/1.375rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-x-small:600 .75rem/1.125rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-x-large:400 1.25rem/1.875rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-large:400 1.125rem/1.75rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-medium:400 1rem/1.5rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-small:400 .875rem/1.375rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-x-small:400 .75rem/1.125rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-3-x-large:500 2.25rem/2.875rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-2-x-large:500 1.625rem/2.25rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-x-large:500 1.25rem/1.875rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-large:500 1.125rem/1.75rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-medium:500 1rem/1.5rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-small:500 .875rem/1.375rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-x-small:500 .75rem/1.125rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+}
+
+@media(min-width:48rem){
+html:root {
+  --hero-hero:500 2.25rem/2.75rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-x-large:500 2.25rem/2.75rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-large:500 1.75rem/2.375rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-medium:500 1.375rem/2.125rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-medium-subtle:475 1.125rem/1.75rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-small:500 1.125rem/1.75rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-small-subtle:475 1rem/1.5rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-x-small:500 1rem/1.5rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-x-large:600 1.25rem/1.875rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-large:600 1.125rem/1.75rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-medium:600 1rem/1.5rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-small:600 .875rem/1.375rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-x-small:600 .75rem/1.125rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-x-large:400 1.25rem/1.875rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-large:400 1.125rem/1.75rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-medium:400 1rem/1.5rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-small:400 .875rem/1.375rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-x-small:400 .75rem/1.125rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-3-x-large:500 2.25rem/2.875rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-2-x-large:500 1.625rem/2.25rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-x-large:500 1.25rem/1.875rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-large:500 1.125rem/1.75rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-medium:500 1rem/1.5rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-small:500 .875rem/1.375rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-x-small:500 .75rem/1.125rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+}
+
+@media(min-width:64rem){
+html:root {
+  --hero-hero:500 4rem/4.5rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-x-large:500 3rem/3.625rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-large:500 2rem/2.75rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-medium:500 1.625rem/2.25rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-medium-subtle:475 1.5rem/2rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-small:500 1.25rem/1.875rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-small-subtle:475 1.25rem/1.875rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-x-small:500 1rem/1.5rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-x-large:600 1.25rem/1.875rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-large:600 1.125rem/1.75rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-medium:600 1rem/1.5rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-small:600 .875rem/1.375rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-x-small:600 .75rem/1.125rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-x-large:400 1.25rem/1.875rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-large:400 1.125rem/1.75rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-medium:400 1rem/1.5rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-small:400 .875rem/1.375rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-x-small:400 .75rem/1.125rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-3-x-large:500 2.25rem/2.875rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-2-x-large:500 1.625rem/2.25rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-x-large:500 1.25rem/1.875rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-large:500 1.125rem/1.75rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-medium:500 1rem/1.5rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-small:500 .875rem/1.375rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-x-small:500 .75rem/1.125rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+}
+
+@media(min-width:90rem){
+html:root {
+  --hero-hero:500 4rem/4.5rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-x-large:500 3rem/3.625rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-large:500 2rem/2.75rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-medium:500 1.625rem/2.25rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-medium-subtle:475 1.5rem/2rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-small:500 1.25rem/1.875rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-small-subtle:475 1.25rem/1.875rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --heading-x-small:500 1rem/1.5rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-x-large:600 1.25rem/1.875rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-large:600 1.125rem/1.75rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-medium:600 1rem/1.5rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-small:600 .875rem/1.375rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-title-x-small:600 .75rem/1.125rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-x-large:400 1.25rem/1.875rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-large:400 1.125rem/1.75rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-medium:400 1rem/1.5rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-small:400 .875rem/1.375rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --paragraph-body-x-small:400 .75rem/1.125rem "Bernina Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-3-x-large:500 2.25rem/2.875rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-2-x-large:500 1.625rem/2.25rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-x-large:500 1.25rem/1.875rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-large:500 1.125rem/1.75rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-medium:500 1rem/1.5rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-small:500 .875rem/1.375rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --label-x-small:500 .75rem/1.125rem "Clan Pro", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+}
+
+html.dark,
+html.dark .context-default,
+html.dark .context-weak {
+  --shadow-subtle:0 0 2rem 0 #00030733;
+  --shadow-neutral:0 0 2rem 0 #00030740;
+  --shadow-strong:0 0 2rem 0 #00030759;
+  --foreground-color-strong:#fff;
+  --foreground-color-neutral:#fff;
+  --foreground-color-subtle:#fff;
+  --foreground-color-highlight-strong:#59bbe7;
+  --foreground-color-highlight-subtle:#59bbe7;
+  --foreground-color-inverse-strong:#003d86;
+  --foreground-color-inverse-neutral:#000307;
+  --foreground-color-feedback-positive:#87c59c;
+  --foreground-color-feedback-notice:#f9c78c;
+  --foreground-color-feedback-negative:#eab2b2;
+  --foreground-color-feedback-marked:#d3b2d6;
+  --foreground-color-accent-red:#ebaba8;
+  --foreground-color-interactive-disabled:#999;
+  --foreground-color-interactive-disabled-strong:#a6a6a6;
+  --foreground-color-interactive-highlight-strong:#59bbe7;
+  --foreground-color-interactive-highlight-strong-hover:#fff;
+  --foreground-color-interactive-highlight-strong-active:#fff;
+  --foreground-color-interactive-highlight-subtle:#59bbe7;
+  --foreground-color-interactive-highlight-subtle-hover:#fff;
+  --foreground-color-interactive-highlight-subtle-active:#fff;
+  --foreground-color-interactive-strong:#fff;
+  --foreground-color-interactive-strong-hover:#59bbe7;
+  --foreground-color-interactive-strong-active:#59bbe7;
+  --foreground-color-interactive-neutral:#fff;
+  --foreground-color-interactive-neutral-hover:#59bbe7;
+  --foreground-color-interactive-neutral-active:#59bbe7;
+  --background-color-default:#003d86;
+  --background-color-highlight:#59bbe7;
+  --background-color-strong:#fff;
+  --background-color-subtle:#002e65;
+  --background-color-weak:#002e65;
+  --background-color-form-controls:#fff;
+  --background-color-interactive-disabled:#d9d9d9;
+  --background-color-interactive-disabled-strong:#e5e5e5;
+  --background-color-interactive-default:#003d86;
+  --background-color-interactive-default-hover:#002e65;
+  --background-color-interactive-default-active:#00224a;
+  --background-color-interactive-subtle:#002e65;
+  --background-color-interactive-subtle-hover:#00224a;
+  --background-color-interactive-subtle-active:#001b3c;
+  --background-color-interactive-highlight-strong:#59bbe7;
+  --background-color-interactive-highlight-strong-hover:#59bbe7;
+  --background-color-interactive-highlight-strong-active:#fff;
+  --background-color-interactive-highlight-subtle:#59bbe7;
+  --background-color-interactive-highlight-subtle-hover:#0096da;
+  --background-color-interactive-highlight-subtle-active:#0080b9;
+  --background-color-interactive-highlight-subtle-on-strong:#0096da;
+  --background-color-interactive-strong:#fff;
+  --background-color-interactive-strong-hover:#e5e5e5;
+  --background-color-interactive-strong-active:#d9d9d9;
+  --background-color-interactive-weak:#002e65;
+  --background-color-interactive-weak-hover:#00224a;
+  --background-color-interactive-weak-active:#001b3c;
+  --background-color-interactive-form-controls:#fff;
+  --background-color-interactive-form-controls-hover:#e5e5e5;
+  --background-color-interactive-form-controls-active:#d9d9d9;
+  --background-color-interactive-feedback-positive-strong:#fff;
+  --background-color-interactive-feedback-positive-strong-hover:#e5e5e5;
+  --background-color-interactive-feedback-positive-strong-active:#d9d9d9;
+  --background-color-fill-strong:var(--foreground-color-strong);
+  --background-color-fill-neutral:var(--foreground-color-neutral);
+  --background-color-fill-subtle:var(--foreground-color-subtle);
+  --background-color-fill-highlight-strong:var(--foreground-color-highlight-strong);
+  --background-color-fill-highlight-subtle:var(--foreground-color-highlight-subtle);
+  --background-color-fill-inverse-strong:var(--foreground-color-inverse-strong);
+  --background-color-fill-inverse-neutral:var(--foreground-color-inverse-neutral);
+  --background-color-fill-feedback-positive:var(--foreground-color-feedback-positive);
+  --background-color-fill-feedback-notice:var(--foreground-color-feedback-notice);
+  --background-color-fill-feedback-negative:var(--foreground-color-feedback-negative);
+  --background-color-fill-feedback-marked:var(--foreground-color-feedback-marked);
+  --background-color-fill-accent-red:var(--foreground-color-accent-red);
+  --background-color-fill-interactive-disabled:var(--foreground-color-interactive-disabled);
+  --background-color-fill-interactive-disabled-strong:var(--foreground-color-interactive-disabled-strong);
+  --background-color-fill-interactive-highlight-strong:var(--foreground-color-interactive-highlight-strong);
+  --background-color-fill-interactive-highlight-strong-hover:var(--foreground-color-interactive-highlight-strong-hover);
+  --background-color-fill-interactive-highlight-strong-active:var(--foreground-color-interactive-highlight-strong-active);
+  --background-color-fill-interactive-highlight-subtle:var(--foreground-color-interactive-highlight-subtle);
+  --background-color-fill-interactive-highlight-subtle-hover:var(--foreground-color-interactive-highlight-subtle-hover);
+  --background-color-fill-interactive-highlight-subtle-active:var(--foreground-color-interactive-highlight-subtle-active);
+  --background-color-fill-interactive-strong:var(--foreground-color-interactive-strong);
+  --background-color-fill-interactive-strong-hover:var(--foreground-color-interactive-strong-hover);
+  --background-color-fill-interactive-strong-active:var(--foreground-color-interactive-strong-active);
+  --background-color-fill-interactive-neutral:var(--foreground-color-interactive-neutral);
+  --background-color-fill-interactive-neutral-hover:var(--foreground-color-interactive-neutral-hover);
+  --background-color-fill-interactive-neutral-active:var(--foreground-color-interactive-neutral-active);
+  --background-image-gradient-default-center:linear-gradient(to right, #0000 0%, #0000004d 33%, #0000004d 66%, #0000 100%);
+  --background-image-gradient-default-left-right:linear-gradient(to right, #003d86, #003d8600);
+  --background-image-gradient-default-right-left:linear-gradient(to right, #003d8600, #003d86);
+  --border-color-default:#fff;
+  --border-color-strong:#fff;
+  --border-color-subtle:#00224a;
+  --border-color-weak:#00224a;
+  --border-color-feedback-positive-strong:#87c59c;
+  --border-color-feedback-notice-strong:#f9c78c;
+  --border-color-feedback-negative-strong:#eab2b2;
+  --border-color-feedback-informative-strong:#3b7dcd;
+  --border-color-interactive-neutral:#fff;
+  --border-color-interactive-focus:#59bbe7;
+  --border-color-interactive-disabled:#d9d9d9;
+  --border-color-interactive-disabled-strong:#e5e5e5;
+  --border-color-interactive-highlight-strong:#59bbe7;
+  --border-color-interactive-highlight-strong-hover:#59bbe7;
+  --border-color-interactive-highlight-strong-active:#fff;
+  --border-color-interactive-highlight-subtle:#59bbe7;
+  --border-color-interactive-highlight-subtle-hover:#0096da;
+  --border-color-interactive-highlight-subtle-active:#0080b9;
+  --border-color-interactive-highlight-subtle-on-strong:#0096da;
+  --border-color-interactive-strong:#fff;
+  --border-color-interactive-strong-hover:#fff;
+  --border-color-interactive-strong-active:#fff;
+  --border-color-interactive-weak:#002e65;
+  --border-color-interactive-weak-hover:#00224a;
+  --border-color-interactive-weak-active:#001b3c;
+  --border-color-inverse:#d9d9d9;
+  --border-color-inverse-subtle:#e5e5e5;
+  --text-color-strong:var(--foreground-color-strong);
+  --text-color-neutral:var(--foreground-color-neutral);
+  --text-color-subtle:var(--foreground-color-subtle);
+  --text-color-highlight-strong:var(--foreground-color-highlight-strong);
+  --text-color-highlight-subtle:var(--foreground-color-highlight-subtle);
+  --text-color-inverse-strong:var(--foreground-color-inverse-strong);
+  --text-color-inverse-neutral:var(--foreground-color-inverse-neutral);
+  --text-color-feedback-positive:var(--foreground-color-feedback-positive);
+  --text-color-feedback-notice:var(--foreground-color-feedback-notice);
+  --text-color-feedback-negative:var(--foreground-color-feedback-negative);
+  --text-color-feedback-marked:var(--foreground-color-feedback-marked);
+  --text-color-accent-red:var(--foreground-color-accent-red);
+  --text-color-interactive-disabled:var(--foreground-color-interactive-disabled);
+  --text-color-interactive-disabled-strong:var(--foreground-color-interactive-disabled-strong);
+  --text-color-interactive-highlight-strong:var(--foreground-color-interactive-highlight-strong);
+  --text-color-interactive-highlight-strong-hover:var(--foreground-color-interactive-highlight-strong-hover);
+  --text-color-interactive-highlight-strong-active:var(--foreground-color-interactive-highlight-strong-active);
+  --text-color-interactive-highlight-subtle:var(--foreground-color-interactive-highlight-subtle);
+  --text-color-interactive-highlight-subtle-hover:var(--foreground-color-interactive-highlight-subtle-hover);
+  --text-color-interactive-highlight-subtle-active:var(--foreground-color-interactive-highlight-subtle-active);
+  --text-color-interactive-strong:var(--foreground-color-interactive-strong);
+  --text-color-interactive-strong-hover:var(--foreground-color-interactive-strong-hover);
+  --text-color-interactive-strong-active:var(--foreground-color-interactive-strong-active);
+  --text-color-interactive-neutral:var(--foreground-color-interactive-neutral);
+  --text-color-interactive-neutral-hover:var(--foreground-color-interactive-neutral-hover);
+  --text-color-interactive-neutral-active:var(--foreground-color-interactive-neutral-active);
+  color-scheme: dark;
+}
+
+/* ─── Handgeschreven: vlakken voor het donkere thema ─────────────────────── */
+/* Pagina (context weak) is het donkerst, kaarten (context default) een stap
+   lichter. Afgeleid van ANWB-ocean. Feedbackvlakken blijven licht, want Nomad
+   zet daar vaste donkere tekst op. */
+html.dark,
+html.dark .context-weak {
+  --foreground-color-subtle: #c3cfdd;
+  --foreground-color-weak: #8295ad;
+  --background-color-default: #001634;
+  --background-color-weak: #00224a;
+  --background-color-subtle: #002e65;
+  --background-color-form-controls: #001634;
+  --background-color-interactive-form-controls: #001634;
+  --background-color-interactive-form-controls-hover: #00224a;
+  --background-color-interactive-default: #001634;
+  --background-color-interactive-default-hover: #00224a;
+  --background-color-interactive-default-active: #002e65;
+  --background-color-interactive-weak: #00224a;
+  --background-color-interactive-weak-hover: #002e65;
+  --background-color-interactive-weak-active: #003d86;
+  --border-color-default: #2d5285;
+  --border-color-subtle: #1a3d6b;
+  --border-color-weak: #00224a;
+  --border-color-interactive-form-controls: #c3cfdd;
+  --background-color-interactive-disabled: #002e65;
+  --foreground-color-interactive-disabled: #8295ad;
+  --chart-1: #59bbe7;
+  --chart-off: #2d5285;
+}
+
+html.dark .context-default {
+  --foreground-color-subtle: #c3cfdd;
+  --foreground-color-weak: #8295ad;
+  --background-color-default: #00224a;
+  --background-color-weak: #002e65;
+  --background-color-subtle: #003d86;
+  --background-color-form-controls: #001634;
+  --background-color-interactive-form-controls: #001634;
+  --background-color-interactive-form-controls-hover: #002e65;
+  --background-color-interactive-default: #00224a;
+  --background-color-interactive-default-hover: #002e65;
+  --background-color-interactive-default-active: #003d86;
+  --background-color-interactive-weak: #003d86;
+  --background-color-interactive-weak-hover: #0a4a99;
+  --background-color-interactive-weak-active: #002e65;
+  --border-color-default: #2d5285;
+  --border-color-subtle: #1f4777;
+  --border-color-weak: #002e65;
+  --border-color-interactive-form-controls: #c3cfdd;
+  --background-color-interactive-disabled: #002e65;
+  --foreground-color-interactive-disabled: #8295ad;
+  --chart-1: #59bbe7;
+  --chart-off: #2d5285;
+}

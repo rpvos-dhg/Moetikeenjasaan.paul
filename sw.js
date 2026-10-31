@@ -1,4 +1,4 @@
-const CACHE = 'dighv-v12';
+const CACHE = 'dighv-v13';
 // Weerdata apart en klein houden: alleen als terugval offline, en met
 // coördinaten erin, dus niet onbeperkt bewaren.
 const API_CACHE = 'dighv-api';
@@ -7,9 +7,11 @@ const API_CACHE_MAX = 6;
 const PRECACHE = [
   './',
   './index.html',
+  './nomad/nomad.css',
   './nomad/tokens.css',
   './nomad/base.css',
   './nomad/components.css',
+  './nomad/theme.css',
   './style.css',
   './logic.js',
   './script.js',
