@@ -21,8 +21,14 @@ const NOMAD = {
   actionIcon: `inline-flex size-400 shrink-0 items-center justify-center rounded-100 leading-none ${NOMAD_FOCUS} text-interactive-strong hover:text-interactive-strong-hover active:text-interactive-strong-active`,
   // TextLink als knop
   textLink: `inline-flex items-center min-h-500 px-50 text-interactive-highlight-strong underline hover:text-interactive-highlight-strong-hover active:text-interactive-highlight-strong-active focus-visible:rounded-50 ${NOMAD_FOCUS} prose-paragraph-body-small`,
-  // Meter
-  meter: 'w-full meter-low:bg-fill-feedback-negative meter-low:bg-none meter-medium:bg-none meter-high:bg-none meter-medium:bg-fill-feedback-notice meter-high:bg-fill-feedback-positive overflow-hidden webkit-meter-bar:bg-none webkit-meter-bar:bg-static-subtle webkit-meter-bar:h-100 h-100 rounded-pill bg-static-subtle bg-none',
+  // Label (Data display/Label); kleur per niveau of uitkomst
+  label: 'inline-flex items-center gap-100 overflow-hidden rounded-100 align-middle text-clip whitespace-nowrap px-150 h-500',
+  labelColor: {
+    green: 'bg-static-accent-green-strong text-static-inverse',
+    yellow: 'bg-static-accent-yellow-strong text-static-strong',
+    red: 'bg-static-accent-red-strong text-static-inverse',
+    grey: 'bg-static-subtle text-static-neutral',
+  },
 };
 
 function setNomadState(el, on, onClasses, offClasses) {
@@ -195,7 +201,7 @@ const i18n = {
     saveFailed: 'Opslaan op dit toestel lukte niet. Het blijft staan tot je de pagina sluit.',
     logNobodyWalked: '<em>Niemand meegelopen</em>',
     logWeather: (feels, rain) => [feels === null ? null : `${feels} °C`, rain ? `${rain} mm regen` : 'droog'].filter(Boolean).join(', '),
-    toastDeleted: 'Wandeling verwijderd.', toastUndo: 'Ongedaan maken',
+    toastDeleted: 'Wandeling verwijderd.', toastUndo: 'Ongedaan maken', toastClose: 'Melding sluiten',
     teamEdit: 'Team bewerken', teamAddLabel: 'Naam toevoegen', teamAdd: 'Toevoegen',
     teamReset: 'Standaardlijst terugzetten', teamRemove: name => `${name} verwijderen`,
     teamExists: 'Die naam staat er al.', teamEmpty: 'Nog geen namen. Voeg collega\'s toe via Team bewerken.',
@@ -220,7 +226,7 @@ const i18n = {
     pollenShowAll: 'Alle soorten tonen',
     pollenMeasured: time => `(gemeten ${time})`,
     pollenUnavailable: 'Pollendata is nu niet beschikbaar.', pollenUnit: 'korrels/m³',
-    pollenItemLevel: { medium: 'matig', high: 'hoog' },
+    pollenItemLevel: { low: 'laag', medium: 'matig', high: 'hoog' },
     groupAlways: 'Altijd mee', groupSun: 'Zon', groupRain: 'Regen',
     groupCold: 'Kou', groupInfo: 'Info',
     checkPersPass: 'Personeelspas',
@@ -399,7 +405,7 @@ const i18n = {
     saveFailed: "Couldn't save on this device. It stays until you close the page.",
     logNobodyWalked: '<em>Nobody came along</em>',
     logWeather: (feels, rain) => [feels === null ? null : `${feels} °C`, rain ? `${rain} mm rain` : 'dry'].filter(Boolean).join(', '),
-    toastDeleted: 'Walk deleted.', toastUndo: 'Undo',
+    toastDeleted: 'Walk deleted.', toastUndo: 'Undo', toastClose: 'Close message',
     teamEdit: 'Edit team', teamAddLabel: 'Add name', teamAdd: 'Add',
     teamReset: 'Restore default list', teamRemove: name => `Remove ${name}`,
     teamExists: 'That name is already on the list.', teamEmpty: 'No names yet. Add colleagues via Edit team.',
@@ -424,7 +430,7 @@ const i18n = {
     pollenShowAll: 'Show all types',
     pollenMeasured: time => `(measured ${time})`,
     pollenUnavailable: 'Pollen data is not available right now.', pollenUnit: 'grains/m³',
-    pollenItemLevel: { medium: 'moderate', high: 'high' },
+    pollenItemLevel: { low: 'low', medium: 'moderate', high: 'high' },
     groupAlways: 'Always bring', groupSun: 'Sun', groupRain: 'Rain',
     groupCold: 'Cold', groupInfo: 'Info',
     checkPersPass: 'Staff pass',
@@ -2282,13 +2288,13 @@ function renderPollenCard() {
     return { name: t('pollenNames')[k], value, threshold, level };
   }).sort((a, b) => b.value - a.value);
 
+  // Niveau als Nomad Label. Geen Meter: die betekent in Nomad "hoe voller, hoe beter".
+  const levelColor = { low: 'green', medium: 'yellow', high: 'red' };
   const list = `<ul class="pollen-items">${items.map(p => {
-    return `<li class="pollen-item ${p.level}">
-      <div class="pollen-item-header">
-        <span class="pollen-name">${p.name}</span>
-        <span class="pollen-value">${Math.round(p.value)} ${t('pollenUnit')}${p.level !== 'low' ? ` · ${t('pollenItemLevel')[p.level]}` : ''}</span>
-      </div>
-      <meter class="${NOMAD.meter}" aria-hidden="true" min="0" max="${p.threshold * 2}" low="${p.threshold * 0.5}" high="${p.threshold}" optimum="0" value="${Math.min(p.value, p.threshold * 2)}"></meter>
+    return `<li class="pollen-item">
+      <span class="pollen-name">${p.name}</span>
+      <span class="pollen-value">${Math.round(p.value)} ${t('pollenUnit')}</span>
+      <span class="${NOMAD.label} ${NOMAD.labelColor[levelColor[p.level]]}"><span class="prose-label-small">${t('pollenItemLevel')[p.level]}</span></span>
     </li>`;
   }).join('')}</ul>`;
 
@@ -2685,17 +2691,27 @@ function showToast(key, actionKey, onAction) {
   const toast = document.getElementById('toast');
   toast.hidden = false;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { toast.hidden = true; toastState = null; }, 6000);
+  // Nomad: een Toast met een actie mag niet vanzelf verdwijnen als die actie nergens
+  // anders op de pagina staat (ongedaan maken). Die blijft staan tot sluiten of actie.
+  if (!actionKey) toastTimer = setTimeout(hideToast, 6000);
+}
+
+function hideToast() {
+  clearTimeout(toastTimer);
+  document.getElementById('toast').hidden = true;
+  toastState = null;
 }
 
 function renderToast() {
-  const toast = document.getElementById('toast');
   const action = document.getElementById('toastAction');
   const { key, actionKey, onAction } = toastState;
   document.getElementById('toastText').textContent = t(key);
   action.hidden = !actionKey;
   action.textContent = actionKey ? t(actionKey) : '';
-  action.onclick = () => { toast.hidden = true; toastState = null; onAction?.(); };
+  action.onclick = () => { hideToast(); onAction?.(); };
+  const close = document.getElementById('toastClose');
+  close.setAttribute('aria-label', t('toastClose'));
+  close.onclick = hideToast;
 }
 
 // ─── Voorkeuren ──────────────────────────────────────────────────────────────
@@ -2782,7 +2798,7 @@ function renderWeatherComparison() {
       <div class="comparison-temp"><span class="comparison-max">${t('maxLabel')}</span> ${day.tempMax == null ? '–' : Math.round(day.tempMax)}°</div>
       <div class="comparison-detail">${t('rainLabel', fmt1(day.rain))}</div>
       <div class="comparison-detail">${t('windLabel', Math.round(day.wind))}</div>
-      ${n === 2 ? `<div class="comparison-verdict ${dir}">${t(dir)}</div>` : ''}
+      ${n === 2 ? `<span class="comparison-verdict ${NOMAD.label} ${NOMAD.labelColor[{ better: 'green', worse: 'red', similar: 'grey' }[dir]]}"><span class="prose-label-small">${t(dir)}</span></span>` : ''}
     </div>`).join('');
 
   const dT = days[2].tempMax != null && days[1].tempMax != null ? Math.round(days[2].tempMax - days[1].tempMax) : 0;
