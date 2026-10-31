@@ -28,7 +28,9 @@ HTML, CSS en vanilla JavaScript, zonder build-stap en zonder runtime-dependencie
 | `index.html` | Structuur, Content-Security-Policy |
 | `logic.js` | Pure rekenlogica (advies, pauzemoment, statistieken); getest |
 | `script.js` | Weergave, opslag, data ophalen |
-| `huisstijl/` | ANWB huisstijl-designsysteem: tokens, basisstijl en componenten |
+| `huisstijl/huisstijl.css` | Stylesheet van huisstijl (de huisstijl), zonder fontverwijzingen |
+| `huisstijl/tokens.css`, `base.css`, `components.css` | huisstijl-tokens en `anwb-*`-componenten uit de ANWB-huisstijlskill |
+| `huisstijl/theme.css` | Letterterugval en donker thema; bovenste deel gegenereerd |
 | `style.css` | App-stijl op huisstijl-tokens, plus het donkere thema |
 | `theme-init.js` | Zet het thema vóór de eerste paint |
 | `sw.js` | Service worker (offline) |
@@ -45,13 +47,15 @@ Data wordt elke 10 minuten ververst (niet in een verborgen tabblad). Standaardlo
 
 ## Huisstijl
 
-De app volgt huisstijl, het designsysteem van ANWB (de huisstijl): kleuren, typografie, vormtaal en componenten komen uit `huisstijl/`. `style.css` gebruikt alleen huisstijl-tokens, geen eigen kleurwaarden.
+De app volgt huisstijl, het designsysteem van ANWB (de huisstijl). Waar huisstijl een component heeft, staat de letterlijke huisstijl-markup in de HTML (tabs als SubNavigation, iconknoppen, ToggleButton, Tag, FilterChip, Meter, Tile). `style.css` bevat alleen wat huisstijl niet heeft, zoals de jas-o-meter en de regengrafiek, en gebruikt daarbij alleen huisstijl-tokens.
 
 - **Geen ANWB-logo.** Dit is geen officieel ANWB-product. Linksboven staat een eigen beeldmerk (gele tegel met een jas), dat ook als favicon en app-icoon dient.
 - **Geen ANWB-fonts in de repo.** Clan Pro en Bernina Sans zijn eigendom van ANWB en de repo is openbaar. Staan ze op het toestel, dan gebruikt de app ze; anders valt hij terug op Inter.
 - **Donker thema** bestaat niet in huisstijl. Het is hier afgeleid van ANWB-ocean.
 
 App-iconen opnieuw maken na een wijziging aan het beeldmerk: `node scripts/generate-icons.js`.
+
+Nieuwe versie van huisstijl: zet de nieuwe `huisstijl.css` neer en draai `python3 scripts/build-theme.py pad/naar/huisstijl.css`. Dat haalt de fontverwijzingen weg en maakt de letterterugval en het donkere thema opnieuw. Het handgeschreven deel onderaan `huisstijl/theme.css` blijft staan.
 
 ## Lokaal draaien
 
