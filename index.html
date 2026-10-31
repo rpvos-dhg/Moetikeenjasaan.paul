@@ -14,13 +14,13 @@
 <meta name="theme-color" content="#001b3c" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Pauze-advies">
-<script src="theme-init.js?v=23"></script>
-<link rel="stylesheet" href="huisstijl/huisstijl.css?v=23">
-<link rel="stylesheet" href="huisstijl/tokens.css?v=23">
-<link rel="stylesheet" href="huisstijl/base.css?v=23">
-<link rel="stylesheet" href="huisstijl/components.css?v=23">
-<link rel="stylesheet" href="huisstijl/theme.css?v=23">
-<link rel="stylesheet" href="style.css?v=23">
+<script src="theme-init.js?v=24"></script>
+<link rel="stylesheet" href="huisstijl/huisstijl.css?v=24">
+<link rel="stylesheet" href="huisstijl/tokens.css?v=24">
+<link rel="stylesheet" href="huisstijl/base.css?v=24">
+<link rel="stylesheet" href="huisstijl/components.css?v=24">
+<link rel="stylesheet" href="huisstijl/theme.css?v=24">
+<link rel="stylesheet" href="style.css?v=24">
 </head>
 <body class="context-weak">
 <svg class="hidden" aria-hidden="true" focusable="false"><symbol id="nmd-ic-8" viewBox="0 0 32 32"><path d="M12.61 26.284c-.424 0-.831-.167-1.132-.469l-7.809-7.809a1.599 1.599 0 1 1 2.262-2.262l6.575 6.575L25.975 6.286a1.6 1.6 0 1 1 2.45 2.058L13.834 25.713c-.289.342-.708.55-1.156.569q-.032.003-.068.002"></path></symbol></svg>
@@ -59,7 +59,6 @@
     <button class="tab no-underline inline-flex h-full min-h-700 snap-start items-center border-b-200 p-50 prose-label-small hover:text-interactive-neutral-hover focus-visible:rounded-100 focus-visible:outline-200 focus-visible:-outline-offset-25 focus-visible:outline-interactive-focus active:text-interactive-neutral-active border-b-static-interactive-highlight-subtle-active text-interactive-neutral-active" id="tab-advice" data-tab="advice" data-i18n="tabAdvice" role="tab" aria-selected="true" aria-controls="view-advice-wrap" type="button">Advies</button>
     <button class="tab no-underline inline-flex h-full min-h-700 snap-start items-center border-b-200 p-50 prose-label-small hover:text-interactive-neutral-hover focus-visible:rounded-100 focus-visible:outline-200 focus-visible:-outline-offset-25 focus-visible:outline-interactive-focus active:text-interactive-neutral-active border-static-transparent text-interactive-neutral" id="tab-log" data-tab="log" data-i18n="tabLog" role="tab" aria-selected="false" aria-controls="view-log" tabindex="-1" type="button">Looplog</button>
     <button class="tab no-underline inline-flex h-full min-h-700 snap-start items-center border-b-200 p-50 prose-label-small hover:text-interactive-neutral-hover focus-visible:rounded-100 focus-visible:outline-200 focus-visible:-outline-offset-25 focus-visible:outline-interactive-focus active:text-interactive-neutral-active border-static-transparent text-interactive-neutral" id="tab-explain" data-tab="explain" data-i18n="tabExplain" role="tab" aria-selected="false" aria-controls="view-explain" tabindex="-1" type="button">Uitleg</button>
-    <button class="tab no-underline inline-flex h-full min-h-700 snap-start items-center border-b-200 p-50 prose-label-small hover:text-interactive-neutral-hover focus-visible:rounded-100 focus-visible:outline-200 focus-visible:-outline-offset-25 focus-visible:outline-interactive-focus active:text-interactive-neutral-active border-static-transparent text-interactive-neutral" id="tab-changelog" data-tab="changelog" data-i18n="tabChangelog" role="tab" aria-selected="false" aria-controls="view-changelog" tabindex="-1" type="button">Nieuw</button>
   </div>
 </nav>
 
@@ -210,9 +209,6 @@
   <div class="explain-content anwb-container"></div>
 </div>
 
-<div class="view" id="view-changelog" role="tabpanel" aria-labelledby="tab-changelog">
-  <div class="changelog-content anwb-container"></div>
-</div>
 
 <div class="view" id="view-log" role="tabpanel" aria-labelledby="tab-log">
   <div class="log-content anwb-container">
@@ -267,12 +263,12 @@
 <footer class="anwb-footer context-strong">
   <svg class="lockup footer-lockup" viewBox="0 0 121 145" aria-hidden="true" focusable="false"><path fill="currentColor" d="M121 0v145H37L.89 54.189A7.884 7.884 0 0 1 5.4 43.888L120.431 0H121Z"/></svg>
   <p data-i18n-html="footerHtml">Gebouwd door en voor <strong>DIGHV</strong> · Weerdata via Open&#8209;Meteo · Geen officieel ANWB-product</p>
-  <p class="mt-50 prose-paragraph-body-x-small"><a href="#releaselog"><span id="appVersion"></span><span data-i18n="footerWhatsNew">Wat is er nieuw</span></a></p>
+  <p class="mt-50 prose-paragraph-body-x-small" id="appVersion"></p>
 </footer>
 
 </div>
 
-<script src="logic.js?v=23"></script>
-<script src="script.js?v=23"></script>
+<script src="logic.js?v=24"></script>
+<script src="script.js?v=24"></script>
 </body>
 </html>

@@ -9,13 +9,6 @@ function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 }
 
-// Badge afleiden uit het eerste woord van de commit ("Fix …" is geen "Nieuw").
-function commitType(msg) {
-  if (/^(fix|herstel)/i.test(msg)) return 'fix';
-  if (/^(refine|revise|improve|update|polish|redesign|qa|follow-?ups?|verbeter|fase|review|releaselog|rapport)/i.test(msg)) return 'improve';
-  return 'new';
-}
-
 function durationParts(mins) {
   return { d: Math.floor(mins / 1440), h: Math.floor((mins % 1440) / 60), m: mins % 60 };
 }
@@ -537,7 +530,7 @@ function seasonalMoment(dateKey, today, memory = {}) {
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
-    escapeHtml, commitType, durationParts, pickDaily, dateKeyInZone,
+    escapeHtml, durationParts, pickDaily, dateKeyInZone,
     normalizeForecast, mergeHourlyByTime, dataTimestamp, hourlyNowIndex,
     POLLEN_KEYS, POLLEN_THRESHOLDS, parsePollen, highPollenKeys,
     THRESHOLDS, checklistConditions, PREF_OFFSETS, interpolateHourly, isSnowCode, outlookAt, computeConditions, jacketLevel, adviceKeys, extremePool, jacketScale, calibrate,

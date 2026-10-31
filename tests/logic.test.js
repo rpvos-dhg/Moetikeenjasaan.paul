@@ -46,12 +46,6 @@ test('escapeHtml neutraliseert HTML', () => {
   assert.equal(L.escapeHtml('<img src=x onerror="a">'), '&lt;img src=x onerror=&quot;a&quot;&gt;');
 });
 
-test('commitType leidt de badge af uit het eerste woord', () => {
-  assert.equal(L.commitType('Fix UV index'), 'fix');
-  assert.equal(L.commitType('Refine jacket icon'), 'improve');
-  assert.equal(L.commitType('Tutorial overlay'), 'new');
-});
-
 test('normalizeForecast zet unixtime om naar ms en lokale datumsleutels', () => {
   const w = L.normalizeForecast({
     utc_offset_seconds: 7200,
