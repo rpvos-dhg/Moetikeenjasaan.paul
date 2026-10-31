@@ -1,8 +1,7 @@
 /*
  * ANWB huisstijl design tokens (curated subset for HTML, slides and visuals).
- * Source: https://de huisstijl (Fundamentals/Tokens), read 2026-10-28.
- * Names and values match the design system's own CSS custom properties, so code written
- * against this file ports to the design system package without renaming.
+ * Read 2026-10-28.
+ * Names and values match the design system's own CSS custom properties.
  *
  * Colour tokens are CONTEXTUAL: put class "context-default" (white page),
  * "context-weak" (light grey page) or "context-strong" (dark blue page) on a

@@ -6,7 +6,7 @@ const WALKERS = [
 ];
 
 // ─── huisstijl-klassen voor wat het script opbouwt of omschakelt ───────────────
-// Letterlijk uit de huisstijl-componenten (de huisstijl); de stijl komt uit huisstijl/huisstijl.css.
+// Letterlijk uit de huisstijl-componenten; de stijl komt uit huisstijl/huisstijl.css.
 const UI_FOCUS = 'focus-visible:outline-200 focus-visible:outline-offset-25 focus-visible:outline-interactive-focus';
 const UI = {
   // SubNavigation-item: geselecteerd en niet geselecteerd
@@ -2691,7 +2691,7 @@ function showToast(key, actionKey, onAction) {
   const toast = document.getElementById('toast');
   toast.hidden = false;
   clearTimeout(toastTimer);
-  // huisstijl: een Toast met een actie mag niet vanzelf verdwijnen als die actie nergens
+  // Huisstijl: een Toast met een actie mag niet vanzelf verdwijnen als die actie nergens
   // anders op de pagina staat (ongedaan maken). Die blijft staan tot sluiten of actie.
   if (!actionKey) toastTimer = setTimeout(hideToast, 6000);
 }

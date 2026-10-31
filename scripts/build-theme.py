@@ -34,7 +34,7 @@ decls = [d.strip() for d in m.group(1).split(';') if d.strip().startswith('--') 
 dark = 'html.dark,\nhtml.dark .context-default,\nhtml.dark .context-weak {\n  ' + ';\n  '.join(decls) + ';\n  color-scheme: dark;\n}'
 
 head = """/*
- * Gegenereerd uit huisstijl.css door scripts/build-theme.py (zie README).
+ * Gegenereerd uit huisstijl.css door scripts/build-theme.py.
  * 1. Lettertokens met terugval: huisstijl noemt alleen "Clan Pro" en "Bernina Sans".
  *    Die fonts zitten niet in deze openbare repo; staan ze op het toestel, dan
  *    worden ze gebruikt, anders Inter.
