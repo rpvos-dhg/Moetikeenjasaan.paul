@@ -256,15 +256,6 @@ h1 {
   left: 0;
   z-index: var(--z-dropdown);
   width: min(22.5rem, calc(100vw - 2 * var(--spacing-200)));
-  padding: var(--spacing-200);
-  border-radius: var(--radius-200);
-  background: var(--background-color-weak);
-  box-shadow: var(--shadow-neutral);
-}
-
-#locationPanelCoords {
-  color: var(--foreground-color-subtle);
-  font-variant-numeric: tabular-nums;
 }
 
 .location-actions {
@@ -280,13 +271,12 @@ h1 {
 
 .location-source,
 .location-status {
-  margin-top: var(--spacing-150);
   color: var(--foreground-color-subtle);
   font: var(--paragraph-body-x-small);
   font-family: var(--font-body);
 }
 
-.location-status { min-height: var(--size-250); margin-top: var(--spacing-50); }
+.location-status { min-height: var(--size-250); }
 .location-source a { color: var(--foreground-color-interactive-highlight-strong); }
 
 /* ─── Raster ──────────────────────────────────────────────────────────────── */
@@ -956,16 +946,13 @@ html.dark .anwb-select {
 .pollen-items { display: grid; gap: var(--spacing-100); padding-bottom: var(--spacing-150); }
 
 .pollen-item {
-  padding: var(--spacing-150);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--spacing-150);
+  padding: var(--spacing-100) var(--spacing-150);
   border-radius: var(--radius-200);
   background: var(--background-color-weak);
-}
-
-.pollen-item-header {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--spacing-150);
-  margin-bottom: var(--spacing-75);
   font: var(--paragraph-body-small);
   font-family: var(--font-body);
 }
@@ -975,10 +962,8 @@ html.dark .anwb-select {
 .pollen-value {
   color: var(--foreground-color-subtle);
   font-variant-numeric: tabular-nums;
-  text-align: right;
 }
 
-/* huisstijl Meter: spoor + vulling; feedbackkleur, want het is een waarschuwing */
 .pollen-tomorrow {
   margin-top: var(--spacing-150);
   padding-top: var(--spacing-150);
@@ -1050,18 +1035,18 @@ html.dark .anwb-select {
   color: var(--foreground-color-subtle);
 }
 
-/* huisstijl Label (small) */
+/* huisstijl Label; in de smalle dagkolom mag de tekst afbreken (anders valt "Vergelijkbaar" weg) */
 .comparison-verdict {
   margin-top: var(--spacing-75);
-  padding: var(--spacing-25) var(--spacing-100);
-  border-radius: var(--radius-100);
-  font: var(--label-x-small);
-  font-family: var(--font-heading);
+  height: auto;
+  min-height: var(--size-400);
+  max-width: 100%;
+  padding-inline: var(--spacing-100);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  text-align: center;
 }
-
-.comparison-verdict.better { background: var(--brand-green); color: var(--white); }
-.comparison-verdict.worse { background: var(--brand-orange); color: var(--white); }
-.comparison-verdict.similar { background: var(--neutral-200); color: var(--neutral-900); }
 
 /* ─── Looplog ─────────────────────────────────────────────────────────────── */
 .log-content { padding-top: var(--spacing-400); padding-bottom: var(--spacing-600); }
@@ -1233,29 +1218,6 @@ html.dark .anwb-select {
   padding: var(--spacing-300);
   text-align: center;
   color: var(--foreground-color-subtle);
-}
-
-/* huisstijl Toast: ocean vlak, korte melding met actie */
-.toast {
-  position: fixed;
-  left: var(--spacing-200);
-  right: var(--spacing-200);
-  bottom: max(var(--spacing-300), env(safe-area-inset-bottom));
-  z-index: var(--z-toast);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-200);
-  width: fit-content;
-  max-width: calc(100vw - 2 * var(--spacing-200));
-  margin-inline: auto;
-  padding: var(--spacing-150) var(--spacing-200);
-  border-radius: var(--radius-100);
-  background: var(--background-color-default);
-  color: var(--foreground-color-neutral);
-  box-shadow: var(--shadow-neutral);
-  font: var(--paragraph-body-small);
-  font-family: var(--font-body);
 }
 
 /* ─── Uitleg en releaselog ────────────────────────────────────────────────── */
