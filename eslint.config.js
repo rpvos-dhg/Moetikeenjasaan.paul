@@ -7,11 +7,11 @@ const browser = Object.fromEntries([
 
 // Functies uit logic.js die script.js gebruikt (beide gewone <script>-bestanden).
 const logic = Object.fromEntries([
-  'escapeHtml', 'commitType', 'durationParts', 'pickDaily', 'dateKeyInZone', 'normalizeForecast',
+  'escapeHtml', 'durationParts', 'pickDaily', 'dateKeyInZone', 'normalizeForecast',
   'mergeHourlyByTime', 'dataTimestamp', 'hourlyNowIndex', 'POLLEN_KEYS',
   'POLLEN_THRESHOLDS', 'parsePollen', 'highPollenKeys', 'THRESHOLDS', 'checklistConditions', 'PREF_OFFSETS', 'interpolateHourly', 'isSnowCode',
   'outlookAt', 'computeConditions',
-  'jacketLevel', 'adviceKeys', 'extremePool', 'jacketScale', 'calibrate', 'minutesOfDay',
+  'jacketLevel', 'adviceKeys', 'extremePool', 'jacketScale', 'calibrate', 'walkPhase', 'minutesOfDay',
   'scoreBreakBlocks', 'bestBreakMoment', 'topBreakOptions', 'WET_SLOT_MM', 'nowcast', 'windowDayStats', 'dayScore', 'logStats',
   'achievements', 'seasonalMoment',
 ].map(name => [name, 'readonly']));

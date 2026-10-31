@@ -145,6 +145,10 @@ const i18n = {
     extremeFog: ['Mist. Je collega\'s zie je pas als je er bijna bent.', 'Dichte mist: blijf op de stoep.'],
     weekendNote: 'Weekend! Het advies geldt, maar de pauzetijden niet.',
     feedbackQuestion: 'Hoe was het buiten?',
+    walkStart: 'Ik ga nu lopen', walkBack: 'Ik ben terug',
+    walkOut: time => `Onderweg sinds ${time}. Fijne wandeling!`,
+    walkQuestion: 'Hoe was je wandeling?',
+    walkSkipped: 'Oké, deze wandeling telt niet mee.',
     feedbackCold: 'Ik had het koud', feedbackOk: 'Precies goed', feedbackWarm: 'Ik had het warm',
     feedbackSkip: 'Niet buiten geweest', feedbackSkipped: 'Prima, morgen weer.',
     feedbackThanks: 'Dank je. We passen het advies voor jou aan.',
@@ -349,6 +353,10 @@ const i18n = {
     extremeFog: ['Fog. You will only see your colleagues once you are close.', 'Thick fog: stay on the pavement.'],
     weekendNote: 'Weekend! The advice applies, the break times do not.',
     feedbackQuestion: 'How was it outside?',
+    walkStart: "I'm heading out now", walkBack: "I'm back",
+    walkOut: time => `Out since ${time}. Enjoy your walk!`,
+    walkQuestion: 'How was your walk?',
+    walkSkipped: "OK, this walk won't count.",
     feedbackCold: 'I was cold', feedbackOk: 'Just right', feedbackWarm: 'I was warm',
     feedbackSkip: "Didn't go out", feedbackSkipped: 'Fine, see you tomorrow.',
     feedbackThanks: 'Thanks. We will adjust the advice for you.',
@@ -518,6 +526,7 @@ function applyTranslations() {
   renderPrefSummary();
   renderCalibrationNote();
   renderFeedbackRow();
+  renderWalkRow();
   if (toastState && !document.getElementById('toast').hidden) renderToast();
   if (tourStep >= 0) showTourStep(tourStep);
   renderLocationUi();
@@ -609,7 +618,7 @@ function renderExplainHtml() {
         <tr><td>Normal</td><td><code>0</code></td></tr>
         <tr><td>I run warm</td><td>5 °C warmer</td></tr>
       </table>
-      <p>After your lunch on workdays the app asks how it was outside. "I was cold" makes the advice count 1 °C colder, "I was warm" 1 °C warmer, up to 6 °C. Below the advice you see "for you X °C" whenever an adjustment applies; under "Your type" you can reset it.</p>
+      <p>Tap "I'm heading out now" when you go outside. After "I'm back", or by itself after 10 minutes, the app asks how your walk was. Without a walk it asks after your lunch on workdays. "I was cold" makes the advice count 1 °C colder, "I was warm" 1 °C warmer, up to 6 °C. Below the advice you see "for you X °C" whenever an adjustment applies; under "Your type" you can reset it.</p>
     </div>
     <div class="explain-section context-default">
       <h2>5. Rain, snow and storms take priority</h2>
@@ -715,7 +724,7 @@ function renderExplainHtml() {
         <tr><td>Normaal</td><td><code>0</code></td></tr>
         <tr><td>Warmbloedig</td><td>5 °C warmer</td></tr>
       </table>
-      <p>Na je lunch vraagt de app op werkdagen hoe het buiten was. Bij "Ik had het koud" rekent het advies 1 °C kouder, bij "Ik had het warm" 1 °C warmer, tot maximaal 6 °C. Onder het advies zie je "voor jou X °C" zodra er een bijstelling geldt; onder "Jouw type" zet je hem terug.</p>
+      <p>Tik op "Ik ga nu lopen" als je naar buiten gaat. Na "Ik ben terug", of vanzelf na 10 minuten, vraagt de app hoe je wandeling was. Zonder wandeling vraagt de app het op werkdagen na je lunch. Bij "Ik had het koud" rekent het advies 1 °C kouder, bij "Ik had het warm" 1 °C warmer, tot maximaal 6 °C. Onder het advies zie je "voor jou X °C" zodra er een bijstelling geldt; onder "Jouw type" zet je hem terug.</p>
     </div>
     <div class="explain-section context-default">
       <h2>5. Regen, sneeuw en storm gaan voor</h2>
@@ -1816,6 +1825,7 @@ function renderAdvice() {
   renderJacketMeter(cond);
   renderExtremeNote(cond);
   renderFeedbackRow(cond);
+  renderWalkRow();
 
   // Schermlezers: alleen aankondigen als het advies echt verandert.
   const announcement = jacketType ? `${verdict}. ${jacketType}.` : `${verdict}.`;
@@ -1862,7 +1872,56 @@ function renderExtremeNote(cond) {
   el.textContent = text;
 }
 
-// Na de lunch op werkdagen: hoe was het buiten? Eén keer per dag, niet bij storm.
+// "Ik ga nu lopen": tijdstip bewaren, daarna vragen hoe het was (zie walkPhase).
+let walk = readJson('dighv_walk', null);
+function setWalk(value) {
+  walk = value;
+  if (value) localStorage_safe_set('dighv_walk', JSON.stringify(value));
+  else localStorage_safe_remove('dighv_walk');
+}
+function currentWalkPhase() {
+  const phase = walkPhase(walk, Date.now());
+  if (phase === 'expired') { setWalk(null); return 'none'; }
+  return phase;
+}
+
+function renderWalkRow() {
+  const row = document.getElementById('walkRow');
+  if (!row) return;
+  const phase = currentWalkPhase();
+  // Staat er een open vraag (lunch), dan eerst die; na een bedankregel mag je weer lopen.
+  const feedback = document.getElementById('feedbackRow');
+  const asking = !feedback.hidden && !feedback.dataset.answer;
+  row.hidden = !weatherData || phase === 'ask' || (phase === 'none' && asking);
+  if (row.hidden) return;
+  const status = document.getElementById('walkStatus');
+  status.hidden = phase !== 'out';
+  if (phase === 'out') status.textContent = t('walkOut', hhmm(walk.start));
+  document.getElementById('walkBtn').textContent = t(phase === 'out' ? 'walkBack' : 'walkStart');
+}
+
+function onWalkButton() {
+  if (currentWalkPhase() === 'out') {
+    setWalk({ ...walk, back: true });
+    renderFeedbackRow();
+    renderWalkRow();
+    const question = document.getElementById('feedbackQuestion');
+    question?.focus();
+    if (question) announce(question.textContent);
+    return;
+  }
+  setWalk({ start: Date.now() });
+  // Een eerder antwoord van vandaag niet laten hangen: nieuwe wandeling, nieuwe vraag.
+  const row = document.getElementById('feedbackRow');
+  delete row.dataset.answer;
+  row.querySelector('.feedback-actions').hidden = false;
+  renderFeedbackRow();
+  renderWalkRow();
+  announce(document.getElementById('walkStatus').textContent);
+}
+
+// Hoe was het buiten? Na "Ik ga nu lopen", en anders na de lunch op werkdagen
+// (één keer per dag, niet bij storm).
 function renderFeedbackRow(cond = weatherData ? getConditions() : null) {
   const row = document.getElementById('feedbackRow');
   if (!row) return;
@@ -1875,21 +1934,26 @@ function renderFeedbackRow(cond = weatherData ? getConditions() : null) {
   const now = new Date();
   const mins = now.getHours() * 60 + now.getMinutes();
   const answered = localStorage_safe_get('dighv_feedback_date') === getAmsterdamDateKey(now);
-  const show = isWorkday(now) && mins >= lunchMinutes + 30 && mins < 18 * 60 && !answered && !cond?.stormy;
+  const afterWalk = currentWalkPhase() === 'ask';
+  const afterLunch = isWorkday(now) && mins >= lunchMinutes + 30 && mins < 18 * 60 && !answered && !cond?.stormy;
+  const show = afterWalk || (afterLunch && currentWalkPhase() === 'none');
   row.hidden = !show;
-  if (show) question.textContent = t('feedbackQuestion');
+  if (show) question.textContent = t(afterWalk ? 'walkQuestion' : 'feedbackQuestion');
 }
 
 function giveFeedback(kind) {
+  const afterWalk = currentWalkPhase() === 'ask';
+  setWalk(null);
   const before = calibration;
   if (kind !== 'skip') calibration = calibrate(calibration, kind);
   const atLimit = kind !== 'ok' && kind !== 'skip' && calibration === before;
   localStorage_safe_set('dighv_calibration', String(calibration));
   localStorage_safe_set('dighv_feedback_date', getAmsterdamDateKey(new Date()));
   const row = document.getElementById('feedbackRow');
-  row.dataset.answer = kind === 'skip' ? 'feedbackSkipped' : kind === 'ok' ? 'feedbackThanksOk' : atLimit ? 'calibrationLimit' : 'feedbackThanks';
+  row.dataset.answer = kind === 'skip' ? (afterWalk ? 'walkSkipped' : 'feedbackSkipped') : kind === 'ok' ? 'feedbackThanksOk' : atLimit ? 'calibrationLimit' : 'feedbackThanks';
   row.querySelector('.feedback-actions').hidden = true;
   renderFeedbackRow();
+  renderWalkRow();
   renderCalibrationNote();
   if (weatherData) renderAdvice();
   // De knoppen zijn weg: focus en voorlezen via de bedankregel.
@@ -2424,6 +2488,7 @@ function bindPrefControls() {
   });
 
   document.querySelectorAll('#feedbackRow [data-feedback]').forEach(btn => btn.addEventListener('click', () => giveFeedback(btn.dataset.feedback)));
+  document.getElementById('walkBtn')?.addEventListener('click', onWalkButton);
   document.getElementById('shareBtn')?.addEventListener('click', shareBreak);
 
   document.getElementById('darkModeToggle').addEventListener('click', () => {
@@ -2761,6 +2826,8 @@ const REFRESH_MS = 10 * 60 * 1000;
 // terugkeer of als de verbinding terugkomt en de data oud is.
 setInterval(() => { if (!document.hidden) fetchWeather(); }, REFRESH_MS);
 setInterval(updateClock, 30000);
+// Na 10 minuten lopen vanzelf de vraag tonen, ook als het weer niet ververst.
+setInterval(() => { if (walk) { renderFeedbackRow(); renderWalkRow(); } }, 30000);
 const refreshIfStale = () => {
   if (!document.hidden && Date.now() - lastFetchAt > REFRESH_MS) fetchWeather();
 };

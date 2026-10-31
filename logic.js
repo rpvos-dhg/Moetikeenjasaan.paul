@@ -316,6 +316,18 @@ function jacketScale(effectiveFeel) {
 }
 
 // Persoonlijke kalibratie na feedback: "te koud" maakt het advies warmer.
+// "Ik ga nu lopen": na 10 minuten (of na "Ik ben terug") vragen we hoe het was.
+// Na 3 uur zonder antwoord vervalt de wandeling.
+const WALK_ASK_AFTER_MS = 10 * 60 * 1000;
+const WALK_EXPIRE_MS = 3 * 60 * 60 * 1000;
+function walkPhase(walk, now) {
+  if (!walk || !Number.isFinite(walk.start)) return 'none';
+  const age = now - walk.start;
+  if (age < 0 || age > WALK_EXPIRE_MS) return 'expired';
+  if (walk.back || age >= WALK_ASK_AFTER_MS) return 'ask';
+  return 'out';
+}
+
 function calibrate(current, feedback) {
   const step = feedback === 'cold' ? 1 : feedback === 'warm' ? -1 : 0;
   return Math.max(-6, Math.min(6, (current || 0) + step));
@@ -533,7 +545,7 @@ if (typeof module !== 'undefined' && module.exports) {
     escapeHtml, durationParts, pickDaily, dateKeyInZone,
     normalizeForecast, mergeHourlyByTime, dataTimestamp, hourlyNowIndex,
     POLLEN_KEYS, POLLEN_THRESHOLDS, parsePollen, highPollenKeys,
-    THRESHOLDS, checklistConditions, PREF_OFFSETS, interpolateHourly, isSnowCode, outlookAt, computeConditions, jacketLevel, adviceKeys, extremePool, jacketScale, calibrate,
+    THRESHOLDS, checklistConditions, PREF_OFFSETS, interpolateHourly, isSnowCode, outlookAt, computeConditions, jacketLevel, adviceKeys, extremePool, jacketScale, calibrate, walkPhase, WALK_ASK_AFTER_MS, WALK_EXPIRE_MS,
     minutesOfDay, scoreBreakBlocks, bestBreakMoment, topBreakOptions, WET_SLOT_MM, nowcast, windowDayStats, dayScore,
     logStats, achievements, seasonalMoment,
   };

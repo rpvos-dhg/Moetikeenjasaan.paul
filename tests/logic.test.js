@@ -46,6 +46,17 @@ test('escapeHtml neutraliseert HTML', () => {
   assert.equal(L.escapeHtml('<img src=x onerror="a">'), '&lt;img src=x onerror=&quot;a&quot;&gt;');
 });
 
+test('walkPhase: onderweg, daarna vragen, na 3 uur vervallen', () => {
+  const start = Date.UTC(2026, 9, 31, 11, 0);
+  assert.equal(L.walkPhase(null, start), 'none');
+  assert.equal(L.walkPhase({ start: 'x' }, start), 'none');
+  assert.equal(L.walkPhase({ start }, start + 5 * 60000), 'out');
+  assert.equal(L.walkPhase({ start, back: true }, start + 60000), 'ask');
+  assert.equal(L.walkPhase({ start }, start + L.WALK_ASK_AFTER_MS), 'ask');
+  assert.equal(L.walkPhase({ start }, start + L.WALK_EXPIRE_MS + 1), 'expired');
+  assert.equal(L.walkPhase({ start }, start - 60000), 'expired');
+});
+
 test('normalizeForecast zet unixtime om naar ms en lokale datumsleutels', () => {
   const w = L.normalizeForecast({
     utc_offset_seconds: 7200,
