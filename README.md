@@ -28,7 +28,7 @@ HTML, CSS en vanilla JavaScript, zonder build-stap en zonder runtime-dependencie
 | [Open-Meteo Forecast API](https://open-meteo.com/) | Temperatuur, wind, windstoten, dauwpunt, neerslag, UV, weercode |
 | [Open-Meteo Air Quality API](https://open-meteo.com/en/docs/air-quality-api) | Live pollenconcentraties |
 | [OpenStreetMap Nominatim](https://nominatim.org/) | Plaatsnaam bij "Gebruik mijn locatie" (© OpenStreetMap-bijdragers) |
-| [GitHub API](https://docs.github.com/rest) | Versienummer en releaselog (een paar uur lokaal bewaard) |
+| [GitHub API](https://docs.github.com/rest) | Versienummer (een paar uur lokaal bewaard) |
 
 Data wordt elke 10 minuten ververst (niet in een verborgen tabblad). Standaardlocatie: **ANWB HQ, Wassenaarseweg, Den Haag** (52.0964° N, 4.3268° O). Via het potlood kan de app je huidige locatie gebruiken, afgerond op ~100 m. Die keuze blijft bewaard tot je terugschakelt naar ANWB HQ.
 

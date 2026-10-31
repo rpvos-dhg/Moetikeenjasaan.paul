@@ -9,13 +9,6 @@ function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 }
 
-// Badge afleiden uit het eerste woord van de commit ("Fix …" is geen "Nieuw").
-function commitType(msg) {
-  if (/^(fix|herstel)/i.test(msg)) return 'fix';
-  if (/^(refine|revise|improve|update|polish|redesign|qa|follow-?ups?|verbeter|fase|review|releaselog|rapport)/i.test(msg)) return 'improve';
-  return 'new';
-}
-
 function durationParts(mins) {
   return { d: Math.floor(mins / 1440), h: Math.floor((mins % 1440) / 60), m: mins % 60 };
 }
@@ -323,6 +316,18 @@ function jacketScale(effectiveFeel) {
 }
 
 // Persoonlijke kalibratie na feedback: "te koud" maakt het advies warmer.
+// "Ik ga nu lopen": na 10 minuten (of na "Ik ben terug") vragen we hoe het was.
+// Na 3 uur zonder antwoord vervalt de wandeling.
+const WALK_ASK_AFTER_MS = 10 * 60 * 1000;
+const WALK_EXPIRE_MS = 3 * 60 * 60 * 1000;
+function walkPhase(walk, now) {
+  if (!walk || !Number.isFinite(walk.start)) return 'none';
+  const age = now - walk.start;
+  if (age < 0 || age > WALK_EXPIRE_MS) return 'expired';
+  if (walk.back || age >= WALK_ASK_AFTER_MS) return 'ask';
+  return 'out';
+}
+
 function calibrate(current, feedback) {
   const step = feedback === 'cold' ? 1 : feedback === 'warm' ? -1 : 0;
   return Math.max(-6, Math.min(6, (current || 0) + step));
@@ -537,10 +542,10 @@ function seasonalMoment(dateKey, today, memory = {}) {
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
-    escapeHtml, commitType, durationParts, pickDaily, dateKeyInZone,
+    escapeHtml, durationParts, pickDaily, dateKeyInZone,
     normalizeForecast, mergeHourlyByTime, dataTimestamp, hourlyNowIndex,
     POLLEN_KEYS, POLLEN_THRESHOLDS, parsePollen, highPollenKeys,
-    THRESHOLDS, checklistConditions, PREF_OFFSETS, interpolateHourly, isSnowCode, outlookAt, computeConditions, jacketLevel, adviceKeys, extremePool, jacketScale, calibrate,
+    THRESHOLDS, checklistConditions, PREF_OFFSETS, interpolateHourly, isSnowCode, outlookAt, computeConditions, jacketLevel, adviceKeys, extremePool, jacketScale, calibrate, walkPhase, WALK_ASK_AFTER_MS, WALK_EXPIRE_MS,
     minutesOfDay, scoreBreakBlocks, bestBreakMoment, topBreakOptions, WET_SLOT_MM, nowcast, windowDayStats, dayScore,
     logStats, achievements, seasonalMoment,
   };

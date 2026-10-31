@@ -63,7 +63,7 @@ let calibration = Math.max(-6, Math.min(6, Number(localStorage_safe_get('dighv_c
 // ─── i18n ────────────────────────────────────────────────────────────────────
 const i18n = {
   nl: {
-    tabAdvice: 'Advies', tabLog: 'Looplog', tabExplain: 'Uitleg', tabChangelog: 'Nieuw',
+    tabAdvice: 'Advies', tabLog: 'Looplog', tabExplain: 'Uitleg',
     tabsLabel: 'Onderdelen',
     h1Html: 'Jas aan of <span class="text-highlight-strong">niet?</span>',
     lead: 'De officieuze DIGHV pauze-scanner. Even checken voor je naar buiten loopt.',
@@ -85,7 +85,7 @@ const i18n = {
     footerHtml: 'Gebouwd door en voor <strong>DIGHV</strong> · Weerdata via Open&#8209;Meteo · Geen officieel ANWB-product',
     pageTitle: 'Jas of geen jas? | DIGHV Pauze-advies',
     editLocation: 'Locatie wijzigen',
-    versionLabel: n => `Versie 1.${n} · `, footerWhatsNew: 'Wat is er nieuw',
+    versionLabel: n => `Versie 1.${n}`,
     meterCold: 'koud', meterWarm: 'warm',
     locationPanelTitle: 'Locatie',
     useCurrentLocationBtn: 'Gebruik mijn locatie', resetLocationBtn: 'Terug naar ANWB HQ',
@@ -145,6 +145,10 @@ const i18n = {
     extremeFog: ['Mist. Je collega\'s zie je pas als je er bijna bent.', 'Dichte mist: blijf op de stoep.'],
     weekendNote: 'Weekend! Het advies geldt, maar de pauzetijden niet.',
     feedbackQuestion: 'Hoe was het buiten?',
+    walkStart: 'Ik ga nu lopen', walkBack: 'Ik ben terug',
+    walkOut: time => `Onderweg sinds ${time}. Fijne wandeling!`,
+    walkQuestion: 'Hoe was je wandeling?',
+    walkSkipped: 'Oké, deze wandeling telt niet mee.',
     feedbackCold: 'Ik had het koud', feedbackOk: 'Precies goed', feedbackWarm: 'Ik had het warm',
     feedbackSkip: 'Niet buiten geweest', feedbackSkipped: 'Prima, morgen weer.',
     feedbackThanks: 'Dank je. We passen het advies voor jou aan.',
@@ -267,7 +271,7 @@ const i18n = {
     dateLocale: 'nl-NL',
   },
   en: {
-    tabAdvice: 'Advice', tabLog: 'Walk log', tabExplain: 'Guide', tabChangelog: "What's new",
+    tabAdvice: 'Advice', tabLog: 'Walk log', tabExplain: 'Guide',
     tabsLabel: 'Sections',
     h1Html: 'Jacket on or <span class="text-highlight-strong">not?</span>',
     lead: 'The unofficial DIGHV break scanner. Check before you head outside.',
@@ -289,7 +293,7 @@ const i18n = {
     footerHtml: 'Built by and for <strong>DIGHV</strong> · Weather data via Open&#8209;Meteo · Not an official ANWB product',
     pageTitle: 'Jacket or no jacket? | DIGHV Break advice',
     editLocation: 'Change location',
-    versionLabel: n => `Version 1.${n} · `, footerWhatsNew: "What's new",
+    versionLabel: n => `Version 1.${n}`,
     meterCold: 'cold', meterWarm: 'warm',
     locationPanelTitle: 'Location',
     useCurrentLocationBtn: 'Use my location', resetLocationBtn: 'Back to ANWB HQ',
@@ -349,6 +353,10 @@ const i18n = {
     extremeFog: ['Fog. You will only see your colleagues once you are close.', 'Thick fog: stay on the pavement.'],
     weekendNote: 'Weekend! The advice applies, the break times do not.',
     feedbackQuestion: 'How was it outside?',
+    walkStart: "I'm heading out now", walkBack: "I'm back",
+    walkOut: time => `Out since ${time}. Enjoy your walk!`,
+    walkQuestion: 'How was your walk?',
+    walkSkipped: "OK, this walk won't count.",
     feedbackCold: 'I was cold', feedbackOk: 'Just right', feedbackWarm: 'I was warm',
     feedbackSkip: "Didn't go out", feedbackSkipped: 'Fine, see you tomorrow.',
     feedbackThanks: 'Thanks. We will adjust the advice for you.',
@@ -494,8 +502,6 @@ function applyTranslations() {
     explainEl.innerHTML = renderExplainHtml();
     buildExplainToc(explainEl);
   }
-  const changelogEl = document.querySelector('.changelog-content');
-  if (changelogEl) changelogEl.innerHTML = renderChangelogHtml();
   const langBtn = document.getElementById('langToggle');
   if (langBtn) {
     // Zichtbare tekst staat vooraan in de naam (WCAG 2.5.3), in de taal van de knop.
@@ -520,6 +526,7 @@ function applyTranslations() {
   renderPrefSummary();
   renderCalibrationNote();
   renderFeedbackRow();
+  renderWalkRow();
   if (toastState && !document.getElementById('toast').hidden) renderToast();
   if (tourStep >= 0) showTourStep(tourStep);
   renderLocationUi();
@@ -533,10 +540,8 @@ function applyTranslations() {
   else { showWeatherLoading(); renderChecklist(); }
 }
 
-let liveChangelogReleases = [];
-
 // De GitHub-API staat 60 calls per uur per IP toe en een heel kantoor zit
-// achter één IP. Versie en commits daarom een paar uur lokaal bewaren.
+// achter één IP. Het versienummer daarom een paar uur lokaal bewaren.
 const GITHUB_CACHE_MS = 6 * 60 * 60 * 1000;
 function readGithubCache(key) {
   try {
@@ -547,328 +552,6 @@ function readGithubCache(key) {
 }
 function writeGithubCache(key, data) {
   localStorage_safe_set(key, JSON.stringify({ ts: Date.now(), data }));
-}
-
-async function fetchChangelogUpdates() {
-  try {
-    let commits = readGithubCache('dighv_gh_commits');
-    if (!Array.isArray(commits)) {
-      const res = await fetch(
-        'https://api.github.com/repos/rpvos-dhg/Moetikeenjasaan.paul/commits?since=2026-05-14T00:00:00Z&per_page=100'
-      );
-      if (!res.ok) return;
-      const raw = await res.json();
-      if (!Array.isArray(raw)) return;
-      commits = raw.map(c => ({ date: c.commit.author.date, subject: c.commit.message.split('\n')[0] }));
-      writeGithubCache('dighv_gh_commits', commits);
-    }
-    if (!commits.length) return;
-
-    const byDate = {};
-    for (const commit of commits) {
-      const isoDate = new Date(commit.date)
-        .toLocaleDateString('sv', { timeZone: 'Europe/Amsterdam' });
-      // Commit-onderwerpen zijn externe tekst: escapen voordat ze in innerHTML komen.
-      const subject = String(commit.subject).replace(/\s*\(#\d+\)\s*$/, '');
-      if (/^Merge /.test(subject)) continue; // merge-commits zeggen niets over de app
-      (byDate[isoDate] ||= []).push(subject);
-    }
-
-    liveChangelogReleases = Object.entries(byDate)
-      .sort(([a], [b]) => b.localeCompare(a))
-      .map(([isoDate, messages]) => {
-        // Commitberichten zijn Nederlands; lang="nl" zodat een schermlezer ze goed uitspreekt.
-        const items = messages.map(msg => ({ type: commitType(msg), text: escapeHtml(msg), lang: 'nl' }));
-        return { isoDate, items: { nl: items, en: items } };
-      });
-
-    const changelogEl = document.querySelector('.changelog-content');
-    if (changelogEl) changelogEl.innerHTML = renderChangelogHtml();
-  } catch {
-    // silently ignore — changelog still shows curated history
-  }
-}
-
-function renderChangelogHtml() {
-  const releases = [
-    {
-      isoDate: '2026-10-21',
-      items: {
-        nl: [
-          { type: 'fix',     text: 'Advies kijkt nu echt naar de komende 30 minuten en herkent sneeuw, onweer, storm en windstoten' },
-          { type: 'fix',     text: 'Eén mislukt verzoek of een kapotte opgeslagen waarde legt de app niet meer plat' },
-          { type: 'new',     text: 'Jouw type en kalibratie: na de pauze aangeven hoe het buiten was, het advies past zich aan' },
-          { type: 'new',     text: 'Beste moment per kwartier rond je eigen lunchtijd, en een knop om collega\'s te vragen' },
-          { type: 'new',     text: 'Jas-o-meter, looplog met weer, statistieken en badges, ongedaan maken' },
-          { type: 'improve', text: 'Rustiger ontwerp: advies bovenaan, minder ruis op mobiel, eigen donker thema' },
-          { type: 'improve', text: 'Beter te bedienen met toetsenbord en schermlezer; korte rondleiding van 4 stappen' },
-          { type: 'improve', text: 'Werkt offline met de laatst bekende data en laat zien hoe oud die is' },
-          { type: 'new',     text: 'De pauzekaart zegt welke jas je om je lunchtijd nodig hebt' },
-        ],
-        en: [
-          { type: 'fix',     text: 'Advice now really looks at the next 30 minutes and recognises snow, thunder, storms and gusts' },
-          { type: 'fix',     text: 'One failed request or a broken stored value no longer breaks the app' },
-          { type: 'new',     text: 'Your type and calibration: tell the app how it was outside and the advice adapts' },
-          { type: 'new',     text: 'Best moment per quarter hour around your own lunch time, plus a button to ask colleagues' },
-          { type: 'new',     text: 'Jacket meter, walk log with weather, stats and badges, undo' },
-          { type: 'improve', text: 'Calmer design: advice first, less noise on mobile, a proper dark theme' },
-          { type: 'improve', text: 'Better keyboard and screen reader support; short 4-step tour' },
-          { type: 'improve', text: 'Works offline with the last known data and shows how old it is' },
-          { type: 'new',     text: 'The break card tells you which jacket you need at your lunch time' },
-        ]
-      }
-    },
-    {
-      isoDate: '2026-07-09',
-      items: {
-        nl: [{ type: 'new', text: 'Rondleiding bij het eerste bezoek langs de belangrijkste onderdelen; over te slaan en later opnieuw te openen' }],
-        en: [{ type: 'new', text: 'Tour on your first visit along the main parts of the app; you can skip it and open it again later' }],
-      }
-    },
-    {
-      isoDate: '2026-06-30',
-      items: {
-        nl: [{ type: 'improve', text: 'Jasicoon bijgewerkt: lange mouwen en een rits over de hele lengte' }],
-        en: [{ type: 'improve', text: 'Jacket icon updated: long sleeves and a full-length zip' }],
-      }
-    },
-    {
-      isoDate: '2026-06-26',
-      items: {
-        nl: [
-          { type: 'fix',     text: 'UV-index werkt weer voor locaties in Nederland (het KNMI-model levert geen UV, die komt nu apart)' },
-          { type: 'improve', text: 'Nieuw jasicoon met mouwen, kraag en rits' },
-        ],
-        en: [
-          { type: 'fix',     text: 'UV index works again for locations in the Netherlands (the KNMI model has no UV, it is now fetched separately)' },
-          { type: 'improve', text: 'New jacket icon with sleeves, collar and zip' },
-        ],
-      }
-    },
-    {
-      isoDate: '2026-06-21',
-      items: {
-        nl: [
-          { type: 'fix',     text: 'Regengrafiek en wachtstrook verschijnen weer' },
-          { type: 'fix',     text: 'Vergelijking gisteren, vandaag en morgen gebruikt de juiste dagen; UV wordt op het goede moment gelezen' },
-          { type: 'improve', text: 'Beter te gebruiken met schermlezer en toetsenbord; echte app-iconen voor installatie' },
-          { type: 'new',     text: 'Regengrafiek toont de grootste kans op regen' },
-        ],
-        en: [
-          { type: 'fix',     text: 'Rain chart and waiting strip show up again' },
-          { type: 'fix',     text: 'Yesterday, today and tomorrow use the right days; UV is read at the right time' },
-          { type: 'improve', text: 'Easier to use with a screen reader and keyboard; proper app icons for installing' },
-          { type: 'new',     text: 'Rain chart shows the highest chance of rain' },
-        ],
-      }
-    },
-    {
-      isoDate: '2026-06-07',
-      items: {
-        nl: [{ type: 'improve', text: 'Verzoeken voor weer- en pollendata bijgewerkt, met pollendata voor locaties in Europa' }],
-        en: [{ type: 'improve', text: 'Requests for weather and pollen data updated, with pollen data for locations in Europe' }],
-      }
-    },
-    {
-      isoDate: '2026-05-13',
-      items: {
-        nl: [
-          { type: 'fix',     text: 'Pollenbadge toonde altijd "zeer hoog" in april/mei door een vaste maandtabel. Nu gebaseerd op live meetwaarden' },
-          { type: 'new',     text: 'Windrichting toegevoegd aan de windmetric (bv. ZW, NO)' },
-          { type: 'new',     text: 'Pollenkaart toont nu ook de verwachte pollenwaarden voor morgen' },
-          { type: 'new',     text: 'Zonsopgang en -ondergang zichtbaar in de "Beste pauzetijd"-kaart' },
-          { type: 'new',     text: 'PWA-ondersteuning: app is installeerbaar als standalone app op mobiel en desktop (via browser-menu of adresbalk)' },
-          { type: 'improve', text: 'De themaknop toont nu het huidige thema (🌙/☀️), met een kleine "A" in de automatische stand. Zo zie je of het thema automatisch of vast staat' },
-          { type: 'improve', text: 'Dark mode-tooltip beschrijft nu wat klikken zal doen, niet alleen de huidige staat' },
-          { type: 'new',     text: 'Versienummer toegevoegd in de footer (automatisch oplopend op basis van commits)' },
-          { type: 'security','text': 'Lokale configuratie en looplog-data uit de repository gehaald' },
-        ],
-        en: [
-          { type: 'fix',     text: 'Pollen badge always showed "very high" in April/May due to a fixed monthly table. Now based on live measurements' },
-          { type: 'new',     text: 'Wind direction added to wind metric (e.g. SW, NE)' },
-          { type: 'new',     text: 'Pollen card now also shows tomorrow\'s expected pollen values' },
-          { type: 'new',     text: 'Sunrise and sunset times visible in the "Best break time" card' },
-          { type: 'new',     text: 'PWA support: app can be installed as standalone app on mobile and desktop (via browser menu or address bar)' },
-          { type: 'improve', text: 'The theme button now shows the current theme (🌙/☀️), with a small "A" in automatic mode. You can see whether the theme is automatic or fixed' },
-          { type: 'improve', text: 'Dark mode tooltip now describes what clicking will do, not just the current state' },
-          { type: 'new',     text: 'Version number added to footer (auto-increments with each commit)' },
-          { type: 'security','text': 'Local configuration and walk log data removed from the repository' },
-        ]
-      }
-    },
-    {
-      isoDate: '2026-05-08',
-      items: {
-        nl: [
-          { type: 'new',     text: 'Taalswitch NL/EN toegevoegd: volledige vertaling van de gehele interface' },
-          { type: 'new',     text: 'ANWB-stijl SVG-favicon toegevoegd' },
-          { type: 'new',     text: 'Stadsnaam zichtbaar in de locatiebadge bij gebruik van GPS ("Huidige locatie · Amsterdam")' },
-          { type: 'improve', text: 'GPS-nauwkeurigheid verbeterd: geen gecachte positie meer, langere timeout' },
-          { type: 'improve', text: 'Beste pauzetijd beperkt tot het venster 11:00–15:00' },
-          { type: 'fix',     text: 'Opgelost: "Nu meteen" verscheen ook buiten pauzetijden' },
-          { type: 'fix',     text: 'Ruimte onder advieskaart op desktop verwijderd' },
-          { type: 'new',     text: 'README toegevoegd aan de repository' },
-        ],
-        en: [
-          { type: 'new',     text: 'NL/EN language toggle added: full translation of the entire interface' },
-          { type: 'new',     text: 'ANWB-style SVG favicon added' },
-          { type: 'new',     text: 'City name visible in location badge when using GPS ("Current location · Amsterdam")' },
-          { type: 'improve', text: 'GPS accuracy improved: no cached position, longer timeout' },
-          { type: 'improve', text: 'Best break time now limited to the 11:00–15:00 window' },
-          { type: 'fix',     text: 'Fixed: "Right now" appeared outside break hours' },
-          { type: 'fix',     text: 'Gap below advice card on desktop removed' },
-          { type: 'new',     text: 'README added to the repository' },
-        ]
-      }
-    },
-    {
-      isoDate: '2026-05-07',
-      items: {
-        nl: [
-          { type: 'improve', text: 'Desktopweergave verbeterd: de kaart "Jouw type" en de uitlijning op brede schermen kloppen weer' },
-          { type: 'improve', text: 'Locatieknop en "Jouw type" naar boven verplaatst voor betere volgorde' },
-          { type: 'fix',     text: 'Dark mode hero-onderstreping aangepast' },
-          { type: 'fix',     text: 'Mobiel schalen en dark mode-problemen opgelost' },
-        ],
-        en: [
-          { type: 'improve', text: 'Desktop view improved: the "Your type" card and the alignment on wide screens are correct again' },
-          { type: 'improve', text: 'Location button and "Your type" moved up for better flow' },
-          { type: 'fix',     text: 'Dark mode hero underline adjusted' },
-          { type: 'fix',     text: 'Mobile scaling and dark mode issues fixed' },
-        ]
-      }
-    },
-    {
-      isoDate: '2026-04-28',
-      items: {
-        nl: [
-          { type: 'improve', text: 'CSS opgeschoond: ongebruikte klassen verwijderd en grid geüpdatet' },
-        ],
-        en: [
-          { type: 'improve', text: 'CSS cleanup: removed unused classes and updated grid' },
-        ]
-      }
-    },
-    {
-      isoDate: '2026-04-24',
-      items: {
-        nl: [
-          { type: 'improve', text: 'Dark mode volgt nu apparaatinstellingen (systeem dark mode) én schakelt automatisch bij zonsondergang' },
-          { type: 'new',     text: 'UV-index toegevoegd aan de weercondities en pollentips' },
-          { type: 'new',     text: 'Dag/nacht weericons op basis van zonsopgang en -ondergang' },
-          { type: 'fix',     text: 'Tijdberekening gecorrigeerd naar Amsterdam-tijdzone' },
-          { type: 'improve', text: 'Dark mode-knop toegankelijker gemaakt (aria-labels)' },
-        ],
-        en: [
-          { type: 'improve', text: 'Dark mode now follows device settings (system dark mode) and switches automatically at sunset' },
-          { type: 'new',     text: 'UV index added to weather conditions and pollen tips' },
-          { type: 'new',     text: 'Day/night weather icons based on sunrise and sunset' },
-          { type: 'fix',     text: 'Time calculation corrected to Amsterdam timezone' },
-          { type: 'improve', text: 'Dark mode button made more accessible (aria labels)' },
-        ]
-      }
-    },
-    {
-      isoDate: '2026-04-23',
-      items: {
-        nl: [
-          { type: 'new',     text: 'Pollenoverzicht uitgebreid naar aparte kaart met volumebalk per allergeen (els, berk, grassen, bijvoet, ambrosia, olijf)' },
-          { type: 'new',     text: '"Vandaag vs Morgen" uitgebreid naar 3-daags overzicht: gisteren, vandaag, morgen' },
-          { type: 'improve', text: 'Checklist prominenter gemaakt met styling en automatische weercondities-koppeling' },
-          { type: 'improve', text: 'Layout omgezet naar echt 2×2 grid met toegankelijkheidsverbeteringen' },
-          { type: 'fix',     text: 'Medicatie-item verwijderd uit checklist; pollenwaarschuwingen blijven zichtbaar in het advies' },
-        ],
-        en: [
-          { type: 'new',     text: 'Pollen overview expanded into separate card with volume bar per allergen (alder, birch, grasses, mugwort, ragweed, olive)' },
-          { type: 'new',     text: '"Today vs Tomorrow" expanded to 3-day view: yesterday, today, tomorrow' },
-          { type: 'improve', text: 'Checklist made more prominent with styling and automatic weather condition linking' },
-          { type: 'improve', text: 'Layout converted to true 2×2 grid with accessibility improvements' },
-          { type: 'fix',     text: 'Medication item removed from checklist; pollen warnings remain visible in advice' },
-        ]
-      }
-    },
-    {
-      isoDate: '2026-04-22',
-      tag: 'Eerste versie',
-      tagEn: 'First release',
-      items: {
-        nl: [
-          { type: 'new', text: 'Jasadvies op basis van gevoelstemperatuur (nu + 30 min), met persoonlijke voorkeur (kouwelijk / normaal / warmbloedig)' },
-          { type: 'new', text: 'Live weerdata via Open-Meteo: temperatuur, wind, neerslag, UV-index' },
-          { type: 'new', text: 'Uurverwachting voor de komende uren' },
-          { type: 'new', text: 'Regenradar per 15 minuten voor de komende 2 uur' },
-          { type: 'new', text: 'Live pollendata via Open-Meteo Air Quality API (els, berk, grassen, bijvoet, ambrosia, olijf)' },
-          { type: 'new', text: 'Beste pauzetijd: berekend op basis van temperatuur en regenkans' },
-          { type: 'new', text: 'Volgende pauze: countdown naar lunch of middagpauze' },
-          { type: 'new', text: 'Looplog: registreer wie er mee gaat op de wandeling, inclusief geschiedenis' },
-          { type: 'new', text: 'Dark mode: automatisch op basis van systeeminstelling en zonsondergang' },
-          { type: 'new', text: 'GPS-locatie: tijdelijk overschakelen naar huidige locatie' },
-        ],
-        en: [
-          { type: 'new', text: 'Jacket advice based on feels-like temperature (now + 30 min), with personal preference (sensitive to cold / normal / warm-blooded)' },
-          { type: 'new', text: 'Live weather data via Open-Meteo: temperature, wind, precipitation, UV index' },
-          { type: 'new', text: 'Hourly forecast for the coming hours' },
-          { type: 'new', text: 'Rain radar per 15 minutes for the next 2 hours' },
-          { type: 'new', text: 'Live pollen data via Open-Meteo Air Quality API (alder, birch, grasses, mugwort, ragweed, olive)' },
-          { type: 'new', text: 'Best break time: calculated based on temperature and rain probability' },
-          { type: 'new', text: 'Next break: countdown to lunch or afternoon break' },
-          { type: 'new', text: 'Walk log: register who joins the walk, including history' },
-          { type: 'new', text: 'Dark mode: automatic based on system settings and sunset' },
-          { type: 'new', text: 'GPS location: temporarily switch to current location' },
-        ]
-      }
-    },
-  ];
-
-  const typeConfig = {
-    new:      { label: lang === 'en' ? 'New'       : 'Nieuw',       cls: 'anwb-label--green' },
-    fix:      { label: lang === 'en' ? 'Fix'       : 'Opgelost',    cls: 'anwb-label--red' },
-    improve:  { label: lang === 'en' ? 'Improved'  : 'Verbeterd',   cls: 'anwb-label--lightblue' },
-    security: { label: lang === 'en' ? 'Security'  : 'Beveiliging', cls: 'anwb-label--grey' },
-  };
-
-  const today = new Date().toLocaleDateString('sv', { timeZone: 'Europe/Amsterdam' });
-  // Commits tonen we alleen als ze nieuwer zijn dan de laatste handgeschreven
-  // release; daarvoor staat er al een leesbare tekst in beide talen.
-  const latestCurated = releases.reduce((max, r) => (r.isoDate > max ? r.isoDate : max), '');
-  const allReleases = [...liveChangelogReleases.filter(r => r.isoDate > latestCurated), ...releases]
-    .sort((a, b) => b.isoDate.localeCompare(a.isoDate));
-  const dateFmt = new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'nl-NL', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
-
-  const title = lang === 'en' ? 'Release log' : 'Releaselog';
-  const intro = lang === 'en'
-    ? 'An overview of all changes, grouped by release date.'
-    : 'Een overzicht van alle wijzigingen, gegroepeerd per releasedatum.';
-
-  let html = `<h1>${title}</h1><p class="intro">${intro}</p>`;
-
-  for (const release of allReleases) {
-    const date = dateFmt.format(new Date(release.isoDate + 'T12:00:00Z'));
-    const isToday = release.isoDate === today;
-    const todayTag = isToday ? (lang === 'en' ? 'Today' : 'Vandaag') : null;
-    const staticTag = lang === 'en' ? release.tagEn : release.tag;
-    const tag = todayTag || staticTag;
-    const items = lang === 'en' ? release.items.en : release.items.nl;
-
-    html += `<div class="cl-release context-default">
-      <div class="cl-header">
-        <h2 class="cl-date prose-heading-small">${date}</h2>
-        ${tag ? `<span class="cl-tag anwb-label anwb-label--small anwb-label--yellow">${tag}</span>` : ''}
-      </div>
-      <ul class="cl-items">`;
-
-    for (const item of items) {
-      const cfg = typeConfig[item.type] || typeConfig.new;
-      html += `<li class="cl-item">
-        <span class="cl-badge anwb-label anwb-label--small ${cfg.cls}">${cfg.label}</span>
-        <span class="cl-text"${item.lang ? ` lang="${item.lang}"` : ''}>${item.text}</span>
-      </li>`;
-    }
-
-    html += `</ul></div>`;
-  }
-
-  return html;
 }
 
 // Inhoudsopgave bovenaan de uitleg. De links (#uitleg-N) kiezen ook het tabblad.
@@ -899,7 +582,7 @@ function renderExplainHtml() {
     <p class="intro">The advice comes from live weather data and a few fixed thresholds. Here they are.</p>
     <div class="explain-section context-default">
       <h2>1. Data source</h2>
-      <p>Every 10 minutes the tool fetches weather data from <strong>Open-Meteo</strong> and pollen data from the <strong>Open-Meteo Air Quality API</strong>. For locations in the Netherlands it uses the KNMI model. A hidden tab does not refresh; it does as soon as you come back or the connection returns. The version number and release log come from the <strong>GitHub API</strong>; those requests are kept for a few hours.</p>
+      <p>Every 10 minutes the tool fetches weather data from <strong>Open-Meteo</strong> and pollen data from the <strong>Open-Meteo Air Quality API</strong>. For locations in the Netherlands it uses the KNMI model. A hidden tab does not refresh; it does as soon as you come back or the connection returns. The version number comes from the <strong>GitHub API</strong>; those requests are kept for a few hours.</p>
       <p>Default location: <code>52.0964° N, 4.3268° E</code>, ANWB headquarters in The Hague. Via the pencil the app can use your current location (rounded to about 100 metres; place name from OpenStreetMap). That choice is kept until you switch back to ANWB HQ.</p>
       <div class="callout anwb-alert anwb-alert--informative"><strong>Live check:</strong> the green LIVE dot means the data is fresh; the advice card shows when it was updated. When opening, the app immediately shows the last known data (at most 6 hours old). Data older than half an hour shows as NOT LIVE, with the time of the advice.</div>
     </div>
@@ -935,7 +618,7 @@ function renderExplainHtml() {
         <tr><td>Normal</td><td><code>0</code></td></tr>
         <tr><td>I run warm</td><td>5 °C warmer</td></tr>
       </table>
-      <p>After your lunch on workdays the app asks how it was outside. "I was cold" makes the advice count 1 °C colder, "I was warm" 1 °C warmer, up to 6 °C. Below the advice you see "for you X °C" whenever an adjustment applies; under "Your type" you can reset it.</p>
+      <p>Tap "I'm heading out now" when you go outside. After "I'm back", or by itself after 10 minutes, the app asks how your walk was. Without a walk it asks after your lunch on workdays. "I was cold" makes the advice count 1 °C colder, "I was warm" 1 °C warmer, up to 6 °C. Below the advice you see "for you X °C" whenever an adjustment applies; under "Your type" you can reset it.</p>
     </div>
     <div class="explain-section context-default">
       <h2>5. Rain, snow and storms take priority</h2>
@@ -1005,7 +688,7 @@ function renderExplainHtml() {
     <p class="intro">Het advies komt uit live weerdata en een paar vaste drempels. Hieronder staat welke.</p>
     <div class="explain-section context-default">
       <h2>1. Databron</h2>
-      <p>Elke 10 minuten haalt de tool weerdata op van <strong>Open-Meteo</strong> en pollendata van de <strong>Open-Meteo Air Quality API</strong>. Voor locaties in Nederland gebruikt hij het KNMI-model. In een verborgen tabblad wordt niet ververst; zodra je terugkomt of de verbinding terug is wel. Versienummer en releaselog komen van de <strong>GitHub-API</strong>; die gegevens bewaart de app een paar uur.</p>
+      <p>Elke 10 minuten haalt de tool weerdata op van <strong>Open-Meteo</strong> en pollendata van de <strong>Open-Meteo Air Quality API</strong>. Voor locaties in Nederland gebruikt hij het KNMI-model. In een verborgen tabblad wordt niet ververst; zodra je terugkomt of de verbinding terug is wel. Het versienummer komt van de <strong>GitHub-API</strong>; die gegevens bewaart de app een paar uur.</p>
       <p>Standaardlocatie: <code>52.0964° N, 4.3268° O</code>, het ANWB-hoofdkantoor in Den Haag. Via het potlood kan de app je huidige locatie gebruiken (afgerond op ongeveer 100 meter; plaatsnaam via OpenStreetMap). Die keuze blijft bewaard tot je terugschakelt naar ANWB HQ.</p>
       <div class="callout anwb-alert anwb-alert--informative"><strong>Live check:</strong> het groene LIVE-bolletje betekent dat de data vers is; in de advieskaart staat wanneer hij is bijgewerkt. Bij openen toont de app meteen de laatst bekende data (hoogstens 6 uur oud). Data ouder dan een half uur staat als NIET LIVE, met het tijdstip van het advies.</div>
     </div>
@@ -1041,7 +724,7 @@ function renderExplainHtml() {
         <tr><td>Normaal</td><td><code>0</code></td></tr>
         <tr><td>Warmbloedig</td><td>5 °C warmer</td></tr>
       </table>
-      <p>Na je lunch vraagt de app op werkdagen hoe het buiten was. Bij "Ik had het koud" rekent het advies 1 °C kouder, bij "Ik had het warm" 1 °C warmer, tot maximaal 6 °C. Onder het advies zie je "voor jou X °C" zodra er een bijstelling geldt; onder "Jouw type" zet je hem terug.</p>
+      <p>Tik op "Ik ga nu lopen" als je naar buiten gaat. Na "Ik ben terug", of vanzelf na 10 minuten, vraagt de app hoe je wandeling was. Zonder wandeling vraagt de app het op werkdagen na je lunch. Bij "Ik had het koud" rekent het advies 1 °C kouder, bij "Ik had het warm" 1 °C warmer, tot maximaal 6 °C. Onder het advies zie je "voor jou X °C" zodra er een bijstelling geldt; onder "Jouw type" zet je hem terug.</p>
     </div>
     <div class="explain-section context-default">
       <h2>5. Regen, sneeuw en storm gaan voor</h2>
@@ -1416,7 +1099,7 @@ function bindLocationControls() {
 
 // ─── Tabs (ARIA-tabs: pijltjes/Home/End) + #hash ─────────────────────────────
 const tabs = [...document.querySelectorAll('.tab')];
-const TAB_HASHES = { advice: '', log: '#log', explain: '#uitleg', changelog: '#releaselog' };
+const TAB_HASHES = { advice: '', log: '#log', explain: '#uitleg' };
 
 function selectTab(tab, focus, scroll = true) {
   const target = tab.dataset.tab;
@@ -1436,8 +1119,6 @@ function selectTab(tab, focus, scroll = true) {
     initLogTab();
     renderLogHistory();
     updateLogTime();
-  } else if (target === 'changelog') {
-    document.getElementById('view-changelog').classList.add('active');
   } else {
     document.getElementById('view-explain').classList.add('active');
   }
@@ -2144,6 +1825,7 @@ function renderAdvice() {
   renderJacketMeter(cond);
   renderExtremeNote(cond);
   renderFeedbackRow(cond);
+  renderWalkRow();
 
   // Schermlezers: alleen aankondigen als het advies echt verandert.
   const announcement = jacketType ? `${verdict}. ${jacketType}.` : `${verdict}.`;
@@ -2190,7 +1872,56 @@ function renderExtremeNote(cond) {
   el.textContent = text;
 }
 
-// Na de lunch op werkdagen: hoe was het buiten? Eén keer per dag, niet bij storm.
+// "Ik ga nu lopen": tijdstip bewaren, daarna vragen hoe het was (zie walkPhase).
+let walk = readJson('dighv_walk', null);
+function setWalk(value) {
+  walk = value;
+  if (value) localStorage_safe_set('dighv_walk', JSON.stringify(value));
+  else localStorage_safe_remove('dighv_walk');
+}
+function currentWalkPhase() {
+  const phase = walkPhase(walk, Date.now());
+  if (phase === 'expired') { setWalk(null); return 'none'; }
+  return phase;
+}
+
+function renderWalkRow() {
+  const row = document.getElementById('walkRow');
+  if (!row) return;
+  const phase = currentWalkPhase();
+  // Staat er een open vraag (lunch), dan eerst die; na een bedankregel mag je weer lopen.
+  const feedback = document.getElementById('feedbackRow');
+  const asking = !feedback.hidden && !feedback.dataset.answer;
+  row.hidden = !weatherData || phase === 'ask' || (phase === 'none' && asking);
+  if (row.hidden) return;
+  const status = document.getElementById('walkStatus');
+  status.hidden = phase !== 'out';
+  if (phase === 'out') status.textContent = t('walkOut', hhmm(walk.start));
+  document.getElementById('walkBtn').textContent = t(phase === 'out' ? 'walkBack' : 'walkStart');
+}
+
+function onWalkButton() {
+  if (currentWalkPhase() === 'out') {
+    setWalk({ ...walk, back: true });
+    renderFeedbackRow();
+    renderWalkRow();
+    const question = document.getElementById('feedbackQuestion');
+    question?.focus();
+    if (question) announce(question.textContent);
+    return;
+  }
+  setWalk({ start: Date.now() });
+  // Een eerder antwoord van vandaag niet laten hangen: nieuwe wandeling, nieuwe vraag.
+  const row = document.getElementById('feedbackRow');
+  delete row.dataset.answer;
+  row.querySelector('.feedback-actions').hidden = false;
+  renderFeedbackRow();
+  renderWalkRow();
+  announce(document.getElementById('walkStatus').textContent);
+}
+
+// Hoe was het buiten? Na "Ik ga nu lopen", en anders na de lunch op werkdagen
+// (één keer per dag, niet bij storm).
 function renderFeedbackRow(cond = weatherData ? getConditions() : null) {
   const row = document.getElementById('feedbackRow');
   if (!row) return;
@@ -2203,21 +1934,26 @@ function renderFeedbackRow(cond = weatherData ? getConditions() : null) {
   const now = new Date();
   const mins = now.getHours() * 60 + now.getMinutes();
   const answered = localStorage_safe_get('dighv_feedback_date') === getAmsterdamDateKey(now);
-  const show = isWorkday(now) && mins >= lunchMinutes + 30 && mins < 18 * 60 && !answered && !cond?.stormy;
+  const afterWalk = currentWalkPhase() === 'ask';
+  const afterLunch = isWorkday(now) && mins >= lunchMinutes + 30 && mins < 18 * 60 && !answered && !cond?.stormy;
+  const show = afterWalk || (afterLunch && currentWalkPhase() === 'none');
   row.hidden = !show;
-  if (show) question.textContent = t('feedbackQuestion');
+  if (show) question.textContent = t(afterWalk ? 'walkQuestion' : 'feedbackQuestion');
 }
 
 function giveFeedback(kind) {
+  const afterWalk = currentWalkPhase() === 'ask';
+  setWalk(null);
   const before = calibration;
   if (kind !== 'skip') calibration = calibrate(calibration, kind);
   const atLimit = kind !== 'ok' && kind !== 'skip' && calibration === before;
   localStorage_safe_set('dighv_calibration', String(calibration));
   localStorage_safe_set('dighv_feedback_date', getAmsterdamDateKey(new Date()));
   const row = document.getElementById('feedbackRow');
-  row.dataset.answer = kind === 'skip' ? 'feedbackSkipped' : kind === 'ok' ? 'feedbackThanksOk' : atLimit ? 'calibrationLimit' : 'feedbackThanks';
+  row.dataset.answer = kind === 'skip' ? (afterWalk ? 'walkSkipped' : 'feedbackSkipped') : kind === 'ok' ? 'feedbackThanksOk' : atLimit ? 'calibrationLimit' : 'feedbackThanks';
   row.querySelector('.feedback-actions').hidden = true;
   renderFeedbackRow();
+  renderWalkRow();
   renderCalibrationNote();
   if (weatherData) renderAdvice();
   // De knoppen zijn weg: focus en voorlezen via de bedankregel.
@@ -2752,6 +2488,7 @@ function bindPrefControls() {
   });
 
   document.querySelectorAll('#feedbackRow [data-feedback]').forEach(btn => btn.addEventListener('click', () => giveFeedback(btn.dataset.feedback)));
+  document.getElementById('walkBtn')?.addEventListener('click', onWalkButton);
   document.getElementById('shareBtn')?.addEventListener('click', shareBreak);
 
   document.getElementById('darkModeToggle').addEventListener('click', () => {
@@ -2822,6 +2559,11 @@ function renderSeasonBanner() {
 }
 
 // ─── Versie ──────────────────────────────────────────────────────────────────
+// De releaselog is weg; ruim de commitlijst op die oudere versies bewaarden.
+function clearOldChangelogCache() {
+  localStorage_safe_remove('dighv_gh_commits');
+}
+
 let appVersionCount = null;
 function setAppVersion(count) {
   appVersionCount = count;
@@ -3076,7 +2818,7 @@ document.getElementById('tutorialBtn')?.addEventListener('click', startTutorial)
 // verhindert dat het weer wordt opgehaald.
 const REFRESH_MS = 10 * 60 * 1000;
 [restoreCachedData, bindPrefControls, applyTranslations, bindLocationControls, selectTabFromHash,
-  fetchWeather, fetchAppVersion, fetchChangelogUpdates].forEach(step => {
+  fetchWeather, fetchAppVersion, clearOldChangelogCache].forEach(step => {
   try { step(); } catch (err) { console.error('Init-stap mislukt:', step.name, err); }
 });
 
@@ -3084,6 +2826,8 @@ const REFRESH_MS = 10 * 60 * 1000;
 // terugkeer of als de verbinding terugkomt en de data oud is.
 setInterval(() => { if (!document.hidden) fetchWeather(); }, REFRESH_MS);
 setInterval(updateClock, 30000);
+// Na 10 minuten lopen vanzelf de vraag tonen, ook als het weer niet ververst.
+setInterval(() => { if (walk) { renderFeedbackRow(); renderWalkRow(); } }, 30000);
 const refreshIfStale = () => {
   if (!document.hidden && Date.now() - lastFetchAt > REFRESH_MS) fetchWeather();
 };
