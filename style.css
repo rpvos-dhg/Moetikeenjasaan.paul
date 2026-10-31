@@ -532,6 +532,19 @@ h1 .accent { color: var(--foreground-color-highlight-strong); }
 
 .muted { color: var(--foreground-color-subtle); }
 
+/* ─── Lockup ──────────────────────────────────────────────────────────────── */
+/* De schuine ANWB-vorm als accent in een hoek: geel op ocean, niet gedraaid of
+   vervormd, en nooit tekst eroverheen. Breedte volgt uit de vaste verhouding. */
+.lockup {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  height: var(--lockup-h);
+  width: calc(var(--lockup-h) * 121 / 145);
+  color: var(--brand-yellow);
+  pointer-events: none;
+}
+
 /* ─── Advieskaart (context strong: Nomad-ocean, ook in donker thema) ──────── */
 .advice-card {
   position: relative;
@@ -544,7 +557,18 @@ h1 .accent { color: var(--foreground-color-highlight-strong); }
   border-radius: var(--radius-200);
   background: var(--background-color-default);
   color: var(--foreground-color-neutral);
+  --lockup-h: 5.5rem;
 }
+
+@media (min-width: 48rem) { .advice-card { --lockup-h: 8rem; } }
+
+/* Tips en feedback blijven naast de lockup, niet erover */
+.advice-card .tips,
+.advice-card .feedback-row { padding-right: calc(var(--lockup-h) * 121 / 145 + var(--spacing-100)); }
+
+/* Laden en fout: geen lockup, de kaart is dan bijna leeg */
+.advice-card:has(.loading) .advice-lockup,
+.advice-card:has(.error) .advice-lockup { display: none; }
 
 .advice-card:has(.loading) { min-height: 23rem; } /* hoogte van een gevuld advies, tegen verspringen */
 .advice-card:has(.error) { min-height: 0; }
@@ -1686,6 +1710,15 @@ footer {
   text-align: center;
   font: var(--paragraph-body-small);
   font-family: var(--font-body);
+}
+
+footer { position: relative; overflow: hidden; --lockup-h: 100%; }
+
+/* Lockup alleen op brede schermen, ver van de gecentreerde tekst */
+.footer-lockup { display: none; }
+
+@media (min-width: 64rem) {
+  .footer-lockup { display: block; height: auto; top: var(--spacing-200); width: auto; aspect-ratio: 121 / 145; }
 }
 
 footer strong { color: var(--foreground-color-accent-yellow); }
