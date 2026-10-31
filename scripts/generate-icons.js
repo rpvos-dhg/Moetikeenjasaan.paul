@@ -8,10 +8,11 @@ const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
 
-// ─── Colours (ANWB palette, matching favicon.svg) ──────────────────────────
-const NAVY = [0, 58, 113];     // #003a71
-const YELLOW = [255, 204, 0];  // #ffcc00
-const LAPEL = [0, 37, 81];     // #002551 (darker fold)
+// ─── Kleuren (Nomad-tokens, gelijk aan favicon.svg) ────────────────────────
+// Gele tegel met een jas in ocean; kraag, rits en manchetten weer geel.
+const TILE = [255, 205, 0];    // --brand-yellow #ffcd00
+const JACKET = [0, 61, 134];   // --brand-ocean #003d86
+const DETAIL = TILE;
 
 // ─── Geometry in the favicon's 32×32 coordinate space ──────────────────────
 // Must stay in sync with favicon.svg. The jacket is one yellow silhouette
@@ -66,10 +67,10 @@ function render(size, { square, glyphScale = 1 }) {
           const px = x + (sx + 0.5) / SS;
           const py = y + (sy + 0.5) / SS;
           let c = null;
-          if (insideBg(px, py)) c = NAVY;
+          if (insideBg(px, py)) c = TILE;
           const gx = (px - off) / scale, gy = (py - off) / scale;
-          if (pointInPoly(gx, gy, jacket)) c = YELLOW;
-          for (const d of navyDetails) { if (pointInPoly(gx, gy, d)) { c = LAPEL; break; } }
+          if (pointInPoly(gx, gy, jacket)) c = JACKET;
+          for (const d of navyDetails) { if (pointInPoly(gx, gy, d)) { c = DETAIL; break; } }
           if (c) { R += c[0]; G += c[1]; B += c[2]; A += 255; }
         }
       }
