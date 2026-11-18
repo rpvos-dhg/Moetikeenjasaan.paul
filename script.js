@@ -47,14 +47,12 @@ const DEFAULT_LOCATION = Object.freeze({
   lon: 4.3268
 });
 // Vaste ANWB-locaties voor de keuzelijst. Coördinaten via OpenStreetMap; voor
-// het weer maakt een paar honderd meter niets uit. Bij de steunpunten in het
-// buitenland gaat het om het opgegeven adres; Athene heeft alleen een postbus
-// in Kalamaki, dus daar het centrum van Kalamaki. zone: voor de melding dat de tijden
-// in de eigen tijdzone van het toestel staan.
+// het weer maakt een paar honderd meter niets uit. Athene heeft alleen een
+// postbus in Kalamaki, dus daar het centrum van Kalamaki. zone: voor de melding
+// dat de tijden in de eigen tijdzone van het toestel staan.
 const ANWB_LOCATIONS = Object.freeze([
   { id: 'hq', lat: 52.0964, lon: 4.3268, label: { nl: 'ANWB HQ · Wassenaarseweg, Den Haag', en: 'ANWB HQ · Wassenaarseweg, The Hague' } },
   { id: 'assen-alc', lat: 53.0258, lon: 6.5655, label: { nl: 'ANWB Alarmcentrale · Amerikaweg, Assen', en: 'ANWB Emergency Centre · Amerikaweg, Assen' } },
-  { id: 'assen-winkel', lat: 52.9971, lon: 6.5607, label: { nl: 'ANWB Winkel · Ceresplein, Assen', en: 'ANWB Shop · Ceresplein, Assen' } },
   { id: 'lyon', lat: 45.7854, lon: 4.8117, zone: 'Europe/Paris', label: { nl: 'ANWB Steunpunt Lyon · Rue du Four à Chaux', en: 'ANWB Support Point Lyon · Rue du Four à Chaux' } },
   { id: 'munchen', lat: 48.1336, lon: 11.5281, zone: 'Europe/Berlin', label: { nl: 'ANWB Steunpunt München · Hansastraße', en: 'ANWB Support Point Munich · Hansastraße' } },
   { id: 'barcelona', lat: 41.3868, lon: 2.1580, zone: 'Europe/Madrid', label: { nl: 'ANWB Steunpunt Barcelona · Calle Aragón', en: 'ANWB Support Point Barcelona · Calle Aragón' } },
@@ -605,7 +603,7 @@ function renderExplainHtml() {
     <div class="explain-section context-default">
       <h2>1. Data source</h2>
       <p>Every 10 minutes the tool fetches weather data from <strong>Open-Meteo</strong> and pollen data from the <strong>Open-Meteo Air Quality API</strong>. For locations in the Netherlands it uses the KNMI model. A hidden tab does not refresh; it does as soon as you come back or the connection returns. The version number comes from the <strong>GitHub API</strong>; those requests are kept for a few hours.</p>
-      <p>Default location: <code>52.0964° N, 4.3268° E</code>, ANWB headquarters in The Hague. Via the pencil you can pick another ANWB location (the Emergency Centre and shop in Assen, or the support points in Lyon, Munich, Barcelona, Athens and Paramaribo) or use your current location (rounded to about 100 metres; place name from OpenStreetMap). That choice is kept until you switch back to ANWB HQ. Times are always shown in your device's time zone.</p>
+      <p>Default location: <code>52.0964° N, 4.3268° E</code>, ANWB headquarters in The Hague. Via the pencil you can pick another ANWB location (the Emergency Centre in Assen, or the support points in Lyon, Munich, Barcelona, Athens and Paramaribo) or use your current location (rounded to about 100 metres; place name from OpenStreetMap). That choice is kept until you switch back to ANWB HQ. Times are always shown in your device's time zone.</p>
       <div class="callout anwb-alert anwb-alert--informative"><strong>Live check:</strong> the green LIVE dot means the data is fresh; the advice card shows when it was updated. When opening, the app immediately shows the last known data (at most 6 hours old). Data older than half an hour shows as NOT LIVE, with the time of the advice.</div>
     </div>
     <div class="explain-section context-default">
@@ -711,7 +709,7 @@ function renderExplainHtml() {
     <div class="explain-section context-default">
       <h2>1. Databron</h2>
       <p>Elke 10 minuten haalt de tool weerdata op van <strong>Open-Meteo</strong> en pollendata van de <strong>Open-Meteo Air Quality API</strong>. Voor locaties in Nederland gebruikt hij het KNMI-model. In een verborgen tabblad wordt niet ververst; zodra je terugkomt of de verbinding terug is wel. Het versienummer komt van de <strong>GitHub-API</strong>; die gegevens bewaart de app een paar uur.</p>
-      <p>Standaardlocatie: <code>52.0964° N, 4.3268° O</code>, het ANWB-hoofdkantoor in Den Haag. Via het potlood kies je een andere ANWB-locatie (Alarmcentrale en winkel in Assen, of de steunpunten in Lyon, München, Barcelona, Athene en Paramaribo) of je huidige locatie (afgerond op ongeveer 100 meter; plaatsnaam via OpenStreetMap). Die keuze blijft bewaard tot je terugschakelt naar ANWB HQ. Tijden staan altijd in de tijdzone van je toestel.</p>
+      <p>Standaardlocatie: <code>52.0964° N, 4.3268° O</code>, het ANWB-hoofdkantoor in Den Haag. Via het potlood kies je een andere ANWB-locatie (Alarmcentrale in Assen, of de steunpunten in Lyon, München, Barcelona, Athene en Paramaribo) of je huidige locatie (afgerond op ongeveer 100 meter; plaatsnaam via OpenStreetMap). Die keuze blijft bewaard tot je terugschakelt naar ANWB HQ. Tijden staan altijd in de tijdzone van je toestel.</p>
       <div class="callout anwb-alert anwb-alert--informative"><strong>Live check:</strong> het groene LIVE-bolletje betekent dat de data vers is; in de advieskaart staat wanneer hij is bijgewerkt. Bij openen toont de app meteen de laatst bekende data (hoogstens 6 uur oud). Data ouder dan een half uur staat als NIET LIVE, met het tijdstip van het advies.</div>
     </div>
     <div class="explain-section context-default">
