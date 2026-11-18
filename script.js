@@ -160,7 +160,7 @@ const i18n = {
     rainDry: 'Droog de komende 2 uur', rainPeakChance: 'Grootste kans', rainTotal: 'Totaal',
     rainChartAria: (list, total) => `Regen komende 2 uur: ${list}. Totaal ${total} mm.`,
     rainChartAriaDry: 'Regen komende 2 uur: droog.',
-    rainChanceSr: 'kans op regen', unitKmh: 'km/u',
+    rainChanceSr: 'kans op regen', unitKmh: 'km/u', unitMmH: 'mm/u',
     metricTemp: 'Temperatuur', metricFeels: 'Gevoelstemperatuur', metricWind: 'Wind',
     metricGusts: 'Windstoten', metricPrecip: 'Neerslag', metricUv: 'UV-index',
     windDirs: ['N', 'NO', 'O', 'ZO', 'Z', 'ZW', 'W', 'NW'],
@@ -368,7 +368,7 @@ const i18n = {
     rainDry: 'Dry for the next 2 hours', rainPeakChance: 'Highest chance', rainTotal: 'Total',
     rainChartAria: (list, total) => `Rain in the next 2 hours: ${list}. Total ${total} mm.`,
     rainChartAriaDry: 'Rain in the next 2 hours: dry.',
-    rainChanceSr: 'chance of rain', unitKmh: 'km/h',
+    rainChanceSr: 'chance of rain', unitKmh: 'km/h', unitMmH: 'mm/h',
     metricTemp: 'Temperature', metricFeels: 'Feels like', metricWind: 'Wind',
     metricGusts: 'Gusts', metricPrecip: 'Precipitation', metricUv: 'UV index',
     windDirs: ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'],
@@ -1271,6 +1271,13 @@ async function fetchWeather() {
   const modelParam = isNetherlands
     ? '&models=knmi_harmonie_arome_netherlands'
     : '';
+  // KNMI Harmonie levert alleen uurdata; Open-Meteo rekent die om naar
+  // kwartieren. DWD ICON-D2 heeft echte kwartierneerslag en dekt heel
+  // Nederland, dus de kwartierregen (grafiek, begin/eind, nu + 30 min) komt
+  // daarvandaan. Faalt dit verzoek, dan blijft de KNMI-schatting staan.
+  const minutelyUrl = isNetherlands
+    ? `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&models=icon_d2&current=precipitation&minutely_15=precipitation&past_days=1&forecast_days=3&timezone=auto&timeformat=unixtime`
+    : null;
 
   // The KNMI Harmonie model forced for NL locations does not output uv_index
   // (it comes back as a null array), so we drop uv_index from the KNMI request
@@ -1293,10 +1300,11 @@ async function fetchWeather() {
   // moet het jasadvies gewoon verschijnen.
   const optionalFetch = url => (url ? fetchWithTimeout(url).catch(() => null) : Promise.resolve(null));
   try {
-    const [weatherRes, airQualityRes, extraRes] = await Promise.all([
+    const [weatherRes, airQualityRes, extraRes, minutelyRes] = await Promise.all([
       fetchWithRetry(weatherUrl),
       optionalFetch(airQualityUrl),
-      optionalFetch(extraUrl)
+      optionalFetch(extraUrl),
+      optionalFetch(minutelyUrl)
     ]);
     if (requestId !== weatherRequestSeq) return;
     if (!weatherRes.ok) throw new Error('Weather network error');
@@ -1309,6 +1317,13 @@ async function fetchWeather() {
         mergeHourlyByTime(weatherData_new.hourly, extra?.hourly, 'uv_index', true);
         mergeHourlyByTime(weatherData_new.hourly, extra?.hourly, 'precipitation_probability', false);
       } catch (_) { /* leave uv_index absent; renderers fall back to 0 */ }
+    }
+    if (minutelyRes?.ok) {
+      try {
+        const fine = await minutelyRes.json();
+        if (requestId !== weatherRequestSeq) return;
+        mergeMinutelyPrecip(weatherData_new, fine);
+      } catch (_) { /* KNMI-kwartieren blijven staan */ }
     }
     let airQualityData = null;
     if (airQualityRes?.ok) {
@@ -1718,11 +1733,14 @@ function renderRainChart() {
   const maxPrecip = Math.max(1, ...slots.map(s => s.precip));
   const html = slots.map(s => {
     const heightPct = s.precip > 0 ? Math.max(4, (s.precip / maxPrecip) * 100) : 2;
+    // Een kwartierwaarde telt het kwartier ervóór: label met het begin ervan,
+    // net als de regel "regen begint om".
+    const label = hhmm(s.time - 15 * 60000);
     const isDry = s.precip < WET_SLOT_MM;
     const valueStr = isDry ? '' : fmt1(s.precip);
     return `<div class="bar-group">
       <div class="bar ${isDry ? 'dry' : ''}" style="height: ${heightPct}%">${valueStr ? `<span class="bar-value">${valueStr}</span>` : ''}</div>
-      <span class="bar-label">${hhmm(s.time)}</span>
+      <span class="bar-label">${label}</span>
     </div>`;
   }).join('');
 
@@ -1731,7 +1749,7 @@ function renderRainChart() {
   // De balken zelf zijn voor schermlezers onzichtbaar; geef de data in het label.
   const wetSlots = slots.filter(s => s.precip >= WET_SLOT_MM);
   chart.setAttribute('aria-label', wetSlots.length
-    ? t('rainChartAria', wetSlots.map(sl => `${hhmm(sl.time)} ${fmt1(sl.precip)} mm`).join(', '), fmt1(totalRain))
+    ? t('rainChartAria', wetSlots.map(sl => `${hhmm(sl.time - 15 * 60000)} ${fmt1(sl.precip)} mm`).join(', '), fmt1(totalRain))
     : t('rainChartAriaDry'));
 
   document.getElementById('rainSummary').innerHTML = `
@@ -1756,7 +1774,7 @@ function renderMetrics() {
     metric(t('metricFeels'), Math.round(c.apparent_temperature), '°C'),
     metric(t('metricWind'), Math.round(c.wind_speed_10m), `${t('unitKmh')} · ${windDirection(c.wind_direction_10m ?? 0)}`),
     c.wind_gusts_10m != null ? metric(t('metricGusts'), Math.round(c.wind_gusts_10m), t('unitKmh')) : '',
-    metric(t('metricPrecip'), fmt1(c.precipitation ?? 0), 'mm'),
+    metric(t('metricPrecip'), fmt1(currentRainRate(c)), t('unitMmH')),
     metric(t('metricUv'), uv == null ? '–' : Math.round(uv)),
   ].join('');
 }
@@ -1769,7 +1787,9 @@ function renderForecast() {
     const idx = startIdx + i;
     const time = new Date(hourly.time[idx]);
     const isNow = i === 0;
-    const rain = hourly.precipitation_probability?.[idx] || 0;
+    // Regenkans geldt voor het voorgaande uur: de kolom van 13:00 (of "nu")
+    // toont de kans voor het uur dat dan begint, dus het volgende slot.
+    const rain = hourly.precipitation_probability?.[idx + 1] || 0;
     const timeLabel = isNow ? t('forecastNow') : String(time.getHours()).padStart(2, '0') + ':00';
     html.push(`<div class="slot ${isNow ? 'now' : ''}" role="listitem">
       <div class="slot-time">${timeLabel}</div>

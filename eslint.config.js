@@ -8,7 +8,7 @@ const browser = Object.fromEntries([
 // Functies uit logic.js die script.js gebruikt (beide gewone <script>-bestanden).
 const logic = Object.fromEntries([
   'escapeHtml', 'durationParts', 'pickDaily', 'dateKeyInZone', 'normalizeForecast',
-  'mergeHourlyByTime', 'dataTimestamp', 'hourlyNowIndex', 'POLLEN_KEYS',
+  'mergeHourlyByTime', 'mergeMinutelyPrecip', 'currentRainRate', 'dataTimestamp', 'hourlyNowIndex', 'POLLEN_KEYS',
   'POLLEN_THRESHOLDS', 'parsePollen', 'highPollenKeys', 'THRESHOLDS', 'checklistConditions', 'PREF_OFFSETS', 'interpolateHourly', 'isSnowCode',
   'outlookAt', 'computeConditions',
   'jacketLevel', 'adviceKeys', 'extremePool', 'jacketScale', 'calibrate', 'walkPhase', 'minutesOfDay',

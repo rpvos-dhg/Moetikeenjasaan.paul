@@ -26,6 +26,7 @@ HTML, CSS en vanilla JavaScript, zonder build-stap en zonder runtime-dependencie
 | Databron | Wat |
 |---|---|
 | [Open-Meteo Forecast API](https://open-meteo.com/) | Temperatuur, wind, windstoten, dauwpunt, neerslag, UV, weercode |
+| [Open-Meteo, model DWD ICON-D2](https://open-meteo.com/en/docs/dwd-api) | Neerslag per kwartier in Nederland (KNMI Harmonie heeft alleen uurdata) |
 | [Open-Meteo Air Quality API](https://open-meteo.com/en/docs/air-quality-api) | Live pollenconcentraties |
 | [OpenStreetMap Nominatim](https://nominatim.org/) | Plaatsnaam bij "Gebruik mijn locatie" (© OpenStreetMap-bijdragers) |
 | [GitHub API](https://docs.github.com/rest) | Versienummer (een paar uur lokaal bewaard) |

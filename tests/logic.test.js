@@ -293,3 +293,39 @@ test('checklist: geen paraplu bij sneeuw of harde wind, sjaal en handschoenen op
   assert.equal(cold.sjaal && cold.handschoenen, true);
   assert.equal(L.checklistConditions({ ...base, minTemp: 8 }).handschoenen, false);
 });
+
+test('currentRainRate rekent de kwartiersom om naar mm per uur', () => {
+  assert.equal(L.currentRainRate({ precipitation: 0.3, interval: 900 }), 1.2);
+  assert.equal(L.currentRainRate({ precipitation: 0.3 }), 1.2);
+  assert.equal(L.currentRainRate({ precipitation: 0.5, interval: 3600 }), 0.5);
+  assert.equal(L.currentRainRate(null), 0);
+});
+
+test('regen van nu telt in mm per uur, ook als de kwartieren erna droog zijn', () => {
+  const now = at('2026-10-21T10:40:00+02:00');
+  const w = forecast({ now });
+  w.current.precipitation = 0.3;  // 0,3 mm in het laatste kwartier = 1,2 mm/u
+  w.current.interval = 900;
+  const cond = L.computeConditions(w, now, 0);
+  assert.equal(cond.rainAmount, 1.2);
+  assert.equal(cond.wet, true);
+});
+
+test('mergeMinutelyPrecip neemt kwartierregen over en laat gaten staan', () => {
+  const target = {
+    current: { precipitation: 0, interval: 900 },
+    minutely_15: { time: [1, 2, 3], precipitation: [0.1, 0.1, 0.1] },
+  };
+  const used = L.mergeMinutelyPrecip(target, {
+    current: { precipitation: 0.4, interval: 900 },
+    minutely_15: { time: [1, 2, 3], precipitation: [0, 0.5, null] },
+  });
+  assert.equal(used, true);
+  assert.deepEqual(target.minutely_15.precipitation, [0, 0.5, 0.1]);
+  assert.equal(target.current.precipitation, 0.4);
+
+  const untouched = { current: { precipitation: 0.2 }, minutely_15: { time: [1], precipitation: [0.2] } };
+  assert.equal(L.mergeMinutelyPrecip(untouched, { current: { precipitation: 0 }, minutely_15: { time: [1], precipitation: [null] } }), false);
+  assert.equal(untouched.current.precipitation, 0.2);
+  assert.equal(L.mergeMinutelyPrecip(untouched, null), false);
+});
