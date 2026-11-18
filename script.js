@@ -46,6 +46,21 @@ const DEFAULT_LOCATION = Object.freeze({
   lat: 52.0964,
   lon: 4.3268
 });
+// Vaste ANWB-locaties voor de keuzelijst. Coördinaten via OpenStreetMap; voor
+// het weer maakt een paar honderd meter niets uit. Bij de steunpunten in het
+// buitenland noemt de ANWB alleen de stad. zone: voor de melding dat de tijden
+// in de eigen tijdzone van het toestel staan.
+const ANWB_LOCATIONS = Object.freeze([
+  { id: 'hq', lat: 52.0964, lon: 4.3268, label: { nl: 'ANWB HQ · Wassenaarseweg, Den Haag', en: 'ANWB HQ · Wassenaarseweg, The Hague' } },
+  { id: 'assen-alc', lat: 53.0258, lon: 6.5655, label: { nl: 'ANWB Alarmcentrale · Amerikaweg, Assen', en: 'ANWB Emergency Centre · Amerikaweg, Assen' } },
+  { id: 'assen-winkel', lat: 52.9971, lon: 6.5607, label: { nl: 'ANWB Winkel · Ceresplein, Assen', en: 'ANWB Shop · Ceresplein, Assen' } },
+  { id: 'lyon', lat: 45.8357, lon: 4.7708, zone: 'Europe/Paris', label: { nl: 'ANWB Steunpunt Lyon · Limonest', en: 'ANWB Support Point Lyon · Limonest' } },
+  { id: 'munchen', lat: 48.1371, lon: 11.5754, zone: 'Europe/Berlin', label: { nl: 'ANWB Steunpunt München', en: 'ANWB Support Point Munich' } },
+  { id: 'barcelona', lat: 41.3826, lon: 2.1771, zone: 'Europe/Madrid', label: { nl: 'ANWB Steunpunt Barcelona', en: 'ANWB Support Point Barcelona' } },
+  { id: 'athene', lat: 37.9756, lon: 23.7348, zone: 'Europe/Athens', label: { nl: 'ANWB Steunpunt Athene', en: 'ANWB Support Point Athens' } },
+  { id: 'paramaribo', lat: 5.8242, lon: -55.1663, zone: 'America/Paramaribo', label: { nl: 'ANWB Steunpunt Paramaribo', en: 'ANWB Support Point Paramaribo' } },
+]);
+const findAnwbLocation = id => ANWB_LOCATIONS.find(l => l.id === id) || null;
 const LOCATION_STORAGE_KEY = 'dighv_location';
 // Opgeslagen waarden alleen gebruiken als ze geldig zijn.
 const oneOf = (value, allowed, fallback) => (allowed.includes(value) ? value : fallback);
@@ -100,6 +115,9 @@ const i18n = {
     locationDenied: 'Je browser deelt je locatie niet. Sta het toe in de browserinstellingen, of gebruik ANWB HQ.',
     locationFailed: 'Je locatie is niet gevonden. Probeer het zo nog eens.',
     anwbHqActive: 'ANWB HQ actief.',
+    locationPresetLabel: 'ANWB-locatie', locationPresetPick: 'Kies een ANWB-locatie',
+    presetActive: name => `${name} actief.`,
+    presetOtherZone: name => `${name} actief. Tijden staan in de tijdzone van dit toestel.`,
     weatherLoading: 'Weer ophalen...', weatherError: 'Geen weerdata. Controleer je verbinding en probeer het opnieuw, of kijk even uit het raam.', retry: 'Opnieuw proberen',
     dataFresh: 'net bijgewerkt', dataAgeMin: mins => `${mins} min geleden bijgewerkt`,
     dataAgeHours: h => `${h} uur geleden bijgewerkt`,
@@ -308,6 +326,9 @@ const i18n = {
     locationDenied: "Your browser isn't sharing your location. Allow it in your browser settings, or use ANWB HQ.",
     locationFailed: "Couldn't find your location. Try again in a moment.",
     anwbHqActive: 'ANWB HQ active.',
+    locationPresetLabel: 'ANWB location', locationPresetPick: 'Choose an ANWB location',
+    presetActive: name => `${name} active.`,
+    presetOtherZone: name => `${name} active. Times are in this device's time zone.`,
     weatherLoading: 'Getting weather...', weatherError: 'No weather data. Check your connection and try again, or just look outside.', retry: 'Try again',
     dataFresh: 'just updated', dataAgeMin: mins => `updated ${mins} min ago`,
     dataAgeHours: h => `updated ${h} h ago`,
@@ -583,7 +604,7 @@ function renderExplainHtml() {
     <div class="explain-section context-default">
       <h2>1. Data source</h2>
       <p>Every 10 minutes the tool fetches weather data from <strong>Open-Meteo</strong> and pollen data from the <strong>Open-Meteo Air Quality API</strong>. For locations in the Netherlands it uses the KNMI model. A hidden tab does not refresh; it does as soon as you come back or the connection returns. The version number comes from the <strong>GitHub API</strong>; those requests are kept for a few hours.</p>
-      <p>Default location: <code>52.0964° N, 4.3268° E</code>, ANWB headquarters in The Hague. Via the pencil the app can use your current location (rounded to about 100 metres; place name from OpenStreetMap). That choice is kept until you switch back to ANWB HQ.</p>
+      <p>Default location: <code>52.0964° N, 4.3268° E</code>, ANWB headquarters in The Hague. Via the pencil you can pick another ANWB location (the Emergency Centre and shop in Assen, or the support points in Lyon, Munich, Barcelona, Athens and Paramaribo) or use your current location (rounded to about 100 metres; place name from OpenStreetMap). That choice is kept until you switch back to ANWB HQ. Times are always shown in your device's time zone.</p>
       <div class="callout anwb-alert anwb-alert--informative"><strong>Live check:</strong> the green LIVE dot means the data is fresh; the advice card shows when it was updated. When opening, the app immediately shows the last known data (at most 6 hours old). Data older than half an hour shows as NOT LIVE, with the time of the advice.</div>
     </div>
     <div class="explain-section context-default">
@@ -689,7 +710,7 @@ function renderExplainHtml() {
     <div class="explain-section context-default">
       <h2>1. Databron</h2>
       <p>Elke 10 minuten haalt de tool weerdata op van <strong>Open-Meteo</strong> en pollendata van de <strong>Open-Meteo Air Quality API</strong>. Voor locaties in Nederland gebruikt hij het KNMI-model. In een verborgen tabblad wordt niet ververst; zodra je terugkomt of de verbinding terug is wel. Het versienummer komt van de <strong>GitHub-API</strong>; die gegevens bewaart de app een paar uur.</p>
-      <p>Standaardlocatie: <code>52.0964° N, 4.3268° O</code>, het ANWB-hoofdkantoor in Den Haag. Via het potlood kan de app je huidige locatie gebruiken (afgerond op ongeveer 100 meter; plaatsnaam via OpenStreetMap). Die keuze blijft bewaard tot je terugschakelt naar ANWB HQ.</p>
+      <p>Standaardlocatie: <code>52.0964° N, 4.3268° O</code>, het ANWB-hoofdkantoor in Den Haag. Via het potlood kies je een andere ANWB-locatie (Alarmcentrale en winkel in Assen, of de steunpunten in Lyon, München, Barcelona, Athene en Paramaribo) of je huidige locatie (afgerond op ongeveer 100 meter; plaatsnaam via OpenStreetMap). Die keuze blijft bewaard tot je terugschakelt naar ANWB HQ. Tijden staan altijd in de tijdzone van je toestel.</p>
       <div class="callout anwb-alert anwb-alert--informative"><strong>Live check:</strong> het groene LIVE-bolletje betekent dat de data vers is; in de advieskaart staat wanneer hij is bijgewerkt. Bij openen toont de app meteen de laatst bekende data (hoogstens 6 uur oud). Data ouder dan een half uur staat als NIET LIVE, met het tijdstip van het advies.</div>
     </div>
     <div class="explain-section context-default">
@@ -793,6 +814,12 @@ function renderExplainHtml() {
 // ─── Location helpers ────────────────────────────────────────────────────────
 function sanitizeLocation(location) {
   if (!location || typeof location !== 'object') return { ...DEFAULT_LOCATION };
+  // ANWB-locaties komen altijd uit de lijst, niet uit wat er bewaard is.
+  if (location.mode === 'preset') {
+    const preset = findAnwbLocation(location.id);
+    if (!preset || preset.id === 'hq') return { ...DEFAULT_LOCATION };
+    return { mode: 'preset', id: preset.id, city: null, label: null, lat: preset.lat, lon: preset.lon, savedAt: null };
+  }
   const lat = Number(location.lat);
   const lon = Number(location.lon);
   if (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
@@ -820,7 +847,26 @@ function getLocationLabel(location) {
   if (loc.mode === 'current') {
     return loc.city ? t('locationCityLabel', loc.city) : t('locationDefaultLabel');
   }
+  if (loc.mode === 'preset') return presetLabel(findAnwbLocation(loc.id));
+  if (loc.mode === 'default') return presetLabel(findAnwbLocation('hq'));
   return loc.label || DEFAULT_LOCATION.label;
+}
+
+function presetLabel(preset) {
+  return preset ? (preset.label[lang] || preset.label.nl) : DEFAULT_LOCATION.label;
+}
+
+// Loopt de klok daar anders dan op dit toestel? Dan staan de tijden in de app
+// niet in de plaatselijke tijd van die locatie.
+function differsFromDeviceZone(zone) {
+  if (!zone) return false;
+  try {
+    const opts = { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' };
+    const now = new Date();
+    return now.toLocaleTimeString('en-GB', { ...opts, timeZone: zone }) !== now.toLocaleTimeString('en-GB', opts);
+  } catch (_) {
+    return false;
+  }
 }
 
 function getStoredLocation() {
@@ -971,7 +1017,7 @@ function setLocationStatus(key, ...args) {
 }
 
 function setLocationButtonsDisabled(disabled) {
-  ['useCurrentLocationBtn', 'resetLocationBtn', 'locationEditBtn'].forEach(id => {
+  ['useCurrentLocationBtn', 'resetLocationBtn', 'locationEditBtn', 'locationPreset'].forEach(id => {
     const btn = document.getElementById(id);
     if (btn) btn.disabled = disabled || (id === 'resetLocationBtn' && isDefaultLocation());
   });
@@ -985,6 +1031,7 @@ function renderLocationUi(status) {
   if (labelEl) labelEl.textContent = getLocationLabel();
   if (panelCoords) panelCoords.textContent = formatCoords();
   if (resetBtn) resetBtn.disabled = isDefaultLocation();
+  renderLocationPresets();
   if (status !== undefined) setLocationStatus(...(status || [null]));
   else if (locationStatusState) setLocationStatus(locationStatusState.key, ...locationStatusState.args);
   else if (currentLocation.mode === 'current' && currentLocation.savedAt) {
@@ -992,6 +1039,28 @@ function renderLocationUi(status) {
     // pas in de vertaling opgemaakt, zodat hij meewisselt van taal.
     setLocationStatus('locationSince', currentLocation.savedAt);
   }
+}
+
+// Keuzelijst met ANWB-locaties; bij "mijn locatie" staat er een lege keuze bovenaan.
+function renderLocationPresets() {
+  const select = document.getElementById('locationPreset');
+  if (!select) return;
+  const selected = currentLocation.mode === 'default' ? 'hq' : currentLocation.mode === 'preset' ? currentLocation.id : '';
+  const options = ANWB_LOCATIONS.map(l => `<option value="${l.id}">${escapeHtml(presetLabel(l))}</option>`);
+  if (!selected) options.unshift(`<option value="" disabled>${escapeHtml(t('locationPresetPick'))}</option>`);
+  select.innerHTML = options.join('');
+  select.value = selected;
+}
+
+function choosePreset(id) {
+  const preset = findAnwbLocation(id);
+  if (!preset) return;
+  if (preset.id === 'hq') {
+    setAppLocation({ ...DEFAULT_LOCATION }, ['anwbHqActive']);
+    return;
+  }
+  const name = presetLabel(preset);
+  setAppLocation({ mode: 'preset', id: preset.id }, [differsFromDeviceZone(preset.zone) ? 'presetOtherZone' : 'presetActive', name]);
 }
 
 function showWeatherLoading() {
@@ -1074,6 +1143,7 @@ function bindLocationControls() {
   });
 
   currentBtn?.addEventListener('click', useCurrentLocation);
+  document.getElementById('locationPreset')?.addEventListener('change', e => choosePreset(e.target.value));
 
   resetBtn?.addEventListener('click', () => {
     setAppLocation({ ...DEFAULT_LOCATION }, ['anwbHqActive']);

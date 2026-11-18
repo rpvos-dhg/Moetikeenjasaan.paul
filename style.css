@@ -257,6 +257,16 @@ h1 {
   width: min(22.5rem, calc(100vw - 2 * var(--spacing-200)));
 }
 
+.location-preset {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-50);
+  font: var(--paragraph-title-medium);
+  font-family: var(--font-body);
+}
+
+.location-preset select { width: 100%; }
+
 .location-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;

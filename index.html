@@ -20,7 +20,7 @@
 <link rel="stylesheet" href="huisstijl/base.css?v=24">
 <link rel="stylesheet" href="huisstijl/components.css?v=24">
 <link rel="stylesheet" href="huisstijl/theme.css?v=24">
-<link rel="stylesheet" href="style.css?v=24">
+<link rel="stylesheet" href="style.css?v=25">
 </head>
 <body class="context-weak">
 <svg class="hidden" aria-hidden="true" focusable="false"><symbol id="nmd-ic-8" viewBox="0 0 32 32"><path d="M12.61 26.284c-.424 0-.831-.167-1.132-.469l-7.809-7.809a1.599 1.599 0 1 1 2.262-2.262l6.575 6.575L25.975 6.286a1.6 1.6 0 1 1 2.45 2.058L13.834 25.713c-.289.342-.708.55-1.156.569q-.032.003-.068.002"></path></symbol></svg>
@@ -78,6 +78,10 @@
       <div class="flex items-center justify-between gap-200 text-strong">
         <p class="m-0 max-w-none prose-heading-small" id="locationPanelTitle" data-i18n="locationPanelTitle">Locatie</p>
         <span class="prose-paragraph-body-x-small text-subtle anwb-num" id="locationPanelCoords">52.0964, 4.3268</span>
+      </div>
+      <div class="location-preset">
+        <label for="locationPreset" data-i18n="locationPresetLabel">ANWB-locatie</label>
+        <select id="locationPreset" class="select anwb-select"></select>
       </div>
       <div class="location-actions">
         <button id="useCurrentLocationBtn" class="anwb-button anwb-button--small anwb-button--secondary" type="button" data-i18n="useCurrentLocationBtn">Gebruik mijn locatie</button>
@@ -272,7 +276,7 @@
 
 </div>
 
-<script src="logic.js?v=26"></script>
-<script src="script.js?v=26"></script>
+<script src="logic.js?v=27"></script>
+<script src="script.js?v=27"></script>
 </body>
 </html>
