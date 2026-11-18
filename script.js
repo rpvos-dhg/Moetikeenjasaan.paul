@@ -56,7 +56,7 @@ const ANWB_LOCATIONS = Object.freeze([
   { id: 'assen-winkel', lat: 52.9971, lon: 6.5607, label: { nl: 'ANWB Winkel · Ceresplein, Assen', en: 'ANWB Shop · Ceresplein, Assen' } },
   { id: 'lyon', lat: 45.7854, lon: 4.8117, zone: 'Europe/Paris', label: { nl: 'ANWB Steunpunt Lyon · Rue du Four à Chaux', en: 'ANWB Support Point Lyon · Rue du Four à Chaux' } },
   { id: 'munchen', lat: 48.1336, lon: 11.5281, zone: 'Europe/Berlin', label: { nl: 'ANWB Steunpunt München · Hansastraße', en: 'ANWB Support Point Munich · Hansastraße' } },
-  { id: 'barcelona', lat: 41.3826, lon: 2.1771, zone: 'Europe/Madrid', label: { nl: 'ANWB Steunpunt Barcelona', en: 'ANWB Support Point Barcelona' } },
+  { id: 'barcelona', lat: 41.3868, lon: 2.1580, zone: 'Europe/Madrid', label: { nl: 'ANWB Steunpunt Barcelona · Calle Aragón', en: 'ANWB Support Point Barcelona · Calle Aragón' } },
   { id: 'athene', lat: 37.9756, lon: 23.7348, zone: 'Europe/Athens', label: { nl: 'ANWB Steunpunt Athene', en: 'ANWB Support Point Athens' } },
   { id: 'paramaribo', lat: 5.8242, lon: -55.1663, zone: 'America/Paramaribo', label: { nl: 'ANWB Steunpunt Paramaribo', en: 'ANWB Support Point Paramaribo' } },
 ]);
