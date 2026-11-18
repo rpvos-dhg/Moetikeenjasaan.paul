@@ -31,7 +31,7 @@ HTML, CSS en vanilla JavaScript, zonder build-stap en zonder runtime-dependencie
 | [OpenStreetMap Nominatim](https://nominatim.org/) | Plaatsnaam bij "Gebruik mijn locatie" (© OpenStreetMap-bijdragers) |
 | [GitHub API](https://docs.github.com/rest) | Versienummer (een paar uur lokaal bewaard) |
 
-Data wordt elke 10 minuten ververst (niet in een verborgen tabblad). Standaardlocatie: **ANWB HQ, Wassenaarseweg, Den Haag** (52.0964° N, 4.3268° O). Via het potlood kan de app je huidige locatie gebruiken, afgerond op ~100 m. Die keuze blijft bewaard tot je terugschakelt naar ANWB HQ.
+Data wordt elke 10 minuten ververst (niet in een verborgen tabblad). Standaardlocatie: **ANWB HQ, Wassenaarseweg, Den Haag** (52.0964° N, 4.3268° O). Via het potlood kies je een andere ANWB-locatie (Alarmcentrale in Assen, steunpunten in Lyon, München, Barcelona, Athene en Paramaribo) of je huidige locatie, afgerond op ~100 m. Tijden staan altijd in de tijdzone van het toestel. Die keuze blijft bewaard tot je terugschakelt naar ANWB HQ.
 
 
 ## Tests en lint
