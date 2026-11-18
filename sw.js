@@ -1,4 +1,4 @@
-const CACHE = 'dighv-v18';
+const CACHE = 'dighv-v19';
 // Weerdata apart en klein houden: alleen als terugval offline, en met
 // coördinaten erin, dus niet onbeperkt bewaren.
 const API_CACHE = 'dighv-api';
