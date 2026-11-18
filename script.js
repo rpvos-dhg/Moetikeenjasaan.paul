@@ -54,7 +54,7 @@ const ANWB_LOCATIONS = Object.freeze([
   { id: 'hq', lat: 52.0964, lon: 4.3268, label: { nl: 'ANWB HQ · Wassenaarseweg, Den Haag', en: 'ANWB HQ · Wassenaarseweg, The Hague' } },
   { id: 'assen-alc', lat: 53.0258, lon: 6.5655, label: { nl: 'ANWB Alarmcentrale · Amerikaweg, Assen', en: 'ANWB Emergency Centre · Amerikaweg, Assen' } },
   { id: 'assen-winkel', lat: 52.9971, lon: 6.5607, label: { nl: 'ANWB Winkel · Ceresplein, Assen', en: 'ANWB Shop · Ceresplein, Assen' } },
-  { id: 'lyon', lat: 45.8357, lon: 4.7708, zone: 'Europe/Paris', label: { nl: 'ANWB Steunpunt Lyon · Limonest', en: 'ANWB Support Point Lyon · Limonest' } },
+  { id: 'lyon', lat: 45.7854, lon: 4.8117, zone: 'Europe/Paris', label: { nl: 'ANWB Steunpunt Lyon · Rue du Four à Chaux', en: 'ANWB Support Point Lyon · Rue du Four à Chaux' } },
   { id: 'munchen', lat: 48.1371, lon: 11.5754, zone: 'Europe/Berlin', label: { nl: 'ANWB Steunpunt München', en: 'ANWB Support Point Munich' } },
   { id: 'barcelona', lat: 41.3826, lon: 2.1771, zone: 'Europe/Madrid', label: { nl: 'ANWB Steunpunt Barcelona', en: 'ANWB Support Point Barcelona' } },
   { id: 'athene', lat: 37.9756, lon: 23.7348, zone: 'Europe/Athens', label: { nl: 'ANWB Steunpunt Athene', en: 'ANWB Support Point Athens' } },
