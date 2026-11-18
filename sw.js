@@ -1,8 +1,8 @@
-const CACHE = 'dighv-v17';
+const CACHE = 'dighv-v18';
 // Weerdata apart en klein houden: alleen als terugval offline, en met
 // coördinaten erin, dus niet onbeperkt bewaren.
 const API_CACHE = 'dighv-api';
-const API_CACHE_MAX = 6;
+const API_CACHE_MAX = 8;
 // Relatieve paden: werkt op GitHub Pages, een eigen domein en lokaal.
 const PRECACHE = [
   './',

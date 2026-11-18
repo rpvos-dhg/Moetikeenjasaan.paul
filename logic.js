@@ -68,6 +68,37 @@ function mergeHourlyByTime(target, source, key, replace) {
   target[key] = target.time.map(ts => (byTime.has(ts) ? byTime.get(ts) : null));
 }
 
+// Legt kwartierneerslag uit een model met echte kwartierdata (ICON-D2) over de
+// uit uurdata geïnterpoleerde kwartieren heen, uitgelijnd op tijdstempel. Lege
+// waarden (buiten het bereik van dat model) laten de bestaande waarde staan.
+// De huidige neerslag komt dan uit hetzelfde model, zodat "regent het nu" en de
+// kwartieren elkaar niet tegenspreken. Geeft true als er iets is overgenomen.
+function mergeMinutelyPrecip(target, source) {
+  const t = target?.minutely_15;
+  const s = source?.minutely_15;
+  if (!t?.time || !s?.time || !Array.isArray(s.precipitation)) return false;
+  const byTime = new Map(s.time.map((ts, i) => [ts, s.precipitation[i]]));
+  let used = false;
+  t.precipitation = t.time.map((ts, i) => {
+    const v = byTime.get(ts);
+    if (v != null) { used = true; return v; }
+    return t.precipitation?.[i] ?? null;
+  });
+  if (used && target.current && source.current?.precipitation != null) {
+    target.current.precipitation = source.current.precipitation;
+    if (source.current.interval) target.current.interval = source.current.interval;
+  }
+  return used;
+}
+
+// Open-Meteo telt current.precipitation over het voorgaande interval (meestal
+// 900 s, één kwartier). Omgerekend naar mm per uur.
+function currentRainRate(current) {
+  const mm = current?.precipitation ?? 0;
+  const interval = current?.interval > 0 ? current.interval : 900;
+  return mm * 3600 / interval;
+}
+
 // Tijdstip van de data zelf (ms). Offline kan de service worker een antwoord van
 // uren geleden teruggeven; dat mag dan niet als "net bijgewerkt" gelden.
 function dataTimestamp(w, nowMs) {
@@ -195,7 +226,7 @@ function computeConditions(w, nowMs, offset = 0) {
   const upcoming = mIdx.length
     ? Math.max(...mIdx.map(i => (m.precipitation[i] ?? 0) * 4))
     : Math.max(0, ...hourIdx.map(i => hourly.precipitation?.[i] ?? 0));
-  const rainAmount = Math.max(upcoming, c.precipitation ?? 0);
+  const rainAmount = Math.max(upcoming, currentRainRate(c));
 
   const codes = [c.weather_code, ...hourIdx.map(i => hourly.weather_code?.[i])];
   const thunder = codes.some(code => code >= 95);
@@ -399,7 +430,7 @@ function nowcast(w, nowMs) {
   const start = m.time.findIndex(ts => ts >= nowMs);
   if (start === -1) return null;
   const wet = i => (m.precipitation[i] ?? 0) >= WET_SLOT_MM;
-  const raining = wet(start) || (w.current?.precipitation ?? 0) >= WET_SLOT_MM;
+  const raining = wet(start) || currentRainRate(w.current) / 4 >= WET_SLOT_MM;
   const code = w.current?.weather_code ?? 0;
   const snow = isSnowCode(code);
   const end = Math.min(start + 12, m.time.length);
@@ -543,7 +574,7 @@ function seasonalMoment(dateKey, today, memory = {}) {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     escapeHtml, durationParts, pickDaily, dateKeyInZone,
-    normalizeForecast, mergeHourlyByTime, dataTimestamp, hourlyNowIndex,
+    normalizeForecast, mergeHourlyByTime, mergeMinutelyPrecip, currentRainRate, dataTimestamp, hourlyNowIndex,
     POLLEN_KEYS, POLLEN_THRESHOLDS, parsePollen, highPollenKeys,
     THRESHOLDS, checklistConditions, PREF_OFFSETS, interpolateHourly, isSnowCode, outlookAt, computeConditions, jacketLevel, adviceKeys, extremePool, jacketScale, calibrate, walkPhase, WALK_ASK_AFTER_MS, WALK_EXPIRE_MS,
     minutesOfDay, scoreBreakBlocks, bestBreakMoment, topBreakOptions, WET_SLOT_MM, nowcast, windowDayStats, dayScore,
