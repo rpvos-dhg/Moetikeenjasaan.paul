@@ -47,16 +47,15 @@ const DEFAULT_LOCATION = Object.freeze({
   lon: 4.3268
 });
 // Vaste ANWB-locaties voor de keuzelijst. Coördinaten via OpenStreetMap; voor
-// het weer maakt een paar honderd meter niets uit. Athene heeft alleen een
-// postbus in Kalamaki, dus daar het centrum van Kalamaki. zone: voor de melding
-// dat de tijden in de eigen tijdzone van het toestel staan.
+// het weer maakt een paar honderd meter niets uit. zone: voor de melding dat
+// de tijden in de eigen tijdzone van het toestel staan.
 const ANWB_LOCATIONS = Object.freeze([
   { id: 'hq', lat: 52.0964, lon: 4.3268, label: { nl: 'ANWB HQ · Wassenaarseweg, Den Haag', en: 'ANWB HQ · Wassenaarseweg, The Hague' } },
   { id: 'assen-alc', lat: 53.0258, lon: 6.5655, label: { nl: 'ANWB Alarmcentrale · Amerikaweg, Assen', en: 'ANWB Emergency Centre · Amerikaweg, Assen' } },
   { id: 'lyon', lat: 45.7854, lon: 4.8117, zone: 'Europe/Paris', label: { nl: 'ANWB Steunpunt Lyon · Rue du Four à Chaux', en: 'ANWB Support Point Lyon · Rue du Four à Chaux' } },
   { id: 'munchen', lat: 48.1336, lon: 11.5281, zone: 'Europe/Berlin', label: { nl: 'ANWB Steunpunt München · Hansastraße', en: 'ANWB Support Point Munich · Hansastraße' } },
   { id: 'barcelona', lat: 41.3868, lon: 2.1580, zone: 'Europe/Madrid', label: { nl: 'ANWB Steunpunt Barcelona · Calle Aragón', en: 'ANWB Support Point Barcelona · Calle Aragón' } },
-  { id: 'athene', lat: 37.9152, lon: 23.7093, zone: 'Europe/Athens', label: { nl: 'ANWB Steunpunt Athene · Kalamaki', en: 'ANWB Support Point Athens · Kalamaki' } },
+  { id: 'athene', lat: 37.9448, lon: 23.7148, zone: 'Europe/Athens', label: { nl: 'ANWB Steunpunt Athene · Eleftheriou Venizelou', en: 'ANWB Support Point Athens · Eleftheriou Venizelou' } },
   { id: 'paramaribo', lat: 5.8242, lon: -55.1663, zone: 'America/Paramaribo', label: { nl: 'ANWB Steunpunt Paramaribo', en: 'ANWB Support Point Paramaribo' } },
 ]);
 const findAnwbLocation = id => ANWB_LOCATIONS.find(l => l.id === id) || null;
