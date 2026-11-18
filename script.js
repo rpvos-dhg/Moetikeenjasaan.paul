@@ -1787,13 +1787,16 @@ function renderForecast() {
     const idx = startIdx + i;
     const time = new Date(hourly.time[idx]);
     const isNow = i === 0;
-    // Regenkans geldt voor het voorgaande uur: de kolom van 13:00 (of "nu")
-    // toont de kans voor het uur dat dan begint, dus het volgende slot.
-    const rain = hourly.precipitation_probability?.[idx + 1] || 0;
+    // Regenkans en weercode gelden voor het voorgaande uur: de kolom van 13:00
+    // (of "nu") toont het uur dat dan begint, dus het volgende slot. De
+    // temperatuur is een momentwaarde en blijft op dit slot.
+    const next = idx + 1 < hourly.time.length ? idx + 1 : idx;
+    const rain = hourly.precipitation_probability?.[next] || 0;
+    const code = hourly.weather_code?.[next] || 0;
     const timeLabel = isNow ? t('forecastNow') : String(time.getHours()).padStart(2, '0') + ':00';
     html.push(`<div class="slot ${isNow ? 'now' : ''}" role="listitem">
       <div class="slot-time">${timeLabel}</div>
-      <div class="slot-icon">${weatherIcon(hourly.weather_code?.[idx] || 0, isDayTime(time), 26)}</div>
+      <div class="slot-icon">${weatherIcon(code, isDayTime(time), 26)}</div>
       <div class="slot-temp">${Math.round(hourly.temperature_2m[idx])}°</div>
       <div class="slot-rain">${rain}%<span class="sr-only"> ${t('rainChanceSr')}</span></div>
     </div>`);
