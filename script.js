@@ -114,8 +114,9 @@ const i18n = {
     locationFailed: 'Je locatie is niet gevonden. Probeer het zo nog eens.',
     anwbHqActive: 'ANWB HQ actief.',
     locationPresetLabel: 'ANWB-locatie', locationPresetPick: 'Kies een ANWB-locatie',
-    presetActive: name => `${name} actief.`,
-    presetOtherZone: name => `${name} actief. Tijden staan in de tijdzone van dit toestel.`,
+    // Krijgt het id, zodat de naam bij een taalwissel meevertaalt.
+    presetActive: id => `${presetLabel(findAnwbLocation(id))} actief.`,
+    presetOtherZone: id => `${presetLabel(findAnwbLocation(id))} actief. Tijden staan in de tijdzone van dit toestel.`,
     weatherLoading: 'Weer ophalen...', weatherError: 'Geen weerdata. Controleer je verbinding en probeer het opnieuw, of kijk even uit het raam.', retry: 'Opnieuw proberen',
     dataFresh: 'net bijgewerkt', dataAgeMin: mins => `${mins} min geleden bijgewerkt`,
     dataAgeHours: h => `${h} uur geleden bijgewerkt`,
@@ -325,8 +326,8 @@ const i18n = {
     locationFailed: "Couldn't find your location. Try again in a moment.",
     anwbHqActive: 'ANWB HQ active.',
     locationPresetLabel: 'ANWB location', locationPresetPick: 'Choose an ANWB location',
-    presetActive: name => `${name} active.`,
-    presetOtherZone: name => `${name} active. Times are in this device's time zone.`,
+    presetActive: id => `${presetLabel(findAnwbLocation(id))} active.`,
+    presetOtherZone: id => `${presetLabel(findAnwbLocation(id))} active. Times are in this device's time zone.`,
     weatherLoading: 'Getting weather...', weatherError: 'No weather data. Check your connection and try again, or just look outside.', retry: 'Try again',
     dataFresh: 'just updated', dataAgeMin: mins => `updated ${mins} min ago`,
     dataAgeHours: h => `updated ${h} h ago`,
@@ -1057,8 +1058,7 @@ function choosePreset(id) {
     setAppLocation({ ...DEFAULT_LOCATION }, ['anwbHqActive']);
     return;
   }
-  const name = presetLabel(preset);
-  setAppLocation({ mode: 'preset', id: preset.id }, [differsFromDeviceZone(preset.zone) ? 'presetOtherZone' : 'presetActive', name]);
+  setAppLocation({ mode: 'preset', id: preset.id }, [differsFromDeviceZone(preset.zone) ? 'presetOtherZone' : 'presetActive', preset.id]);
 }
 
 function showWeatherLoading() {
